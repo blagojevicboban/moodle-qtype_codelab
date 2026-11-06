@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0 (2026-11-06)
+
+- First stable release. Needs tiny_codelab 1.0.0. Tested on the CodeRunner questions of three courses converted
+  to CodeLab: 1109 of 1111 checked answers of students got the same grade.
+
 ## 0.7.0 (2026-11-06)
 
 - Function tests: a test may have test code, for example a call of the function the student writes. It replaces the
