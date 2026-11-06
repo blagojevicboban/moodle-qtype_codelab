@@ -43,7 +43,10 @@ class qtype_codelab_edit_form extends question_edit_form {
         global $PAGE;
         $mform->addElement('header', 'codelabheader', get_string('codeheader', 'qtype_codelab'));
         $mform->setExpanded('codelabheader');
-        $mform->addElement('select', 'language', get_string('language', 'qtype_codelab'), qtype_codelab::language_options());
+        // The languages that can run on this site, and the language of the question being edited.
+        $current = $this->question->options->language ?? null;
+        $languages = qtype_codelab::language_options($current);
+        $mform->addElement('select', 'language', get_string('language', 'qtype_codelab'), $languages);
         $mform->setDefault('language', 'c');
 
         // The module qtype_codelab/edit turns these fields into code editors (found by their ids).

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0 (2026-11-06)
+
+- The language menu of the question offers only the languages that can run on the site; a question keeps its own.
+  When the Jobe server does not have the language, the attempt waits for the teacher. Needs tiny_codelab 0.6.0.
+
 ## 0.4.0 (2026-11-06)
 
 - Python typing help from Jedi in the answer. Needs tiny_codelab 0.5.0.

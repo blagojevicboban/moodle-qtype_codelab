@@ -89,13 +89,16 @@ class qtype_codelab extends question_type {
     }
 
     /**
-     * Names of the languages for a select menu.
+     * Names of the languages for a select menu: those that can run on this site (tiny_codelab), and the language of the
+     * question being edited.
      *
+     * @param string|null $current language of the question being edited
      * @return array code => name
      */
-    public static function language_options(): array {
+    public static function language_options(?string $current = null): array {
+        $offered = \tiny_codelab\local\languages::offered($current);
         $options = [];
-        foreach (self::LANGUAGES as $lang) {
+        foreach (array_intersect(self::LANGUAGES, $offered) as $lang) {
             $options[$lang] = get_string('lang_' . $lang, 'qtype_codelab');
         }
         return $options;

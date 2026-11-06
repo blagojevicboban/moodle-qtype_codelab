@@ -11,11 +11,11 @@ A programming question for Moodle quizzes. The student writes a program in the c
 
 Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal** and **PHP**.
 
-> Status: **alpha** (0.4.0), under development.
+> Status: **alpha** (0.5.0), under development.
 
 ## The teacher sets
 
-- the language, the starting code and a model solution;
+- the language (only those that can run on the site are offered), the starting code and a model solution;
 - **tests**, each with:
   - the input;
   - the expected output;
@@ -55,7 +55,7 @@ A question without tests is graded by the teacher.
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 0.5.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 0.6.0 or newer, installed first, with a Jobe
   server in its settings
 
 ## The CodeLab plugins

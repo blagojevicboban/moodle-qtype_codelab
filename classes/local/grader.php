@@ -27,7 +27,7 @@ use tiny_codelab\local\jobe;
  */
 class grader {
     /** Statuses meaning Jobe could not check the program: the answer is then left for the teacher. */
-    const SANDBOX_FAILURES = ['error', 'busy', 'notconfigured'];
+    const SANDBOX_FAILURES = ['error', 'busy', 'notconfigured', 'nolanguage'];
 
     /** @var jobe|null client, made when first needed */
     protected $jobe;
