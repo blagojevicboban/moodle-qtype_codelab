@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0 (2026-11-06)
+
+- Step for C and C++ answers in the attempt when the site has a CodeLab runner; the hidden code before and after
+  the answer is passed over. Needs tiny_codelab 1.2.0.
+
 ## 1.1.0 (2026-11-06)
 
 - Run in the attempt is interactive for C, C++, Java and C# when the site has a CodeLab runner: the student types the

@@ -26,7 +26,7 @@ import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
 import {available as pythonAvailable} from 'tiny_codelab/python';
 import {PythonSession} from 'tiny_codelab/session';
-import {RemoteSession, runsInteractively} from 'tiny_codelab/remote';
+import {RemoteSession, runsInteractively, stepsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
 
 /**
@@ -240,9 +240,11 @@ export const init = async(config) => {
     const runButton = button(s.run, 'btn-secondary');
     // Python runs in the browser when it can: input() asks while the program runs, Step goes line by line.
     const browser = config.lang === 'python' && config.pyodide && pythonAvailable();
-    const stepButton = browser ? button(s.step, 'btn-secondary') : null;
-    // C, C++, Java and C# run on the interactive server when the site has one; the tests and the grade stay on Jobe.
+    // C, C++, Java and C# run on the interactive server when the site has one (C and C++ also step by step there);
+    // the tests and the grade stay on Jobe.
     const remote = !browser && runsInteractively(config.interactive, config.lang);
+    const steps = browser || (remote && stepsInteractively(config.interactive, config.lang));
+    const stepButton = steps ? button(s.step, 'btn-secondary') : null;
     const stopButton = browser || remote ? button(s.stop, 'btn-danger') : null;
     const testsButton = config.tests.length ? button(s.runtests, 'btn-secondary') : null;
     const panel = document.createElement('div');
@@ -266,11 +268,11 @@ export const init = async(config) => {
         }
     };
 
+    // Python in the browser or the interactive server: the same Run, Step and Stop.
     let session = null;
-    if (browser) {
+    if (browser || remote) {
         stopButton.hidden = true;
-        session = new PythonSession({
-            base: config.pyodide,
+        const options = {
             editor,
             panel,
             vars,
@@ -280,11 +282,16 @@ export const init = async(config) => {
             onState: (state) => {
                 busy(state !== 'idle');
                 runButton.disabled = state === 'running';
-                stepButton.disabled = state === 'running';
+                if (stepButton) {
+                    stepButton.disabled = state === 'running';
+                }
                 stopButton.hidden = state === 'idle';
             },
-        });
-        stepButton.addEventListener('click', () => {
+        };
+        session = browser
+            ? new PythonSession({base: config.pyodide, ...options})
+            : new RemoteSession({lang: config.lang, contextid: config.contextid, ...options});
+        stepButton?.addEventListener('click', () => {
             if (session.state === 'paused') {
                 session.step();
             } else if (session.state === 'idle') {
@@ -294,27 +301,7 @@ export const init = async(config) => {
         stopButton.addEventListener('click', () => session.stop());
     }
 
-    let remoteSession = null;
-    if (remote) {
-        stopButton.hidden = true;
-        remoteSession = new RemoteSession({
-            lang: config.lang,
-            program: () => testProgram(config.lang, code(), config.tests.find((tc) => tc.code)?.code || ''),
-            panel,
-            contextid: config.contextid,
-            onState: (state) => {
-                busy(state !== 'idle');
-                stopButton.hidden = state === 'idle';
-            },
-        });
-        stopButton.addEventListener('click', () => remoteSession.stop());
-    }
-
     runButton.addEventListener('click', async() => {
-        if (remoteSession) {
-            await remoteSession.start(stdin.value);
-            return;
-        }
         if (session) {
             if (session.state === 'paused') {
                 session.resume();
