@@ -59,6 +59,22 @@ class question_jobe extends jobe {
     }
 
     /**
+     * The client that grades a language: the interactive server (CodeLab runner) for SQL, which Jobe does not have,
+     * otherwise Jobe with the limits of the question (null: the default client).
+     *
+     * @param string $lang
+     * @param int $cputime
+     * @param int $memorylimit
+     * @return jobe|null
+     */
+    public static function client_for(string $lang, int $cputime, int $memorylimit): ?jobe {
+        if (in_array($lang, \tiny_codelab\local\interactive::ONLY, true)) {
+            return new \tiny_codelab\local\runner_client();
+        }
+        return self::for_limits($cputime, $memorylimit);
+    }
+
+    /**
      * Largest CPU time a question may ask for (setting of qtype_codelab).
      *
      * @return int seconds

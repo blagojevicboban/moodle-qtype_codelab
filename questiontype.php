@@ -40,7 +40,7 @@ require_once($CFG->dirroot . '/question/type/codelab/question.php');
  */
 class qtype_codelab extends question_type {
     /** Languages in the order they are offered. */
-    const LANGUAGES = ['c', 'cpp', 'python', 'java', 'csharp', 'javascript', 'pascal', 'php'];
+    const LANGUAGES = ['c', 'cpp', 'python', 'java', 'csharp', 'javascript', 'pascal', 'php', 'mysql'];
 
     /**
      * Extra fields kept in qtype_codelab_options (also used for backup, restore, import and export).
@@ -290,7 +290,11 @@ class qtype_codelab extends question_type {
      * @return \tiny_codelab\local\jobe|null
      */
     protected static function jobe_for($data): ?\tiny_codelab\local\jobe {
-        return question_jobe::for_limits(self::limit($data->cputime ?? 0), self::limit($data->memorylimit ?? 0));
+        return question_jobe::client_for(
+            (string) ($data->language ?? ''),
+            self::limit($data->cputime ?? 0),
+            self::limit($data->memorylimit ?? 0)
+        );
     }
 
     /**

@@ -26,6 +26,7 @@ import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
 import {available as pythonAvailable} from 'tiny_codelab/python';
 import {PythonSession} from 'tiny_codelab/session';
+import {fullscreenButton} from 'tiny_codelab/fullscreen';
 import {RemoteSession, runsInteractively, stepsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
 
@@ -144,6 +145,9 @@ export const matches = (expected, got, comparison, tolerance) => {
             return unix(expected) === unix(got);
         case 'numbers':
             return numbersMatch(expected, got, tolerance);
+        case 'unordered':
+            return normalise(expected, true).split('\n').sort().join('\n') ===
+                normalise(got, true).split('\n').sort().join('\n');
         case 'regex':
             try {
                 return new RegExp(`^(?:${unix(expected).replace(/\n+$/, '')})$`, 'u').test(normalise(got, true));
@@ -192,7 +196,8 @@ export const init = async(config) => {
     if (!textarea) {
         return;
     }
-    const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'editorlabel', 'step', 'stop'];
+    const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'editorlabel', 'step', 'stop',
+        'fullscreen', 'exitfullscreen'];
     const values = await getStrings(keys.map((key) => ({key, component: key.startsWith('test') || key === 'runtests'
         ? 'qtype_codelab' : 'tiny_codelab'})));
     const s = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
@@ -252,6 +257,8 @@ export const init = async(config) => {
     panel.setAttribute('role', 'status');
     panel.setAttribute('aria-label', s.output);
     panel.hidden = true;
+    // SQL reads no input.
+    stdinLabel.hidden = stdin.hidden = config.lang === 'mysql';
     tools.append(stdinLabel, stdin, runButton);
     [stepButton, stopButton, testsButton].filter(Boolean).forEach((b) => tools.append(b));
     const vars = document.createElement('div');
@@ -259,6 +266,9 @@ export const init = async(config) => {
     vars.hidden = true;
     tools.append(panel, vars);
     host.after(tools);
+    // The editor, its buttons and the console on the whole screen (the block of the answer).
+    tools.insertBefore(fullscreenButton({root: host.parentElement, editor, label: s.fullscreen,
+        exitLabel: s.exitfullscreen, className: 'btn btn-secondary'}), panel);
 
     const code = () => program(config.prefix, editor.getValue(), config.suffix);
     const busy = (value) => {
@@ -288,6 +298,13 @@ export const init = async(config) => {
                 stopButton.hidden = state === 'idle';
             },
         };
+        if (config.lang === 'mysql') {
+            // SQL: the code before (tables and data) runs first without showing its output; Run shows the answer.
+            options.setup = () => config.prefix;
+            options.program = () => testProgram(config.lang, program('', editor.getValue(), config.suffix),
+                config.tests.find((tc) => tc.code)?.code || '');
+            options.offset = 0;
+        }
         session = browser
             ? new PythonSession({base: config.pyodide, ...options})
             : new RemoteSession({lang: config.lang, contextid: config.contextid, ...options});

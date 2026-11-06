@@ -11,7 +11,7 @@ A programming question for Moodle quizzes. The student writes a program in the c
 
 Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal** and **PHP**.
 
-> Status: **stable** (1.2.0).
+> Status: **stable** (1.3.0).
 
 ## The teacher sets
 
@@ -57,6 +57,13 @@ A question without tests is graded by the teacher.
   by the teacher. During Check the try does not count (see below).
 - Backup and restore keep all the settings and tests.
 
+## SQL questions
+
+With a CodeLab runner that has MariaDB, questions can be in **MySQL (MariaDB)**. The *code before* holds the tables
+and data; the student writes the SQL; a test may have *test code*, a query that checks the tables after the answer
+(for INSERT, UPDATE, DELETE). Expected outputs come from the solution, as the result tables of the mysql client.
+Choose *Lines in any order* when the rows of the result may come in any order (a query without ORDER BY).
+
 ## Check with penalties
 
 In the quiz settings, under *Question behaviour*, choose **Interactive with multiple tries** or **Adaptive mode**.
@@ -86,7 +93,7 @@ after a change on the Jobe server or after a restore.
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.2.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.3.0 or newer, installed first, with a Jobe
   server in its settings
 
 ## The CodeLab plugins

@@ -55,12 +55,14 @@ $string['compare_help'] = 'How the output of the program is compared with the ex
 
 * **Exactly**: every character counts.
 * **Spaces at the end do not count**: spaces at the end of lines and empty lines at the end are left out.
+* **Lines in any order**: like the previous, but the lines may come in any order, for SQL queries without ORDER BY.
 * **Numbers with a tolerance**: the outputs are compared word by word, and two numbers are equal when they differ by no more than the tolerance (absolute, or relative to the larger number). Spaces and line breaks between the words do not count.
 * **Regular expression**: the expected output of each test is a regular expression (PCRE) that must match the whole output, for example <code>Sum: [0-9]+</code>. Empty expected outputs are filled from the solution as patterns that match only that output.';
 $string['comparison_exact'] = 'Exactly';
 $string['comparison_numbers'] = 'Numbers with a tolerance';
 $string['comparison_regex'] = 'Regular expression';
 $string['comparison_spaces'] = 'Spaces at the end do not count';
+$string['comparison_unordered'] = 'Lines in any order (SQL rows)';
 $string['compileerror'] = 'The program does not compile:';
 $string['cputime'] = 'CPU time limit (seconds)';
 $string['cputime_help'] = 'Largest CPU time of one run of a test when the answer is graded. Empty: the setting of the CodeLab editor plugin (5 seconds unless changed). At most {$a} seconds (set by the administrator). Run and Run the tests in the attempt keep the site setting.';
@@ -71,6 +73,7 @@ $string['lang_cpp'] = 'C++';
 $string['lang_csharp'] = 'C#';
 $string['lang_java'] = 'Java';
 $string['lang_javascript'] = 'JavaScript (Node.js)';
+$string['lang_mysql'] = 'MySQL (MariaDB)';
 $string['lang_pascal'] = 'Pascal';
 $string['lang_php'] = 'PHP';
 $string['lang_python'] = 'Python';

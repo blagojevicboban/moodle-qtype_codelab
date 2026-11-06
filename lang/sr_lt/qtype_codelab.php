@@ -55,12 +55,14 @@ $string['compare_help'] = 'Kako se izlaz programa poredi sa očekivanim izlazom 
 
 * **Tačno**: računa se svaki znak.
 * **Razmaci na kraju se ne računaju**: izostavljaju se razmaci na kraju redova i prazni redovi na kraju.
+* **Redovi bilo kojim redosledom**: kao prethodno, ali redovi mogu doći bilo kojim redom, za SQL upite bez ORDER BY.
 * **Brojevi sa tolerancijom**: izlazi se porede reč po reč, a dva broja su jednaka kada se razlikuju najviše za toleranciju (apsolutno ili u odnosu na veći broj). Razmaci i prelasci u novi red između reči se ne računaju.
 * **Regularni izraz**: očekivani izlaz svakog testa je regularni izraz (PCRE) koji mora da odgovara celom izlazu, na primer <code>Zbir: [0-9]+</code>. Prazni očekivani izlazi se popunjavaju iz rešenja kao izrazi koji odgovaraju samo tom izlazu.';
 $string['comparison_exact'] = 'Tačno';
 $string['comparison_numbers'] = 'Brojevi sa tolerancijom';
 $string['comparison_regex'] = 'Regularni izraz';
 $string['comparison_spaces'] = 'Razmaci na kraju se ne računaju';
+$string['comparison_unordered'] = 'Redovi bilo kojim redosledom (SQL)';
 $string['compileerror'] = 'Program ne može da se prevede:';
 $string['cputime'] = 'Ograničenje procesorskog vremena (sekunde)';
 $string['cputime_help'] = 'Najveće procesorsko vreme jednog pokretanja testa kada se odgovor ocenjuje. Prazno: podešavanje dodatka CodeLab za editor (5 sekundi ako nije menjano). Najviše {$a} sekundi (podešava administrator). Pokreni i Pokreni testove u pokušaju koriste podešavanje sajta.';
@@ -71,6 +73,7 @@ $string['lang_cpp'] = 'C++';
 $string['lang_csharp'] = 'C#';
 $string['lang_java'] = 'Java';
 $string['lang_javascript'] = 'JavaScript (Node.js)';
+$string['lang_mysql'] = 'MySQL (MariaDB)';
 $string['lang_pascal'] = 'Pascal';
 $string['lang_php'] = 'PHP';
 $string['lang_python'] = 'Python';

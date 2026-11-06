@@ -129,7 +129,7 @@ class qtype_codelab_question extends question_graded_automatically {
         $cache = \cache::make('qtype_codelab', 'results');
         $results = $cache->get($key);
         if ($results === false) {
-            $jobe = question_jobe::for_limits((int) $this->cputime, (int) $this->memorylimit);
+            $jobe = question_jobe::client_for((string) $this->language, (int) $this->cputime, (int) $this->memorylimit);
             $results = (new grader($jobe))->run_tests(
                 $this->language,
                 $program,

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0 (2026-11-06)
+
+- SQL questions (MySQL / MariaDB), graded on the CodeLab runner: the code before is the tables and data, a test may
+  have a query that checks the tables after the answer, expected outputs come from the solution.
+- New comparison: lines in any order (rows of a query without ORDER BY).
+- Full screen button in the attempt. Needs tiny_codelab 1.3.0.
+
 ## 1.2.0 (2026-11-06)
 
 - Step for C and C++ answers in the attempt when the site has a CodeLab runner; the hidden code before and after

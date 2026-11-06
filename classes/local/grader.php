@@ -33,7 +33,7 @@ class grader {
     const MARKER = '{{TEST}}';
 
     /** Ways to compare the output with the expected output. */
-    const COMPARISONS = ['exact', 'spaces', 'numbers', 'regex'];
+    const COMPARISONS = ['exact', 'spaces', 'unordered', 'numbers', 'regex'];
 
     /** Default tolerance of the comparison numbers. */
     const TOLERANCE = 0.001;
@@ -168,9 +168,24 @@ class grader {
                 return self::numbers_match($expected, $got, $tolerance);
             case 'regex':
                 return self::regex_matches($expected, $got) === true;
+            case 'unordered':
+                return self::lines_sorted($expected) === self::lines_sorted($got);
             default:
                 return self::normalise($expected, true) === self::normalise($got, true);
         }
+    }
+
+    /**
+     * The lines of an output without trailing spaces and empty lines at the end, sorted: for results whose rows may come
+     * in any order (SQL without ORDER BY).
+     *
+     * @param string $text
+     * @return string[]
+     */
+    public static function lines_sorted(string $text): array {
+        $lines = explode("\n", self::normalise($text, true));
+        sort($lines, SORT_STRING);
+        return $lines;
     }
 
     /**

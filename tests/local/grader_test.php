@@ -120,6 +120,16 @@ final class grader_test extends \advanced_testcase {
         $this->assertFalse(grader::is_number('NaN'));
     }
 
+    public function test_matches_unordered(): void {
+        $table = "+-----+\n| ime |\n+-----+\n| Ivo |\n| Ana |\n+-----+\n";
+        $other = "+-----+\n| ime |\n+-----+\n| Ana |\n| Ivo |\n+-----+\n\n";
+        $this->assertTrue(grader::matches($table, $other, 'unordered'));
+        $this->assertFalse(grader::matches($table, $other, 'spaces'));
+        // The same lines are still needed, as many times.
+        $this->assertFalse(grader::matches($table, str_replace('| Ana |', '| Eva |', $other), 'unordered'));
+        $this->assertFalse(grader::matches("a\na\nb", "a\nb\nb", 'unordered'));
+    }
+
     public function test_matches_regex(): void {
         $this->assertTrue(grader::matches('Sum: [0-9]+', "Sum: 42  \n\n", 'regex'));
         // The pattern must match the whole output.
