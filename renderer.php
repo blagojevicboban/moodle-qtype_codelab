@@ -81,7 +81,7 @@ class qtype_codelab_renderer extends qtype_renderer {
         if ($question->showtests && !$options->readonly) {
             foreach ($question->tests as $tc) {
                 if (!$tc['hidden']) {
-                    $tests[] = ['stdin' => $tc['stdin'], 'expected' => $tc['expected']];
+                    $tests[] = ['stdin' => $tc['stdin'], 'expected' => $tc['expected'], 'code' => $tc['code'] ?? ''];
                 }
             }
         }
@@ -119,7 +119,8 @@ class qtype_codelab_renderer extends qtype_renderer {
             return html_writer::div(get_string('sandboxfailed', 'qtype_codelab'), 'qtype_codelab-sandbox alert alert-warning');
         }
         $out = '';
-        if (($results[0]['status'] ?? '') === 'compile') {
+        // When no test compiles, the answer itself does not: one message. With test code, a single test may not compile.
+        if ($results && !array_filter($results, fn($r) => $r['status'] !== 'compile')) {
             $out .= html_writer::div(get_string('compileerror', 'qtype_codelab'), 'qtype_codelab-compile fw-bold');
             $out .= html_writer::tag('pre', s($results[0]['cmpinfo']), ['class' => 'qtype_codelab-cmpinfo']);
             return $out;
@@ -132,8 +133,14 @@ class qtype_codelab_renderer extends qtype_renderer {
 
         $table = new html_table();
         $table->attributes['class'] = 'generaltable qtype_codelab-results';
-        $table->head = [get_string('test', 'qtype_codelab'), get_string('teststdin', 'qtype_codelab'),
-            get_string('testexpected', 'qtype_codelab'), get_string('testgot', 'qtype_codelab'), ''];
+        // The column of the test code only when a visible test has one.
+        $withcode = (bool) array_filter($question->tests, fn($tc) => !$tc['hidden'] && ($tc['code'] ?? '') !== '');
+        $table->head = array_merge(
+            [get_string('test', 'qtype_codelab')],
+            $withcode ? [get_string('testcode', 'qtype_codelab')] : [],
+            [get_string('teststdin', 'qtype_codelab'), get_string('testexpected', 'qtype_codelab'),
+                get_string('testgot', 'qtype_codelab'), '']
+        );
         // Hidden tests are given only as a count, so their order does not tell which input failed.
         $hidden = ['passed' => 0, 'total' => 0];
         foreach ($question->tests as $i => $tc) {
@@ -148,11 +155,16 @@ class qtype_codelab_renderer extends qtype_renderer {
                 : html_writer::span(get_string('failed', 'qtype_codelab'), 'badge bg-danger');
             $got = $r['got'];
             if ($r['status'] !== 'ok') {
+                $detail = $r['status'] === 'compile' ? ($r['cmpinfo'] ?? '') : $r['stderr'];
                 $got .= ($got === '' ? '' : "\n") . get_string('status_' . $r['status'], 'tiny_codelab') .
-                    ($r['stderr'] !== '' ? "\n" . $r['stderr'] : '');
+                    ($detail !== '' ? "\n" . $detail : '');
             }
-            $table->data[] = [$i + 1, html_writer::tag('pre', s($tc['stdin'])), html_writer::tag('pre', s($tc['expected'])),
-                html_writer::tag('pre', s($got)), $mark];
+            $table->data[] = array_merge(
+                [$i + 1],
+                $withcode ? [html_writer::tag('pre', s($tc['code'] ?? ''))] : [],
+                [html_writer::tag('pre', s($tc['stdin'])), html_writer::tag('pre', s($tc['expected'])),
+                    html_writer::tag('pre', s($got)), $mark]
+            );
         }
         if ($table->data) {
             $out .= html_writer::table($table);

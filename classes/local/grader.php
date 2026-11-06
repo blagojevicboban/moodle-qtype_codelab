@@ -29,6 +29,9 @@ class grader {
     /** Statuses meaning Jobe could not check the program: the answer is then left for the teacher. */
     const SANDBOX_FAILURES = ['error', 'busy', 'notconfigured', 'nolanguage'];
 
+    /** Place of the test code in the hidden code (see test_program()). */
+    const MARKER = '{{TEST}}';
+
     /** Ways to compare the output with the expected output. */
     const COMPARISONS = ['exact', 'spaces', 'numbers', 'regex'];
 
@@ -51,7 +54,8 @@ class grader {
      * Tests from their JSON, with every field.
      *
      * @param string|null $json
-     * @return array list of ['stdin' => string, 'expected' => string, 'hidden' => bool, 'weight' => float]
+     * @return array list of ['stdin' => string, 'expected' => string, 'code' => string, 'hidden' => bool,
+     *     'weight' => float]
      */
     public static function decode_tests(?string $json): array {
         $tests = json_decode((string) $json, true);
@@ -64,6 +68,7 @@ class grader {
             $out[] = [
                 'stdin' => self::unix((string) ($tc['stdin'] ?? '')),
                 'expected' => self::unix((string) ($tc['expected'] ?? '')),
+                'code' => rtrim(self::unix((string) ($tc['code'] ?? '')), "\n"),
                 'hidden' => !empty($tc['hidden']),
                 'weight' => $weight,
             ];
@@ -83,6 +88,36 @@ class grader {
         // Text areas of forms send Windows line ends; programs and their input use \n.
         $parts = array_map(fn($p) => rtrim(self::unix($p), "\n"), [$prefix, $code, $suffix]);
         return implode("\n", array_filter($parts, fn($p) => $p !== '')) . "\n";
+    }
+
+    /**
+     * The program of one test: the test code (for example a call of the student's function) goes where the hidden code
+     * has the marker {{TEST}}; without the marker a C or C++ program without main gets a main that runs the test code,
+     * and in other languages the test code is added at the end. Without test code the marker is left out.
+     *
+     * @param string $lang
+     * @param string $program the whole program (see program())
+     * @param string $code test code, may be empty
+     * @return string
+     */
+    public static function test_program(string $lang, string $program, string $code): string {
+        $code = rtrim(self::unix($code), "\n");
+        if (strpos($program, self::MARKER) !== false) {
+            // The test code takes the indentation of the marker's line.
+            return preg_replace_callback('/^([ \t]*)(.*?)' . preg_quote(self::MARKER, '/') . '/m', function ($m) use ($code) {
+                $lines = explode("\n", $code);
+                return $m[1] . $m[2] . implode("\n" . $m[1], $lines);
+            }, $program, 1);
+        }
+        if ($code === '') {
+            return $program;
+        }
+        if (in_array($lang, ['c', 'cpp'], true) && !preg_match('/\bmain\s*\(/', $program)) {
+            $main = $lang === 'c' ? 'int main(void)' : 'int main()';
+            $body = '    ' . str_replace("\n", "\n    ", $code);
+            return $program . "\n" . $main . "\n{\n" . $body . "\n    return 0;\n}\n";
+        }
+        return $program . $code . "\n";
     }
 
     /**
@@ -239,8 +274,10 @@ class grader {
     ): array {
         $this->jobe = $this->jobe ?? new jobe();
         $results = [];
+        // With test code every test is another program, so a compilation error may belong to one test only.
+        $sameprogram = !array_filter($tests, fn($tc) => ($tc['code'] ?? '') !== '');
         foreach ($tests as $tc) {
-            $run = $this->jobe->run($lang, $program, $tc['stdin']);
+            $run = $this->jobe->run($lang, self::test_program($lang, $program, $tc['code'] ?? ''), $tc['stdin']);
             $results[] = [
                 'status' => $run['status'],
                 'passed' => $run['status'] === 'ok' && self::matches($tc['expected'], $run['stdout'], $comparison, $tolerance),
@@ -249,7 +286,7 @@ class grader {
                 'stderr' => $run['stderr'],
             ];
             // The same program does not compile on the next tests either, and a sandbox failure would repeat.
-            if ($run['status'] === 'compile' || in_array($run['status'], self::SANDBOX_FAILURES, true)) {
+            if (($run['status'] === 'compile' && $sameprogram) || in_array($run['status'], self::SANDBOX_FAILURES, true)) {
                 while (count($results) < count($tests)) {
                     $results[] = ['status' => $run['status'], 'passed' => false, 'got' => '', 'cmpinfo' => $run['cmpinfo'],
                         'stderr' => $run['stderr']];

@@ -119,13 +119,15 @@ class qtype_codelab extends question_type {
         foreach ($form->teststdin as $i => $stdin) {
             $stdin = grader::unix((string) $stdin);
             $expected = grader::unix((string) ($form->testexpected[$i] ?? ''));
-            if (trim($stdin) === '' && trim($expected) === '') {
+            $code = rtrim(grader::unix((string) ($form->testcode[$i] ?? '')), "\n");
+            if (trim($stdin) === '' && trim($expected) === '' && trim($code) === '') {
                 continue;
             }
             $weight = $form->testweight[$i] ?? 1;
             $tests[] = [
                 'stdin' => $stdin,
                 'expected' => $expected,
+                'code' => $code,
                 'hidden' => !empty($form->testhidden[$i]),
                 'weight' => is_numeric($weight) ? max(0.0, (float) $weight) : 1.0,
             ];
@@ -219,8 +221,8 @@ class qtype_codelab extends question_type {
         foreach ($data['teststdin'] ?? [] as $i => $stdin) {
             $expected = grader::unix((string) ($data['testexpected'][$i] ?? ''));
             if ($expected !== '') {
-                $tests[$i] = ['stdin' => grader::unix((string) $stdin), 'expected' => $expected, 'hidden' => false,
-                    'weight' => 1.0];
+                $tests[$i] = ['stdin' => grader::unix((string) $stdin), 'expected' => $expected,
+                    'code' => (string) ($data['testcode'][$i] ?? ''), 'hidden' => false, 'weight' => 1.0];
             }
         }
         if (!$tests) {
@@ -243,14 +245,16 @@ class qtype_codelab extends question_type {
         if (grader::sandbox_failed($results)) {
             return $none;
         }
-        if (($results[0]['status'] ?? '') === 'compile') {
+        // No test compiles: the solution itself does not (with test code a single test may not compile).
+        if (!array_filter($results, fn($r) => $r['status'] !== 'compile')) {
             return ['compile' => (string) $results[0]['cmpinfo'], 'failed' => []];
         }
         $failed = [];
         foreach (array_keys($tests) as $n => $i) {
             if (empty($results[$n]['passed'])) {
                 $r = $results[$n];
-                $failed[$i] = $r['status'] === 'ok' ? $r['got'] : trim($r['got'] . "\n" . $r['stderr']);
+                $detail = $r['status'] === 'compile' ? $r['cmpinfo'] : $r['stderr'];
+                $failed[$i] = $r['status'] === 'ok' ? $r['got'] : trim($r['got'] . "\n" . $detail);
             }
         }
         return ['compile' => null, 'failed' => $failed];

@@ -31,7 +31,23 @@ $string['assist'] = 'Помоћ при куцању';
 $string['badlimit'] = 'Унесите цео број од 1 до {$a}, или оставите празно за подразумевану вредност.';
 $string['badregex'] = 'Ово није исправан регуларни израз.';
 $string['badtolerance'] = 'Унесите број 0 или већи, на пример 0.001.';
+$string['bulkcheck'] = 'Провера решења CodeLab питања';
+$string['bulkcheck_again'] = 'Провери поново';
+$string['bulkcheck_bank'] = 'Банка питања';
+$string['bulkcheck_done'] = 'Проверено питања: {$a->total}. Све тестове пролази {$a->ok}, пажњу тражи {$a->problems}.';
+$string['bulkcheck_finished'] = 'Завршено.';
+$string['bulkcheck_intro'] = 'Решење сваког од {$a} CodeLab питања у банкама питања овог курса покреће се на Jobe серверу на тестовима тог питања, једно по једно. Питања чије решење не пролази, не преводи се или не постоји наводе се прва. Резултати решења која су већ проверавана узимају се из кеша.';
+$string['bulkcheck_none'] = 'У банкама питања овог курса нема CodeLab питања.';
+$string['bulkcheck_progress'] = 'Проверава се {$a->done} од {$a->total}: {$a->name}';
+$string['bulkcheck_result'] = 'Резултат';
+$string['bulkcheck_start'] = 'Покрени проверу';
 $string['cachedef_results'] = 'Резултати тестова предатих програма';
+$string['check_compile'] = 'Не преводи се';
+$string['check_failed'] = 'Пролази {$a->passed} од {$a->total} тестова';
+$string['check_jobe'] = 'Jobe није могао да га покрене';
+$string['check_nosolution'] = 'Нема решења';
+$string['check_notests'] = 'Нема тестова (оцењује наставник)';
+$string['check_ok'] = 'Пролази све тестове ({$a->total})';
 $string['checkfailed'] = 'Програм није могао да се провери на серверу (Jobe), па се овај покушај не рачуна. Притисните Провери поново за који тренутак.';
 $string['codeheader'] = 'Код';
 $string['compare'] = 'Поређење излаза';
@@ -96,6 +112,15 @@ $string['suffix_help'] = 'Код који се додаје иза ученик�
 $string['template'] = 'Почетни код';
 $string['template_help'] = 'Код од ког ученици почињу у едитору; може да буде празан.';
 $string['test'] = 'Тест';
+$string['testcode'] = 'Код теста';
+$string['testcode_help'] = 'Код који се извршава у овом тесту, на пример позив функције коју пише ученик: <code>printf("%d\\n", zbir(2, 3));</code> или <code>print(zbir(2, 3))</code>. Може бити празан.
+
+* Ако код после учениковог програма има ознаку <code>{{TEST}}</code>, на пример у функцији main коју ви пишете, код теста долази на њено место.
+* Иначе C или C++ програм без функције main добија је: <code>int main(void) { код теста return 0; }</code>.
+* У осталим језицима код теста се додаје на крај програма.
+
+Тест може имати и улаз. Ученици виде код тестова који нису скривени.';
+$string['testcoden'] = 'Тест {no}: код теста';
 $string['testexpected'] = 'Очекивани излаз';
 $string['testfailed'] = 'Тест {$a}: није прошао';
 $string['testgot'] = 'Излаз';

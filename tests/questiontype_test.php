@@ -136,7 +136,7 @@ final class questiontype_test extends \advanced_testcase {
         $this->assertSame(4, $loaded->cputime);
         $this->assertSame(0, $loaded->memorylimit);
         $this->assertEqualsWithDelta(0.01, $loaded->tolerance, 1e-12);
-        $this->assertSame([['stdin' => '1 2', 'expected' => '3', 'hidden' => true, 'weight' => 2.0]], $loaded->tests);
+        $this->assertSame([['stdin' => '1 2', 'expected' => '3', 'code' => '', 'hidden' => true, 'weight' => 2.0]], $loaded->tests);
         $this->assertTrue($loaded->has_tests());
     }
 

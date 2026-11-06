@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 (2026-11-06)
+
+- Function tests: a test may have test code, for example a call of the function the student writes. It replaces the
+  marker {{TEST}} in the code after the answer; a C or C++ program without main gets one around it; other languages
+  run it at the end. Run the tests in the attempt works the same way.
+- Check CodeLab solutions: a page in the course menu runs the solution of every CodeLab question of the course on its
+  tests, with a progress bar, and lists the questions whose solution fails, does not compile or is missing.
+- When no test compiles the feedback shows the compiler message once; with test code a single test may fail to compile.
+
 ## 0.6.0 (2026-11-06)
 
 - Check with penalties: in Interactive with multiple tries and Adaptive mode, each wrong Check takes the penalty of

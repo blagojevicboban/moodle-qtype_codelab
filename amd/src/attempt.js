@@ -39,6 +39,36 @@ import {getStrings} from 'core/str';
 export const program = (prefix, code, suffix) =>
     [prefix, code, suffix].map((p) => p.replace(/\n+$/, '')).filter((p) => p !== '').join('\n') + '\n';
 
+/** Place of the test code in the hidden code (as grader::MARKER). */
+const MARKER = '{{TEST}}';
+
+/**
+ * The program of one test (as grader::test_program on the server): the test code replaces the marker; without it a C
+ * or C++ program without main gets one, and other languages get the test code at the end.
+ *
+ * @param {string} lang
+ * @param {string} whole the whole program (see program())
+ * @param {string} testcode may be empty
+ * @returns {string}
+ */
+export const testProgram = (lang, whole, testcode) => {
+    const code = (testcode || '').replace(/\r\n?/g, '\n').replace(/\n+$/, '');
+    const at = whole.indexOf(MARKER);
+    if (at >= 0) {
+        const linestart = whole.lastIndexOf('\n', at) + 1;
+        const indent = whole.slice(linestart, at).match(/^[ \t]*/)[0];
+        return whole.slice(0, at) + code.split('\n').join('\n' + indent) + whole.slice(at + MARKER.length);
+    }
+    if (code === '') {
+        return whole;
+    }
+    if ((lang === 'c' || lang === 'cpp') && !/\bmain\s*\(/.test(whole)) {
+        const main = lang === 'c' ? 'int main(void)' : 'int main()';
+        return `${whole}\n${main}\n{\n    ${code.split('\n').join('\n    ')}\n    return 0;\n}\n`;
+    }
+    return `${whole}${code}\n`;
+};
+
 /**
  * Lines of the hidden code before the student's code in program().
  *
@@ -149,7 +179,7 @@ const button = (text, style) => {
  * @param {boolean} config.noassist
  * @param {string} config.prefix
  * @param {string} config.suffix
- * @param {Array<{stdin: string, expected: string}>} config.tests tests that are not hidden
+ * @param {Array<{stdin: string, expected: string, code: string}>} config.tests tests that are not hidden
  * @param {string} config.comparison exact, spaces, numbers or regex
  * @param {number} config.tolerance for the comparison numbers
  * @param {number} config.contextid
@@ -240,7 +270,8 @@ export const init = async(config) => {
             editor,
             panel,
             vars,
-            program: code,
+            // As Run on the server: the call of the first test with test code, after the student's lines.
+            program: () => testProgram(config.lang, code(), config.tests.find((tc) => tc.code)?.code || ''),
             offset: prefixLines(config.prefix),
             onState: (state) => {
                 busy(state !== 'idle');
@@ -272,7 +303,10 @@ export const init = async(config) => {
         busy(true);
         await showRunning(panel);
         try {
-            await showResult(panel, await run(config.lang, code(), stdin.value, config.contextid));
+            // A question with function tests has no main of its own: Run calls the function as the first test does.
+            const first = config.tests.find((tc) => tc.code)?.code || '';
+            await showResult(panel, await run(config.lang, testProgram(config.lang, code(), first), stdin.value,
+                config.contextid));
         } catch (e) {
             await showError(panel, e);
         } finally {
@@ -289,7 +323,7 @@ export const init = async(config) => {
             list.className = 'list-unstyled mb-0';
             let passed = 0;
             for (const [i, tc] of config.tests.entries()) {
-                const result = await run(config.lang, code(), tc.stdin, config.contextid);
+                const result = await run(config.lang, testProgram(config.lang, code(), tc.code), tc.stdin, config.contextid);
                 if (result.status !== 'ok') {
                     // A compilation error or a server problem: show it as a normal run.
                     await showResult(panel, result);

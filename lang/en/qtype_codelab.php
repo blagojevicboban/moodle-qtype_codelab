@@ -31,7 +31,23 @@ $string['assist'] = 'Typing help';
 $string['badlimit'] = 'Give a whole number from 1 to {$a}, or leave it empty for the default.';
 $string['badregex'] = 'This is not a valid regular expression.';
 $string['badtolerance'] = 'Give a number of 0 or more, for example 0.001.';
+$string['bulkcheck'] = 'Check CodeLab solutions';
+$string['bulkcheck_again'] = 'Check again';
+$string['bulkcheck_bank'] = 'Question bank';
+$string['bulkcheck_done'] = 'Checked {$a->total} questions: {$a->ok} pass all their tests, {$a->problems} need attention.';
+$string['bulkcheck_finished'] = 'Finished.';
+$string['bulkcheck_intro'] = 'The solution of each of the {$a} CodeLab questions in the question banks of this course is run on the Jobe server on the tests of its question, one by one. Questions whose solution fails, does not compile or is missing are listed first. Results of solutions checked before are taken from the cache.';
+$string['bulkcheck_none'] = 'There are no CodeLab questions in the question banks of this course.';
+$string['bulkcheck_progress'] = 'Checking {$a->done} of {$a->total}: {$a->name}';
+$string['bulkcheck_result'] = 'Result';
+$string['bulkcheck_start'] = 'Start the check';
 $string['cachedef_results'] = 'Results of the tests of submitted programs';
+$string['check_compile'] = 'Does not compile';
+$string['check_failed'] = 'Passes {$a->passed} of {$a->total} tests';
+$string['check_jobe'] = 'Jobe could not run it';
+$string['check_nosolution'] = 'No solution';
+$string['check_notests'] = 'No tests (graded by the teacher)';
+$string['check_ok'] = 'Passes all tests ({$a->total})';
 $string['checkfailed'] = 'The program could not be checked on the server (Jobe), so this try does not count. Press Check again in a moment.';
 $string['codeheader'] = 'Code';
 $string['compare'] = 'Comparing the output';
@@ -96,6 +112,15 @@ $string['suffix_help'] = 'Code added after the student\'s program when it is run
 $string['template'] = 'Starting code';
 $string['template_help'] = 'Code students start from in the editor; may be empty.';
 $string['test'] = 'Test';
+$string['testcode'] = 'Test code';
+$string['testcode_help'] = 'Code run in this test, for example a call of the function the student writes: <code>printf("%d\\n", sum(2, 3));</code> or <code>print(sum(2, 3))</code>. It may be empty.
+
+* If the code after the student\'s program has the marker <code>{{TEST}}</code>, for example inside a main that you write, the test code takes its place.
+* Otherwise a C or C++ program without main gets one: <code>int main(void) { test code return 0; }</code>.
+* In other languages the test code is added at the end of the program.
+
+The test can also have an input. Students see the test code of the tests that are not hidden.';
+$string['testcoden'] = 'Test {no}: test code';
 $string['testexpected'] = 'Expected output';
 $string['testfailed'] = 'Test {$a}: failed';
 $string['testgot'] = 'Output';

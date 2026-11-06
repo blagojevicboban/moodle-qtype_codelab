@@ -72,7 +72,7 @@ final class grader_test extends \advanced_testcase {
     public function test_decode_tests(): void {
         $tests = grader::decode_tests('[{"stdin":"1","expected":"2"},{"stdin":"x","expected":"y","hidden":1,"weight":"3"},5]');
         $this->assertCount(2, $tests);
-        $this->assertSame(['stdin' => '1', 'expected' => '2', 'hidden' => false, 'weight' => 1.0], $tests[0]);
+        $this->assertSame(['stdin' => '1', 'expected' => '2', 'code' => '', 'hidden' => false, 'weight' => 1.0], $tests[0]);
         $this->assertTrue($tests[1]['hidden']);
         $this->assertSame(3.0, $tests[1]['weight']);
         $this->assertSame([], grader::decode_tests('not json'));
@@ -165,6 +165,59 @@ final class grader_test extends \advanced_testcase {
         $jobe = self::fake_jobe(fn() => ['status' => 'busy']);
         $tests = grader::decode_tests('[{"stdin":"1","expected":"1"}]');
         $this->assertTrue(grader::sandbox_failed((new grader($jobe))->run_tests('c', 'x', $tests)));
+    }
+
+    public function test_test_program(): void {
+        $c = "int zbir(int a, int b)\n{\n    return a + b;\n}\n";
+        // C without main: a main around the test code.
+        $this->assertSame(
+            $c . "\nint main(void)\n{\n    printf(\"%d\\n\", zbir(2, 3));\n    return 0;\n}\n",
+            grader::test_program('c', $c, 'printf("%d\n", zbir(2, 3));' . "\n")
+        );
+        $this->assertStringContainsString(
+            "int main()\n{\n    int x = 1;\n    cout << x;\n",
+            grader::test_program('cpp', $c, "int x = 1;\ncout << x;")
+        );
+        // The marker of the teacher's main takes the code, with its indentation.
+        $main = $c . "int main(void)\n{\n    {{TEST}}\n    return 0;\n}\n";
+        $this->assertSame(
+            $c . "int main(void)\n{\n    int s = zbir(1, 2);\n    printf(\"%d\", s);\n    return 0;\n}\n",
+            grader::test_program('c', $main, "int s = zbir(1, 2);\nprintf(\"%d\", s);")
+        );
+        // Without test code the marker is left out; a program with main is not changed.
+        $this->assertSame($c . "int main(void)\n{\n    \n    return 0;\n}\n", grader::test_program('c', $main, ''));
+        $this->assertSame($c, grader::test_program('c', $c, ''));
+        // Other languages: at the end.
+        $this->assertSame(
+            "def zbir(a, b):\n    return a + b\nprint(zbir(2, 3))\n",
+            grader::test_program('python', "def zbir(a, b):\n    return a + b\n", 'print(zbir(2, 3))')
+        );
+    }
+
+    public function test_run_tests_with_test_code(): void {
+        // The fake Jobe "runs" the last line: the call of each test.
+        $jobe = self::fake_jobe(function ($lang, $code) {
+            $lines = explode("\n", rtrim($code, "\n"));
+            return ['stdout' => end($lines) === 'print(zbir(2, 3))' ? "5\n" : "?\n"];
+        });
+        $tests = grader::decode_tests(json_encode([
+            ['code' => 'print(zbir(2, 3))', 'expected' => '5'],
+            ['code' => 'print(zbir(1, 1))', 'expected' => '2'],
+        ]));
+        $results = (new grader($jobe))->run_tests('python', "def zbir(a, b):\n    return a + b\n", $tests);
+        $this->assertSame([true, false], array_column($results, 'passed'));
+        $this->assertSame(2, $jobe->runs);
+
+        // A compilation error of one test does not stop the others.
+        $jobe = self::fake_jobe(fn($lang, $code) => strpos($code, 'bad') !== false
+            ? ['status' => 'compile', 'cmpinfo' => 'error'] : ['stdout' => "5\n"]);
+        $tests = grader::decode_tests(json_encode([
+            ['code' => 'bad();', 'expected' => '5'],
+            ['code' => 'printf("5");', 'expected' => '5'],
+        ]));
+        $results = (new grader($jobe))->run_tests('c', "int f(void) { return 5; }\n", $tests);
+        $this->assertSame(['compile', 'ok'], array_column($results, 'status'));
+        $this->assertSame(2, $jobe->runs);
     }
 
     public function test_zero_weights(): void {

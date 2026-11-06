@@ -74,6 +74,12 @@ class qtype_codelab_edit_form extends question_edit_form {
         $repeated = [
             $mform->createElement(
                 'textarea',
+                'testcode',
+                get_string('testcoden', 'qtype_codelab'),
+                ['rows' => 2, 'cols' => 60, 'spellcheck' => 'false', 'class' => 'font-monospace']
+            ),
+            $mform->createElement(
+                'textarea',
                 'teststdin',
                 get_string('testinputn', 'qtype_codelab'),
                 ['rows' => 3, 'cols' => 60, 'spellcheck' => 'false']
@@ -90,6 +96,7 @@ class qtype_codelab_edit_form extends question_edit_form {
             ], ' ', false),
         ];
         $options = [
+            'testcode' => ['type' => PARAM_RAW, 'helpbutton' => ['testcode', 'qtype_codelab']],
             'teststdin' => ['type' => PARAM_RAW],
             'testexpected' => ['type' => PARAM_RAW],
             // No default here: it would win over the saved weights; data_preprocessing() fills in 1.
@@ -161,6 +168,7 @@ class qtype_codelab_edit_form extends question_edit_form {
         foreach ($question->options->testlist ?? [] as $i => $tc) {
             $question->teststdin[$i] = $tc['stdin'];
             $question->testexpected[$i] = $tc['expected'];
+            $question->testcode[$i] = $tc['code'];
             $question->testhidden[$i] = $tc['hidden'] ? 1 : 0;
             $question->testweight[$i] = $tc['weight'];
         }
@@ -195,7 +203,8 @@ class qtype_codelab_edit_form extends question_edit_form {
         $regex = ($data['comparison'] ?? '') === 'regex';
         foreach ($data['teststdin'] ?? [] as $i => $stdin) {
             $expected = (string) ($data['testexpected'][$i] ?? '');
-            if (trim((string) $stdin) !== '' && $expected === '' && !$hassolution) {
+            $used = trim((string) $stdin) !== '' || trim((string) ($data['testcode'][$i] ?? '')) !== '';
+            if ($used && $expected === '' && !$hassolution) {
                 $errors["testexpected[$i]"] = get_string('noexpected', 'qtype_codelab');
             } else if ($regex && $expected !== '' && !grader::regex_valid($expected)) {
                 $errors["testexpected[$i]"] = get_string('badregex', 'qtype_codelab');

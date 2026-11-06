@@ -8,12 +8,10 @@
   </div>
 
   <hr>
-  <p><strong>What's New in v0.6.0</strong></p>
+  <p><strong>What's New in v0.7.0</strong></p>
   <ul>
-    <li><strong>Check with penalties:</strong> with Interactive with multiple tries or Adaptive mode, students press Check, see which visible tests passed and how many hidden ones, and each wrong try costs the penalty of the question. A Check while Jobe is down does not use a try.</li>
-    <li><strong>Output comparison:</strong> exactly, ignoring spaces at the end, numbers with a tolerance (3.14159 matches 3.1416), or a regular expression.</li>
-    <li><strong>Solution checked on save:</strong> the question is saved only when the model solution passes its tests.</li>
-    <li><strong>Time and memory limit per question</strong>, up to the largest values set by the administrator.</li>
+    <li><strong>Function tests:</strong> a test can call the function the student writes, for example printf of sum(2, 3). C and C++ get a main around the call, or the teacher places it with a marker in the hidden code.</li>
+    <li><strong>Check all solutions of a course:</strong> one page runs the model solution of every CodeLab question on its tests and lists the ones that fail or are missing.</li>
   </ul>
 
   <hr>
@@ -24,7 +22,8 @@
     <li><strong>Hidden code before and after the answer:</strong> for example the class and Main around a few statements.</li>
     <li><strong>For the student:</strong> the code editor with typing help, Run with their own input, and Run the tests for the tests that are not hidden.</li>
     <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load Jobe again. When Jobe cannot check a program at the final submit, the answer waits for the teacher.</li>
-    <li><strong>Options:</strong> how outputs are compared, time and memory limits, and turning off typing help for tests. A question without tests is graded by the teacher.</li>
+    <li><strong>Check with penalties</strong> in Interactive and Adaptive mode, and output compared exactly, without trailing spaces, as numbers with a tolerance or by a regular expression.</li>
+    <li><strong>Options:</strong> time and memory limits, and turning off typing help for tests. A question without tests is graded by the teacher.</li>
     <li><strong>Backup and restore</strong> keep all settings and tests.</li>
   </ul>
 

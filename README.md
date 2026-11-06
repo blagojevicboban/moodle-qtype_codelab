@@ -19,6 +19,9 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 - **tests**, each with:
   - the input;
   - the expected output;
+  - test code (optional), for questions where the student writes a function: for example
+    `printf("%d\n", zbir(2, 3));`. It replaces the marker `{{TEST}}` in the code after the student's program; without
+    the marker, a C or C++ program without `main` gets one around the test code, and other languages run it at the end;
   - hidden or not (students see only how many hidden tests passed);
   - a weight.
 
@@ -64,6 +67,13 @@ the number of tries is the number of hints plus one.
 
 If Jobe cannot check the program during Check, the try does not count: the student sees a message and presses Check
 again. Only at the final submit does such an answer wait for the teacher.
+
+## Check all solutions of a course
+
+Teachers who can edit questions find **Check CodeLab solutions** in the course menu (*More*). The page runs the
+solution of every CodeLab question in the question banks of the course on its tests, one by one with a progress bar,
+and lists first the questions whose solution fails, does not compile or is missing, with a link to edit each. Use it
+after a change on the Jobe server or after a restore.
 
 ## Installation
 
