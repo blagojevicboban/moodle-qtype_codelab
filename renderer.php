@@ -98,6 +98,8 @@ class qtype_codelab_renderer extends qtype_renderer {
             'contextid' => $options->context->id,
             // Run and Step of a Python answer in the browser; the tests and the grade still come from Jobe.
             'pyodide' => \tiny_codelab\local\runtime::config()['pyodide'],
+            // Run with the input typed while the program runs, on the interactive server of the site (if any).
+            'interactive' => \tiny_codelab\local\runtime::config()['interactive'] ?? [],
         ]]);
         return $result;
     }

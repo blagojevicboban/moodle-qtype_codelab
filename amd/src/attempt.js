@@ -26,6 +26,7 @@ import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
 import {available as pythonAvailable} from 'tiny_codelab/python';
 import {PythonSession} from 'tiny_codelab/session';
+import {RemoteSession, runsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
 
 /**
@@ -184,6 +185,7 @@ const button = (text, style) => {
  * @param {number} config.tolerance for the comparison numbers
  * @param {number} config.contextid
  * @param {string} config.pyodide address of Pyodide for Run and Step of Python in the browser, or ''
+ * @param {string[]} [config.interactive] languages that Run sends to the interactive server (input typed while running)
  */
 export const init = async(config) => {
     const textarea = document.getElementById(config.textareaid);
@@ -239,7 +241,9 @@ export const init = async(config) => {
     // Python runs in the browser when it can: input() asks while the program runs, Step goes line by line.
     const browser = config.lang === 'python' && config.pyodide && pythonAvailable();
     const stepButton = browser ? button(s.step, 'btn-secondary') : null;
-    const stopButton = browser ? button(s.stop, 'btn-danger') : null;
+    // C, C++, Java and C# run on the interactive server when the site has one; the tests and the grade stay on Jobe.
+    const remote = !browser && runsInteractively(config.interactive, config.lang);
+    const stopButton = browser || remote ? button(s.stop, 'btn-danger') : null;
     const testsButton = config.tests.length ? button(s.runtests, 'btn-secondary') : null;
     const panel = document.createElement('div');
     panel.className = 'tiny_codelab-console mt-2';
@@ -290,7 +294,27 @@ export const init = async(config) => {
         stopButton.addEventListener('click', () => session.stop());
     }
 
+    let remoteSession = null;
+    if (remote) {
+        stopButton.hidden = true;
+        remoteSession = new RemoteSession({
+            lang: config.lang,
+            program: () => testProgram(config.lang, code(), config.tests.find((tc) => tc.code)?.code || ''),
+            panel,
+            contextid: config.contextid,
+            onState: (state) => {
+                busy(state !== 'idle');
+                stopButton.hidden = state === 'idle';
+            },
+        });
+        stopButton.addEventListener('click', () => remoteSession.stop());
+    }
+
     runButton.addEventListener('click', async() => {
+        if (remoteSession) {
+            await remoteSession.start(stdin.value);
+            return;
+        }
         if (session) {
             if (session.state === 'paused') {
                 session.resume();

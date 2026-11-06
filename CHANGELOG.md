@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 (2026-11-06)
+
+- Run in the attempt is interactive for C, C++, Java and C# when the site has a CodeLab runner: the student types the
+  input while the program runs. Run the tests and the grade stay on Jobe. Needs tiny_codelab 1.1.0.
+
 ## 1.0.0 (2026-11-06)
 
 - First stable release. Needs tiny_codelab 1.0.0. Tested on the CodeRunner questions of three courses converted
