@@ -1,0 +1,53 @@
+<div>
+  <p><strong>CodeLab Question Type: Programming Questions Graded with Tests</strong></p>
+  <p><em>Students write a program in the code editor of VS Code. It is run on the teacher's tests on a Jobe server, and the grade is the weighted share of the tests it passes.</em></p>
+  <div>
+    <a href="https://github.com/blagojevicboban/moodle-qtype_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-qtype_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
+    <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
+    <a href="https://github.com/blagojevicboban/moodle-qtype_codelab" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" alt="License GPL v3"></a>
+  </div>
+
+  <hr>
+  <p><strong>What's New in v0.3.0</strong></p>
+  <ul>
+    <li><strong>Three more languages:</strong> JavaScript on Node.js, Pascal and PHP.</li>
+    <li><strong>Python in the browser:</strong> students run their answer with input in the console, and Step through it line by line with the variables. The hidden code before and after the answer is passed over. The tests and the grade still come from Jobe.</li>
+  </ul>
+
+  <hr>
+  <p><strong>Core features</strong></p>
+  <ul>
+    <li><strong>Eight languages:</strong> C, C++, Python, Java, C#, JavaScript, Pascal and PHP.</li>
+    <li><strong>Tests:</strong> each test has an input, an expected output, a weight, and can be hidden. Students see only whether a hidden test passed. Empty expected outputs are filled in by running the model solution when the question is saved.</li>
+    <li><strong>Hidden code before and after the answer:</strong> for example the class and Main around a few statements.</li>
+    <li><strong>For the student:</strong> the code editor with typing help, Run with their own input, and Run the tests for the tests that are not hidden.</li>
+    <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load Jobe again. When Jobe cannot check a program, the attempt waits for the teacher.</li>
+    <li><strong>Options:</strong> ignore trailing spaces, and turn off typing help for tests. A question without tests is graded by the teacher.</li>
+    <li><strong>Backup and restore</strong> keep all settings and tests.</li>
+  </ul>
+
+  <hr>
+  <p><strong>The CodeLab plugins</strong></p>
+  <ul>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab (code editor)</a></strong>: inserts examples in the TinyMCE editor. The other two plugins use its editor and runner.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab viewer (Run / Step)</a></strong>: turns examples into code editors that readers can edit and run.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong> (this plugin): programming questions graded on Jobe with tests.</li>
+  </ul>
+
+  <hr>
+  <p><strong>Requirements</strong></p>
+  <ul>
+    <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
+    <li><strong>tiny_codelab:</strong> version 0.4.0 or newer, installed first, with a Jobe server in its settings.</li>
+  </ul>
+
+  <hr>
+  <p><strong>Privacy</strong></p>
+  <p>Answers are stored like any quiz answer. Programs and their input are sent to the Jobe server set by the administrator to be compiled and run. The plugin implements the Moodle Privacy API.</p>
+
+  <hr>
+  <p>Developed by <strong>Boban Blagojevi&#263;</strong>. Languages: English and Serbian (Latin and Cyrillic).<br>
+    Source, documentation and issue tracker:
+    <a href="https://github.com/blagojevicboban/moodle-qtype_codelab" target="_blank" rel="noreferrer noopener">github.com/blagojevicboban/moodle-qtype_codelab</a><br>
+    Licensed under the GNU GPL v3 or later.</p>
+</div>
