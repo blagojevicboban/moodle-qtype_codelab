@@ -117,6 +117,7 @@ export const init = async(config) => {
             minLines: config.readonly ? 3 : 12,
             maxLines: 40,
             label: s.editorlabel,
+            pyodide: config.readonly ? '' : config.pyodide,
         });
     } catch (e) {
         host.remove();

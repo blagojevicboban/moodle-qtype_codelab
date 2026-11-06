@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (2026-11-06)
+
+- Python typing help from Jedi in the answer. Needs tiny_codelab 0.5.0.
+
 ## 0.3.0 (2026-11-06)
 
 - JavaScript (Node.js), Pascal and PHP questions.
