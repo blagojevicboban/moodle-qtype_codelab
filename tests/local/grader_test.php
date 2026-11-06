@@ -92,13 +92,48 @@ final class grader_test extends \advanced_testcase {
         $this->assertSame("3\n", $tests[0]['expected']);
     }
 
-    public function test_matches(): void {
-        $this->assertTrue(grader::matches("5\n5.15", "5  \n5.15\n\n", true));
-        $this->assertFalse(grader::matches("5\n5.15", "5  \n5.15\n\n", false));
-        $this->assertTrue(grader::matches("a\r\nb", "a\nb", false));
-        $this->assertFalse(grader::matches('5', '6', true));
+    public function test_matches_spaces_and_exact(): void {
+        $this->assertTrue(grader::matches("5\n5.15", "5  \n5.15\n\n", 'spaces'));
+        $this->assertTrue(grader::matches("5\n5.15", "5  \n5.15\n\n"));
+        $this->assertFalse(grader::matches("5\n5.15", "5  \n5.15\n\n", 'exact'));
+        $this->assertTrue(grader::matches("a\r\nb", "a\nb", 'exact'));
+        $this->assertFalse(grader::matches('5', '6', 'spaces'));
         // Spaces inside a line always count.
-        $this->assertFalse(grader::matches('1 2', '1  2', true));
+        $this->assertFalse(grader::matches('1 2', '1  2', 'spaces'));
+    }
+
+    public function test_matches_numbers(): void {
+        // Absolute tolerance.
+        $this->assertTrue(grader::matches("Average: 2.333", "Average: 2.3333333\n", 'numbers', 0.001));
+        $this->assertFalse(grader::matches('Average: 2.333', 'Average: 2.336', 'numbers', 0.001));
+        // Relative tolerance for large numbers.
+        $this->assertTrue(grader::matches('1000000', '1000400', 'numbers', 0.001));
+        $this->assertFalse(grader::matches('1000000', '1002000', 'numbers', 0.001));
+        // Spaces and line ends between the words do not count; other words must be the same.
+        $this->assertTrue(grader::matches("1 2\n3", "1\n2  3\n", 'numbers', 0));
+        $this->assertFalse(grader::matches('Sum: 5', 'Zbir: 5', 'numbers', 0.001));
+        $this->assertFalse(grader::matches('1 2', '1 2 3', 'numbers', 0.001));
+        $this->assertTrue(grader::matches('-0.5 1e3 .25', '-0.5000 1000 0.25', 'numbers', 0));
+        $this->assertFalse(grader::matches('1,5', '1,50', 'numbers', 0.1));
+        $this->assertTrue(grader::is_number('+12.'));
+        $this->assertFalse(grader::is_number('0x1A'));
+        $this->assertFalse(grader::is_number('NaN'));
+    }
+
+    public function test_matches_regex(): void {
+        $this->assertTrue(grader::matches('Sum: [0-9]+', "Sum: 42  \n\n", 'regex'));
+        // The pattern must match the whole output.
+        $this->assertFalse(grader::matches('Sum: [0-9]+', "The sum: 42\n", 'regex'));
+        $this->assertFalse(grader::matches('[0-9]+', "42\n43", 'regex'));
+        $this->assertTrue(grader::matches("[0-9]+\n[0-9]+\n", "42\n43\n", 'regex'));
+        // Slashes and tildes need no escaping; UTF-8 letters are one character.
+        $this->assertTrue(grader::matches('a/b~č.', 'a/b~čx', 'regex'));
+        $this->assertTrue(grader::matches('(?i)yes|da', 'DA', 'regex'));
+        // An invalid pattern never matches.
+        $this->assertFalse(grader::matches('[0-9', '5', 'regex'));
+        $this->assertNull(grader::regex_matches('(', ''));
+        $this->assertTrue(grader::regex_valid('^\d+$'));
+        $this->assertFalse(grader::regex_valid('(abc'));
     }
 
     public function test_run_tests_and_fraction(): void {
@@ -108,7 +143,7 @@ final class grader_test extends \advanced_testcase {
             ['stdin' => '2', 'expected' => '4'],
             ['stdin' => '3', 'expected' => '7', 'weight' => 3],
         ]));
-        $results = (new grader($jobe))->run_tests('python', 'x', $tests, true);
+        $results = (new grader($jobe))->run_tests('python', 'x', $tests);
         $this->assertTrue($results[0]['passed']);
         $this->assertFalse($results[1]['passed']);
         $this->assertSame("6\n", $results[1]['got']);
@@ -119,7 +154,7 @@ final class grader_test extends \advanced_testcase {
     public function test_compile_error_stops_after_first_test(): void {
         $jobe = self::fake_jobe(fn() => ['status' => 'compile', 'cmpinfo' => 'error: x undeclared']);
         $tests = grader::decode_tests('[{"stdin":"1","expected":"1"},{"stdin":"2","expected":"2"}]');
-        $results = (new grader($jobe))->run_tests('c', 'int main(void) { return x; }', $tests, true);
+        $results = (new grader($jobe))->run_tests('c', 'int main(void) { return x; }', $tests);
         $this->assertSame(1, $jobe->runs);
         $this->assertCount(2, $results);
         $this->assertSame('compile', $results[1]['status']);
@@ -129,7 +164,7 @@ final class grader_test extends \advanced_testcase {
     public function test_sandbox_failure(): void {
         $jobe = self::fake_jobe(fn() => ['status' => 'busy']);
         $tests = grader::decode_tests('[{"stdin":"1","expected":"1"}]');
-        $this->assertTrue(grader::sandbox_failed((new grader($jobe))->run_tests('c', 'x', $tests, true)));
+        $this->assertTrue(grader::sandbox_failed((new grader($jobe))->run_tests('c', 'x', $tests)));
     }
 
     public function test_zero_weights(): void {

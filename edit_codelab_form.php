@@ -22,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_codelab\local\grader;
+use qtype_codelab\local\question_jobe;
+
 /**
  * CodeLab question editing form: the language, the code (starting code, solution, hidden code before and after) and
  * the tests. The code fields become code editors (qtype_codelab/edit).
@@ -111,13 +114,36 @@ class qtype_codelab_edit_form extends question_edit_form {
             get_string('showtests_desc', 'qtype_codelab')
         );
         $mform->setDefault('showtests', 1);
+        $comparisons = [];
+        foreach (grader::COMPARISONS as $comparison) {
+            $comparisons[$comparison] = get_string('comparison_' . $comparison, 'qtype_codelab');
+        }
+        $mform->addElement('select', 'comparison', get_string('compare', 'qtype_codelab'), $comparisons);
+        $mform->setDefault('comparison', 'spaces');
+        $mform->addHelpButton('comparison', 'compare', 'qtype_codelab');
+        $mform->addElement('text', 'tolerance', get_string('tolerance', 'qtype_codelab'), ['size' => 8]);
+        $mform->setType('tolerance', PARAM_RAW_TRIMMED);
+        $mform->setDefault('tolerance', grader::TOLERANCE);
+        $mform->addHelpButton('tolerance', 'tolerance', 'qtype_codelab');
+        $mform->hideIf('tolerance', 'comparison', 'neq', 'numbers');
+
+        // Limits for this question; empty keeps the defaults of the site and of Jobe.
+        $limits = (object) ['cputime' => question_jobe::max_cputime(), 'memorylimit' => question_jobe::max_memory()];
+        foreach (['cputime', 'memorylimit'] as $field) {
+            $mform->addElement('text', $field, get_string($field, 'qtype_codelab'), ['size' => 6]);
+            $mform->setType($field, PARAM_RAW_TRIMMED);
+            $mform->addHelpButton($field, $field, 'qtype_codelab', '', false, $limits->$field);
+            $mform->setAdvanced($field);
+        }
+
+        // Not saved with the question: only for this save.
         $mform->addElement(
             'advcheckbox',
-            'ignorespaces',
-            get_string('compare', 'qtype_codelab'),
-            get_string('ignorespaces', 'qtype_codelab')
+            'savefailing',
+            get_string('solutioncheck', 'qtype_codelab'),
+            get_string('savefailing', 'qtype_codelab')
         );
-        $mform->setDefault('ignorespaces', 1);
+        $mform->addHelpButton('savefailing', 'solutioncheck', 'qtype_codelab');
 
         $this->add_interactive_settings();
         $PAGE->requires->js_call_amd('qtype_codelab/edit', 'init');
@@ -137,6 +163,14 @@ class qtype_codelab_edit_form extends question_edit_form {
             $question->testexpected[$i] = $tc['expected'];
             $question->testhidden[$i] = $tc['hidden'] ? 1 : 0;
             $question->testweight[$i] = $tc['weight'];
+        }
+        // A limit of 0 is shown as empty: the default.
+        foreach (['cputime', 'memorylimit'] as $field) {
+            if (empty($question->options->$field)) {
+                $question->$field = '';
+            } else {
+                $question->$field = (int) $question->options->$field;
+            }
         }
         // Empty tests (and those added with the button) start with weight 1.
         $count = max(self::START_TESTS, count($question->options->testlist ?? []) + 1) + 20;
@@ -158,10 +192,41 @@ class qtype_codelab_edit_form extends question_edit_form {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         $hassolution = trim((string) ($data['solution'] ?? '')) !== '';
+        $regex = ($data['comparison'] ?? '') === 'regex';
         foreach ($data['teststdin'] ?? [] as $i => $stdin) {
             $expected = (string) ($data['testexpected'][$i] ?? '');
             if (trim((string) $stdin) !== '' && $expected === '' && !$hassolution) {
                 $errors["testexpected[$i]"] = get_string('noexpected', 'qtype_codelab');
+            } else if ($regex && $expected !== '' && !grader::regex_valid($expected)) {
+                $errors["testexpected[$i]"] = get_string('badregex', 'qtype_codelab');
+            }
+        }
+        $tolerance = trim((string) ($data['tolerance'] ?? ''));
+        $badtolerance = $tolerance !== '' && (!is_numeric($tolerance) || (float) $tolerance < 0);
+        if (($data['comparison'] ?? '') === 'numbers' && $badtolerance) {
+            $errors['tolerance'] = get_string('badtolerance', 'qtype_codelab');
+        }
+
+        $max = ['cputime' => question_jobe::max_cputime(), 'memorylimit' => question_jobe::max_memory()];
+        foreach ($max as $field => $limit) {
+            $value = trim((string) ($data[$field] ?? ''));
+            if ($value !== '' && (!ctype_digit($value) || (int) $value < 1 || (int) $value > $limit)) {
+                $errors[$field] = get_string('badlimit', 'qtype_codelab', $limit);
+            }
+        }
+
+        // The solution must pass the tests; it runs on Jobe only when the rest of the form is right.
+        if (!$errors && empty($data['savefailing'])) {
+            $check = qtype_codelab::check_solution($data);
+            if ($check['compile'] !== null) {
+                $errors['solution'] = get_string(
+                    'solutionnocompile',
+                    'qtype_codelab',
+                    s(core_text::substr($check['compile'], 0, 1000))
+                );
+            }
+            foreach ($check['failed'] as $i => $got) {
+                $errors["testexpected[$i]"] = get_string('solutionfails', 'qtype_codelab', s(core_text::substr($got, 0, 300)));
             }
         }
         return $errors;

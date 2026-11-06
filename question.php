@@ -23,6 +23,7 @@
  */
 
 use qtype_codelab\local\grader;
+use qtype_codelab\local\question_jobe;
 
 /**
  * A CodeLab question: the answer is the program the student wrote. With tests it is run on the Jobe server and graded
@@ -47,10 +48,19 @@ class qtype_codelab_question extends question_graded_automatically {
     public $tests = [];
     /** @var bool students may run the tests that are not hidden */
     public $showtests = true;
-    /** @var bool spaces at the end of lines and of the output do not count */
-    public $ignorespaces = true;
+    /** @var string how the output is compared: exact, spaces, numbers or regex (see grader::COMPARISONS) */
+    public $comparison = 'spaces';
+    /** @var float largest difference of two numbers for the comparison numbers */
+    public $tolerance = grader::TOLERANCE;
+    /** @var int CPU time limit in seconds, 0 for the site setting */
+    public $cputime = 0;
+    /** @var int memory limit in MB, 0 for the default of Jobe */
+    public $memorylimit = 0;
     /** @var bool code completion and hints are turned off */
     public $noassist = false;
+
+    /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
+    public static $checkrequested = null;
 
     /** @var array results of the tests by answer, for this request */
     protected $resultcache = [];
@@ -88,6 +98,18 @@ class qtype_codelab_question extends question_graded_automatically {
     }
 
     /**
+     * Key of the results of an answer in the cache: everything that changes them.
+     *
+     * @param string $answer
+     * @return string
+     */
+    public function results_key(string $answer): string {
+        $program = grader::program((string) $this->prefix, $answer, (string) $this->suffix);
+        return sha1(json_encode([$this->language, $program, $this->tests, $this->comparison, (float) $this->tolerance,
+            (int) $this->cputime, (int) $this->memorylimit]));
+    }
+
+    /**
      * Results of the tests for an answer: kept in the application cache, so a review or a regrade of the same answer does
      * not run it on Jobe again.
      *
@@ -100,14 +122,21 @@ class qtype_codelab_question extends question_graded_automatically {
             return [];
         }
         $program = grader::program((string) $this->prefix, $answer, (string) $this->suffix);
-        $key = sha1(json_encode([$this->language, $program, $this->tests, (bool) $this->ignorespaces]));
+        $key = $this->results_key($answer);
         if (isset($this->resultcache[$key])) {
             return $this->resultcache[$key];
         }
         $cache = \cache::make('qtype_codelab', 'results');
         $results = $cache->get($key);
         if ($results === false) {
-            $results = (new grader())->run_tests($this->language, $program, $this->tests, (bool) $this->ignorespaces);
+            $jobe = question_jobe::for_limits((int) $this->cputime, (int) $this->memorylimit);
+            $results = (new grader($jobe))->run_tests(
+                $this->language,
+                $program,
+                $this->tests,
+                $this->comparison,
+                (float) $this->tolerance
+            );
             // A failure of the sandbox is not kept: the next try may work.
             if (!grader::sandbox_failed($results)) {
                 $cache->set($key, $results);
@@ -161,23 +190,59 @@ class qtype_codelab_question extends question_graded_automatically {
     }
 
     /**
-     * An answer is complete when it has code.
+     * Whether the student pressed Check in this request (behaviours Interactive with multiple tries, Adaptive mode and
+     * Immediate feedback). The question engine does not tell the question, so the submitted fields are looked at.
+     *
+     * @return bool
+     */
+    protected function check_requested(): bool {
+        if (self::$checkrequested !== null) {
+            return self::$checkrequested;
+        }
+        foreach (array_keys((array) data_submitted()) as $name) {
+            if (preg_match('/^q\d+:\d+_-submit$/', $name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether an answer has code and, when the student pressed Check, Jobe could run it. A failure of Jobe during Check
+     * makes the answer invalid: the try is not used and the student can check again. The final submit grades it anyway
+     * (see is_gradable_response), and then the teacher grades it.
      *
      * @param array $response
      * @return bool
      */
     public function is_complete_response(array $response) {
+        if (!$this->is_gradable_response($response)) {
+            return false;
+        }
+        return !$this->check_requested() || !grader::sandbox_failed($this->test_results($response));
+    }
+
+    /**
+     * An answer can be graded when it has code.
+     *
+     * @param array $response
+     * @return bool
+     */
+    public function is_gradable_response(array $response) {
         return trim((string) ($response['answer'] ?? '')) !== '';
     }
 
     /**
-     * Message shown when the answer is empty.
+     * Message shown when the answer is empty, or when Jobe could not check it.
      *
      * @param array $response
      * @return string
      */
     public function get_validation_error(array $response) {
-        return $this->is_complete_response($response) ? '' : get_string('noanswer', 'qtype_codelab');
+        if (!$this->is_gradable_response($response)) {
+            return get_string('noanswer', 'qtype_codelab');
+        }
+        return $this->is_complete_response($response) ? '' : get_string('checkfailed', 'qtype_codelab');
     }
 
     /**

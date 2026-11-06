@@ -29,6 +29,12 @@ class grader {
     /** Statuses meaning Jobe could not check the program: the answer is then left for the teacher. */
     const SANDBOX_FAILURES = ['error', 'busy', 'notconfigured', 'nolanguage'];
 
+    /** Ways to compare the output with the expected output. */
+    const COMPARISONS = ['exact', 'spaces', 'numbers', 'regex'];
+
+    /** Default tolerance of the comparison numbers. */
+    const TOLERANCE = 0.001;
+
     /** @var jobe|null client, made when first needed */
     protected $jobe;
 
@@ -108,13 +114,110 @@ class grader {
     /**
      * Whether the output matches the expected output.
      *
-     * @param string $expected
+     * @param string $expected expected output, or a regular expression for the comparison regex
      * @param string $got
-     * @param bool $ignorespaces
+     * @param string $comparison one of COMPARISONS
+     * @param float $tolerance for the comparison numbers: largest absolute or relative difference of two numbers
      * @return bool
      */
-    public static function matches(string $expected, string $got, bool $ignorespaces): bool {
-        return self::normalise($expected, $ignorespaces) === self::normalise($got, $ignorespaces);
+    public static function matches(
+        string $expected,
+        string $got,
+        string $comparison = 'spaces',
+        float $tolerance = self::TOLERANCE
+    ): bool {
+        switch ($comparison) {
+            case 'exact':
+                return self::unix($expected) === self::unix($got);
+            case 'numbers':
+                return self::numbers_match($expected, $got, $tolerance);
+            case 'regex':
+                return self::regex_matches($expected, $got) === true;
+            default:
+                return self::normalise($expected, true) === self::normalise($got, true);
+        }
+    }
+
+    /**
+     * Compare word by word: numbers may differ by the tolerance (absolute, or relative to the larger one), other words
+     * must be the same. Spaces and line ends between the words do not count.
+     *
+     * @param string $expected
+     * @param string $got
+     * @param float $tolerance
+     * @return bool
+     */
+    public static function numbers_match(string $expected, string $got, float $tolerance): bool {
+        $split = fn(string $text) => preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY);
+        $a = $split($expected);
+        $b = $split($got);
+        if (count($a) !== count($b)) {
+            return false;
+        }
+        foreach ($a as $i => $word) {
+            if ($word === $b[$i]) {
+                continue;
+            }
+            if (!self::is_number($word) || !self::is_number($b[$i])) {
+                return false;
+            }
+            $x = (float) $word;
+            $y = (float) $b[$i];
+            $diff = abs($x - $y);
+            if ($diff > $tolerance && $diff > $tolerance * max(abs($x), abs($y))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Whether a word is a number as programs print them: 12, -3, 2.50, .5, 1e-3 (not 0x1A or 1,5).
+     *
+     * @param string $word
+     * @return bool
+     */
+    public static function is_number(string $word): bool {
+        return (bool) preg_match('/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/', $word);
+    }
+
+    /**
+     * The expected output as a regular expression (PCRE) that must match the whole output. Spaces at the end of lines and
+     * empty lines at the end of the output do not count.
+     *
+     * @param string $pattern
+     * @param string $got
+     * @return bool|null whether it matches, null when the pattern is not valid
+     */
+    public static function regex_matches(string $pattern, string $got): ?bool {
+        $regex = self::regex(rtrim(self::unix($pattern), "\n"));
+        $result = @preg_match($regex, self::normalise($got, true));
+        if ($result === false) {
+            // Output that is not UTF-8 is compared byte by byte.
+            $result = @preg_match(substr($regex, 0, -1), self::normalise($got, true));
+        }
+        return $result === false ? null : $result === 1;
+    }
+
+    /**
+     * Whether a pattern of a test is a valid regular expression.
+     *
+     * @param string $pattern
+     * @return bool
+     */
+    public static function regex_valid(string $pattern): bool {
+        return @preg_match(self::regex(rtrim(self::unix($pattern), "\n")), '') !== false;
+    }
+
+    /**
+     * The full PCRE for a pattern: anchored at both ends of the output, UTF-8.
+     *
+     * @param string $pattern
+     * @return string
+     */
+    protected static function regex(string $pattern): string {
+        // The delimiter is a control character, so a teacher's / or ~ needs no escaping.
+        return "\x01\A(?:" . $pattern . ")\z\x01u";
     }
 
     /**
@@ -123,17 +226,24 @@ class grader {
      * @param string $lang
      * @param string $program the whole program (see program())
      * @param array $tests decoded tests
-     * @param bool $ignorespaces
+     * @param string $comparison one of COMPARISONS
+     * @param float $tolerance for the comparison numbers
      * @return array list of ['status', 'passed', 'got', 'cmpinfo', 'stderr'] in the order of the tests
      */
-    public function run_tests(string $lang, string $program, array $tests, bool $ignorespaces): array {
+    public function run_tests(
+        string $lang,
+        string $program,
+        array $tests,
+        string $comparison = 'spaces',
+        float $tolerance = self::TOLERANCE
+    ): array {
         $this->jobe = $this->jobe ?? new jobe();
         $results = [];
         foreach ($tests as $tc) {
             $run = $this->jobe->run($lang, $program, $tc['stdin']);
             $results[] = [
                 'status' => $run['status'],
-                'passed' => $run['status'] === 'ok' && self::matches($tc['expected'], $run['stdout'], $ignorespaces),
+                'passed' => $run['status'] === 'ok' && self::matches($tc['expected'], $run['stdout'], $comparison, $tolerance),
                 'got' => $run['stdout'],
                 'cmpinfo' => $run['cmpinfo'],
                 'stderr' => $run['stderr'],

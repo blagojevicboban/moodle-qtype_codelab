@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/codelab/db" VERSION="20261105" COMMENT="XMLDB file for Moodle question/type/codelab"
+<XMLDB PATH="question/type/codelab/db" VERSION="20261108" COMMENT="XMLDB file for Moodle question/type/codelab"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -15,7 +15,10 @@
         <FIELD NAME="suffix" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Code added after the student's code when it is run, not shown to students."/>
         <FIELD NAME="tests" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of tests: stdin, expected, hidden, weight. No tests: graded manually."/>
         <FIELD NAME="showtests" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="1 to let students run the tests that are not hidden during the attempt."/>
-        <FIELD NAME="ignorespaces" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="1 when spaces at the end of lines and of the output do not count."/>
+        <FIELD NAME="comparison" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="spaces" SEQUENCE="false" COMMENT="How the output is compared: exact, spaces (at the end of lines do not count), numbers or regex."/>
+        <FIELD NAME="tolerance" TYPE="number" LENGTH="20" NOTNULL="true" DEFAULT="0.001" SEQUENCE="false" DECIMALS="10" COMMENT="Largest absolute or relative difference of two numbers for the comparison numbers."/>
+        <FIELD NAME="cputime" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="CPU time limit in seconds; 0 for the setting of tiny_codelab."/>
+        <FIELD NAME="memorylimit" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Memory limit in MB; 0 for the default of Jobe."/>
         <FIELD NAME="noassist" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to turn off code completion and hints in the attempt."/>
       </FIELDS>
       <KEYS>

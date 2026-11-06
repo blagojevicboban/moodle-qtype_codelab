@@ -19,12 +19,21 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 - **tests**, each with:
   - the input;
   - the expected output;
-  - hidden or not (students see only whether a hidden test passed);
+  - hidden or not (students see only how many hidden tests passed);
   - a weight.
 
-  An empty expected output is filled in when the question is saved, by running the solution;
+  An empty expected output is filled in when the question is saved, by running the solution. The solution must
+  also pass the tests that have an expected output, or the question is not saved (unless *Save even if the solution
+  fails the tests* is ticked; when Jobe cannot be reached the question is saved without the check);
 - **hidden code before and after** the student's code, for example the `class` and `Main` around a few statements;
-- whether trailing spaces and empty lines at the end are ignored when outputs are compared;
+- how outputs are compared:
+  - **exactly**;
+  - **spaces at the end do not count** (the default): trailing spaces and empty lines at the end are ignored;
+  - **numbers with a tolerance**: word by word, numbers may differ by the tolerance (absolute, or relative to the larger
+    number; 0.001 by default), so `3.14159` matches `3.1416`;
+  - **regular expression**: the expected output of each test is a PCRE pattern that must match the whole output;
+- a **CPU time limit** and a **memory limit** for grading, when the defaults are not enough (the administrator sets
+  the largest values, 10 s and 2000 MB by default, in the settings of the question type);
 - whether typing help is turned off, for tests.
 
 A question without tests is graded by the teacher.
@@ -41,8 +50,20 @@ A question without tests is graded by the teacher.
 
 - The grade is computed on the server only, on Jobe. The browser never sends a grade.
 - Results are cached by program and tests, so the review and regrading do not load Jobe again.
-- When Jobe cannot check the program (it is down, busy or not set up), the attempt waits for grading by the teacher.
+- When Jobe cannot check the program (it is down, busy or not set up) at the final submit, the answer waits for grading
+  by the teacher. During Check the try does not count (see below).
 - Backup and restore keep all the settings and tests.
+
+## Check with penalties
+
+In the quiz settings, under *Question behaviour*, choose **Interactive with multiple tries** or **Adaptive mode**.
+The student then has a **Check** button: the program is run on all tests, and the feedback lists the visible tests
+with their output and gives the hidden tests only as a count. Each wrong Check takes the *Penalty for each incorrect
+try* of the question off the mark (for example 10 %: a right answer at the second try gets 0.9). In Interactive mode
+the number of tries is the number of hints plus one.
+
+If Jobe cannot check the program during Check, the try does not count: the student sees a message and presses Check
+again. Only at the final submit does such an answer wait for the teacher.
 
 ## Installation
 

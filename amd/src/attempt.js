@@ -63,6 +63,68 @@ export const normalise = (text, ignorespaces) => {
 };
 
 /**
+ * Whether a word is a number as programs print them (as grader::is_number).
+ *
+ * @param {string} word
+ * @returns {boolean}
+ */
+const isNumber = (word) => /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(word);
+
+/**
+ * Word by word, numbers within the tolerance (as grader::numbers_match).
+ *
+ * @param {string} expected
+ * @param {string} got
+ * @param {number} tolerance
+ * @returns {boolean}
+ */
+const numbersMatch = (expected, got, tolerance) => {
+    const split = (text) => text.split(/\s+/).filter((w) => w !== '');
+    const a = split(expected);
+    const b = split(got);
+    return a.length === b.length && a.every((word, i) => {
+        if (word === b[i]) {
+            return true;
+        }
+        if (!isNumber(word) || !isNumber(b[i])) {
+            return false;
+        }
+        const x = parseFloat(word);
+        const y = parseFloat(b[i]);
+        const diff = Math.abs(x - y);
+        return diff <= tolerance || diff <= tolerance * Math.max(Math.abs(x), Math.abs(y));
+    });
+};
+
+/**
+ * Whether the output matches the expected output (as grader::matches on the server). A regular expression is run by
+ * the browser, so a pattern with PCRE-only syntax may give another result than the grade.
+ *
+ * @param {string} expected
+ * @param {string} got
+ * @param {string} comparison exact, spaces, numbers or regex
+ * @param {number} tolerance
+ * @returns {boolean}
+ */
+export const matches = (expected, got, comparison, tolerance) => {
+    const unix = (text) => text.replace(/\r\n?/g, '\n');
+    switch (comparison) {
+        case 'exact':
+            return unix(expected) === unix(got);
+        case 'numbers':
+            return numbersMatch(expected, got, tolerance);
+        case 'regex':
+            try {
+                return new RegExp(`^(?:${unix(expected).replace(/\n+$/, '')})$`, 'u').test(normalise(got, true));
+            } catch (e) {
+                return false;
+            }
+        default:
+            return normalise(expected, true) === normalise(got, true);
+    }
+};
+
+/**
  * A button.
  *
  * @param {string} text
@@ -88,7 +150,8 @@ const button = (text, style) => {
  * @param {string} config.prefix
  * @param {string} config.suffix
  * @param {Array<{stdin: string, expected: string}>} config.tests tests that are not hidden
- * @param {boolean} config.ignorespaces
+ * @param {string} config.comparison exact, spaces, numbers or regex
+ * @param {number} config.tolerance for the comparison numbers
  * @param {number} config.contextid
  * @param {string} config.pyodide address of Pyodide for Run and Step of Python in the browser, or ''
  */
@@ -232,7 +295,7 @@ export const init = async(config) => {
                     await showResult(panel, result);
                     return;
                 }
-                const ok = normalise(result.stdout, config.ignorespaces) === normalise(tc.expected, config.ignorespaces);
+                const ok = matches(tc.expected, result.stdout, config.comparison, config.tolerance);
                 passed += ok ? 1 : 0;
                 const item = document.createElement('li');
                 item.className = ok ? 'text-success' : 'text-danger';

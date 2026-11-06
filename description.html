@@ -8,21 +8,23 @@
   </div>
 
   <hr>
-  <p><strong>What's New in v0.5.0</strong></p>
+  <p><strong>What's New in v0.6.0</strong></p>
   <ul>
-    <li><strong>Only languages that can run:</strong> the language menu offers the languages the Jobe server of the site has. A question keeps its own language.</li>
-    <li><strong>Python typing help from Jedi</strong> (0.4.0) in the student's answer.</li>
+    <li><strong>Check with penalties:</strong> with Interactive with multiple tries or Adaptive mode, students press Check, see which visible tests passed and how many hidden ones, and each wrong try costs the penalty of the question. A Check while Jobe is down does not use a try.</li>
+    <li><strong>Output comparison:</strong> exactly, ignoring spaces at the end, numbers with a tolerance (3.14159 matches 3.1416), or a regular expression.</li>
+    <li><strong>Solution checked on save:</strong> the question is saved only when the model solution passes its tests.</li>
+    <li><strong>Time and memory limit per question</strong>, up to the largest values set by the administrator.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
     <li><strong>Eight languages:</strong> C, C++, Python, Java, C#, JavaScript, Pascal and PHP.</li>
-    <li><strong>Tests:</strong> each test has an input, an expected output, a weight, and can be hidden. Students see only whether a hidden test passed. Empty expected outputs are filled in by running the model solution when the question is saved.</li>
+    <li><strong>Tests:</strong> each test has an input, an expected output, a weight, and can be hidden. Students see only how many hidden tests passed. Empty expected outputs are filled in by running the model solution when the question is saved.</li>
     <li><strong>Hidden code before and after the answer:</strong> for example the class and Main around a few statements.</li>
     <li><strong>For the student:</strong> the code editor with typing help, Run with their own input, and Run the tests for the tests that are not hidden.</li>
-    <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load Jobe again. When Jobe cannot check a program, the attempt waits for the teacher.</li>
-    <li><strong>Options:</strong> ignore trailing spaces, and turn off typing help for tests. A question without tests is graded by the teacher.</li>
+    <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load Jobe again. When Jobe cannot check a program at the final submit, the answer waits for the teacher.</li>
+    <li><strong>Options:</strong> how outputs are compared, time and memory limits, and turning off typing help for tests. A question without tests is graded by the teacher.</li>
     <li><strong>Backup and restore</strong> keep all settings and tests.</li>
   </ul>
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 (2026-11-06)
+
+- Check with penalties: in Interactive with multiple tries and Adaptive mode, each wrong Check takes the penalty of
+  the question off the mark. When Jobe cannot check the program during Check, the try does not count and the student
+  is asked to check again. The feedback lists the visible tests and gives the hidden tests only as a count.
+- Output comparison: exactly, spaces at the end do not count, numbers with a tolerance (absolute or relative), or a
+  regular expression per test. Questions with *ignore trailing spaces* off become *exactly* on upgrade.
+- The solution must pass the tests when the question is saved, unless *Save even if the solution fails the tests* is
+  ticked; when Jobe cannot be reached the question is saved without the check.
+- CPU time and memory limit per question, with largest values in the new settings of the question type.
+
 ## 0.5.0 (2026-11-06)
 
 - The language menu of the question offers only the languages that can run on the site; a question keeps its own.

@@ -68,11 +68,12 @@ class qtype_codelab_renderer extends qtype_renderer {
         );
 
         if ($qa->get_state() == question_state::$invalid) {
-            $result .= html_writer::nonempty_tag(
-                'div',
-                $question->get_validation_error(['answer' => $answer]),
-                ['class' => 'validationerror']
-            );
+            // An answer with code is invalid only when Jobe failed during Check (see is_complete_response); the
+            // failure is not kept, so it is not asked again here.
+            $error = $question->is_gradable_response(['answer' => $answer])
+                ? get_string('checkfailed', 'qtype_codelab')
+                : $question->get_validation_error(['answer' => $answer]);
+            $result .= html_writer::nonempty_tag('div', $error, ['class' => 'validationerror']);
         }
 
         // Only the tests that are not hidden reach the browser.
@@ -92,7 +93,8 @@ class qtype_codelab_renderer extends qtype_renderer {
             'prefix' => (string) $question->prefix,
             'suffix' => (string) $question->suffix,
             'tests' => $tests,
-            'ignorespaces' => (bool) $question->ignorespaces,
+            'comparison' => (string) $question->comparison,
+            'tolerance' => (float) $question->tolerance,
             'contextid' => $options->context->id,
             // Run and Step of a Python answer in the browser; the tests and the grade still come from Jobe.
             'pyodide' => \tiny_codelab\local\runtime::config()['pyodide'],
@@ -132,16 +134,18 @@ class qtype_codelab_renderer extends qtype_renderer {
         $table->attributes['class'] = 'generaltable qtype_codelab-results';
         $table->head = [get_string('test', 'qtype_codelab'), get_string('teststdin', 'qtype_codelab'),
             get_string('testexpected', 'qtype_codelab'), get_string('testgot', 'qtype_codelab'), ''];
+        // Hidden tests are given only as a count, so their order does not tell which input failed.
+        $hidden = ['passed' => 0, 'total' => 0];
         foreach ($question->tests as $i => $tc) {
             $r = $results[$i] ?? ['passed' => false, 'got' => '', 'status' => 'error', 'stderr' => ''];
+            if ($tc['hidden']) {
+                $hidden['total']++;
+                $hidden['passed'] += $r['passed'] ? 1 : 0;
+                continue;
+            }
             $mark = $r['passed']
                 ? html_writer::span(get_string('passed', 'qtype_codelab'), 'badge bg-success')
                 : html_writer::span(get_string('failed', 'qtype_codelab'), 'badge bg-danger');
-            if ($tc['hidden']) {
-                $cell = html_writer::span(get_string('hiddentest', 'qtype_codelab'), 'text-muted');
-                $table->data[] = [$i + 1, $cell, '', '', $mark];
-                continue;
-            }
             $got = $r['got'];
             if ($r['status'] !== 'ok') {
                 $got .= ($got === '' ? '' : "\n") . get_string('status_' . $r['status'], 'tiny_codelab') .
@@ -150,7 +154,13 @@ class qtype_codelab_renderer extends qtype_renderer {
             $table->data[] = [$i + 1, html_writer::tag('pre', s($tc['stdin'])), html_writer::tag('pre', s($tc['expected'])),
                 html_writer::tag('pre', s($got)), $mark];
         }
-        return $out . html_writer::table($table);
+        if ($table->data) {
+            $out .= html_writer::table($table);
+        }
+        if ($hidden['total']) {
+            $out .= html_writer::div(get_string('hiddensummary', 'qtype_codelab', $hidden), 'qtype_codelab-hidden');
+        }
+        return $out;
     }
 
     /**

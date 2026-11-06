@@ -23,6 +23,7 @@
  */
 
 use qtype_codelab\local\grader;
+use qtype_codelab\local\question_jobe;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -48,7 +49,7 @@ class qtype_codelab extends question_type {
      */
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
-            'ignorespaces', 'noassist'];
+            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist'];
     }
 
     /**
@@ -144,9 +145,13 @@ class qtype_codelab extends question_type {
         foreach (['prefix', 'suffix', 'template', 'solution'] as $field) {
             $question->$field = grader::unix((string) ($question->$field ?? ''));
         }
-        foreach (['showtests', 'ignorespaces', 'noassist'] as $field) {
+        foreach (['showtests', 'noassist'] as $field) {
             $question->$field = empty($question->$field) ? 0 : 1;
         }
+        $question->comparison = self::comparison($question);
+        $question->tolerance = self::tolerance($question->tolerance ?? null);
+        $question->cputime = self::limit($question->cputime ?? 0);
+        $question->memorylimit = self::limit($question->memorylimit ?? 0);
         $result = parent::save_question_options($question);
         $this->save_hints($question);
         return $result;
@@ -182,15 +187,116 @@ class qtype_codelab extends question_type {
             (string) $question->solution,
             (string) ($question->suffix ?? '')
         );
-        $grader = $grader ?? new grader();
+        $grader = $grader ?? new grader(self::jobe_for($question));
         $subset = array_map(fn($i) => $tests[$i], $missing);
-        $results = $grader->run_tests((string) $question->language, $program, $subset, true);
+        $results = $grader->run_tests((string) $question->language, $program, $subset);
+        $regex = self::comparison($question) === 'regex';
         foreach ($missing as $n => $i) {
             if (($results[$n]['status'] ?? '') === 'ok') {
-                $tests[$i]['expected'] = $results[$n]['got'];
+                // For the comparison regex the output becomes a pattern that matches only itself.
+                $got = $results[$n]['got'];
+                $tests[$i]['expected'] = $regex ? preg_quote(grader::normalise($got, true)) : $got;
             }
         }
         return $tests;
+    }
+
+    /**
+     * Run the solution of the editing form on its tests that have an expected output (the empty ones are filled from
+     * it when saving).
+     *
+     * @param array $data data of the editing form
+     * @param grader|null $grader
+     * @return array ['compile' => compiler message or null, 'failed' => [form index of the test => output]]; nothing
+     *     failed when there is no solution or Jobe could not run it
+     */
+    public static function check_solution(array $data, ?grader $grader = null): array {
+        $none = ['compile' => null, 'failed' => []];
+        if (trim((string) ($data['solution'] ?? '')) === '') {
+            return $none;
+        }
+        $tests = [];
+        foreach ($data['teststdin'] ?? [] as $i => $stdin) {
+            $expected = grader::unix((string) ($data['testexpected'][$i] ?? ''));
+            if ($expected !== '') {
+                $tests[$i] = ['stdin' => grader::unix((string) $stdin), 'expected' => $expected, 'hidden' => false,
+                    'weight' => 1.0];
+            }
+        }
+        if (!$tests) {
+            return $none;
+        }
+        $program = grader::program(
+            (string) ($data['prefix'] ?? ''),
+            (string) $data['solution'],
+            (string) ($data['suffix'] ?? '')
+        );
+        $grader = $grader ?? new grader(self::jobe_for((object) $data));
+        $results = $grader->run_tests(
+            (string) ($data['language'] ?? 'c'),
+            $program,
+            array_values($tests),
+            self::comparison((object) $data),
+            self::tolerance($data['tolerance'] ?? null)
+        );
+        // A server that is down must not keep the teacher from saving.
+        if (grader::sandbox_failed($results)) {
+            return $none;
+        }
+        if (($results[0]['status'] ?? '') === 'compile') {
+            return ['compile' => (string) $results[0]['cmpinfo'], 'failed' => []];
+        }
+        $failed = [];
+        foreach (array_keys($tests) as $n => $i) {
+            if (empty($results[$n]['passed'])) {
+                $r = $results[$n];
+                $failed[$i] = $r['status'] === 'ok' ? $r['got'] : trim($r['got'] . "\n" . $r['stderr']);
+            }
+        }
+        return ['compile' => null, 'failed' => $failed];
+    }
+
+    /**
+     * The comparison of a question or of form data. Data from before 0.6.0 (scripts, old exports) has ignorespaces.
+     *
+     * @param stdClass $data
+     * @return string one of grader::COMPARISONS
+     */
+    public static function comparison($data): string {
+        if (isset($data->comparison) && in_array($data->comparison, grader::COMPARISONS, true)) {
+            return $data->comparison;
+        }
+        return isset($data->ignorespaces) && empty($data->ignorespaces) ? 'exact' : 'spaces';
+    }
+
+    /**
+     * A time or memory limit: a whole number of at least 0 (0 or empty keeps the default).
+     *
+     * @param mixed $value
+     * @return int
+     */
+    public static function limit($value): int {
+        return is_numeric($value) && (int) $value > 0 ? (int) $value : 0;
+    }
+
+    /**
+     * Jobe client with the limits of a question or of form data, or null for the default client.
+     *
+     * @param stdClass $data
+     * @return \tiny_codelab\local\jobe|null
+     */
+    protected static function jobe_for($data): ?\tiny_codelab\local\jobe {
+        return question_jobe::for_limits(self::limit($data->cputime ?? 0), self::limit($data->memorylimit ?? 0));
+    }
+
+    /**
+     * The tolerance of the comparison numbers: a number of at least 0, the default when it is not given.
+     *
+     * @param mixed $value
+     * @return float
+     */
+    public static function tolerance($value): float {
+        return is_numeric($value) && (float) $value >= 0 ? (float) $value : grader::TOLERANCE;
     }
 
     /**
@@ -203,7 +309,10 @@ class qtype_codelab extends question_type {
         parent::initialise_question_instance($question, $questiondata);
         $question->tests = grader::decode_tests($questiondata->options->tests ?? '');
         $question->showtests = !empty($questiondata->options->showtests);
-        $question->ignorespaces = !empty($questiondata->options->ignorespaces);
+        $question->comparison = self::comparison($questiondata->options);
+        $question->tolerance = self::tolerance($questiondata->options->tolerance ?? null);
+        $question->cputime = self::limit($questiondata->options->cputime ?? 0);
+        $question->memorylimit = self::limit($questiondata->options->memorylimit ?? 0);
         $question->noassist = !empty($questiondata->options->noassist);
     }
 }

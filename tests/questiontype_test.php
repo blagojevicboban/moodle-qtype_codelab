@@ -69,6 +69,47 @@ final class questiontype_test extends \advanced_testcase {
         $this->assertSame(1, $jobe->runs);
     }
 
+    public function test_fill_expected_for_regex(): void {
+        $jobe = grader_test::fake_jobe(fn() => ['stdout' => "Sum: 1+2 (3)\n"]);
+        $question = (object) ['language' => 'c', 'solution' => 'x', 'prefix' => '', 'suffix' => '', 'comparison' => 'regex'];
+        $filled = \qtype_codelab::fill_expected($question, grader::decode_tests('[{"stdin":"1 2"}]'), new grader($jobe));
+        // A pattern that matches only that output.
+        $this->assertTrue(grader::matches($filled[0]['expected'], "Sum: 1+2 (3)\n", 'regex'));
+        $this->assertFalse(grader::matches($filled[0]['expected'], "Sum: 11112 (3)\n", 'regex'));
+    }
+
+    public function test_check_solution(): void {
+        // The "solution" doubles its input.
+        $jobe = grader_test::fake_jobe(fn($lang, $code, $stdin) => ['stdout' => ((int) $stdin * 2) . "\n"]);
+        $data = ['language' => 'python', 'solution' => 'print(2 * int(input()))', 'prefix' => '', 'suffix' => '',
+            'comparison' => 'spaces', 'teststdin' => ['2', '3', '', '4'], 'testexpected' => ['4', '7', '', '']];
+        $check = \qtype_codelab::check_solution($data, new grader($jobe));
+        // Test 2 fails; the empty row and the test without an expected output are not run.
+        $this->assertNull($check['compile']);
+        $this->assertSame([1 => "6\n"], $check['failed']);
+        $this->assertSame(2, $jobe->runs);
+
+        $jobe = grader_test::fake_jobe(fn() => ['status' => 'compile', 'cmpinfo' => 'syntax error']);
+        $this->assertSame('syntax error', \qtype_codelab::check_solution($data, new grader($jobe))['compile']);
+
+        // Jobe down, or no solution: nothing failed.
+        $jobe = grader_test::fake_jobe(fn() => ['status' => 'error']);
+        $this->assertSame(['compile' => null, 'failed' => []], \qtype_codelab::check_solution($data, new grader($jobe)));
+        $data['solution'] = '';
+        $this->assertSame(['compile' => null, 'failed' => []], \qtype_codelab::check_solution($data, new grader($jobe)));
+    }
+
+    public function test_comparison_of_old_data(): void {
+        $this->assertSame('exact', \qtype_codelab::comparison((object) ['ignorespaces' => 0]));
+        $this->assertSame('spaces', \qtype_codelab::comparison((object) ['ignorespaces' => 1]));
+        $this->assertSame('spaces', \qtype_codelab::comparison((object) []));
+        $this->assertSame('regex', \qtype_codelab::comparison((object) ['comparison' => 'regex', 'ignorespaces' => 0]));
+        $this->assertSame('spaces', \qtype_codelab::comparison((object) ['comparison' => 'bogus']));
+        $this->assertSame(0.001, \qtype_codelab::tolerance(''));
+        $this->assertSame(0.0, \qtype_codelab::tolerance('0'));
+        $this->assertSame(0.001, \qtype_codelab::tolerance('-1'));
+    }
+
     public function test_save_and_load(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -79,7 +120,8 @@ final class questiontype_test extends \advanced_testcase {
             'questiontext' => ['text' => '<p>Sum</p>', 'format' => FORMAT_HTML, 'itemid' => 0],
             'generalfeedback' => ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0],
             'defaultmark' => 1, 'penalty' => 0.1, 'language' => 'c', 'template' => 'int main(void) {}',
-            'solution' => '', 'prefix' => '', 'suffix' => '', 'noassist' => 1, 'showtests' => 0, 'ignorespaces' => 1,
+            'solution' => '', 'prefix' => '', 'suffix' => '', 'noassist' => 1, 'showtests' => 0, 'comparison' => 'numbers',
+            'tolerance' => '0.01', 'cputime' => '4', 'memorylimit' => '',
             'teststdin' => ['1 2', ''], 'testexpected' => ['3', ''], 'testhidden' => [1, 0], 'testweight' => [2, 1],
         ];
         $question = (object) ['category' => $category->id, 'qtype' => 'codelab'];
@@ -90,6 +132,10 @@ final class questiontype_test extends \advanced_testcase {
         $this->assertSame('c', $loaded->language);
         $this->assertTrue($loaded->noassist);
         $this->assertFalse($loaded->showtests);
+        $this->assertSame('numbers', $loaded->comparison);
+        $this->assertSame(4, $loaded->cputime);
+        $this->assertSame(0, $loaded->memorylimit);
+        $this->assertEqualsWithDelta(0.01, $loaded->tolerance, 1e-12);
         $this->assertSame([['stdin' => '1 2', 'expected' => '3', 'hidden' => true, 'weight' => 2.0]], $loaded->tests);
         $this->assertTrue($loaded->has_tests());
     }
@@ -99,10 +145,8 @@ final class questiontype_test extends \advanced_testcase {
         $question = new \qtype_codelab_question();
         $question->language = 'python';
         $question->tests = grader::decode_tests('[{"stdin":"1","expected":"1"},{"stdin":"2","expected":"2","weight":3}]');
-        $question->ignorespaces = true;
         // Results as the grader keeps them in the cache: the second (heavier) test passed.
-        $program = grader::program('', 'print(input())', '');
-        $key = sha1(json_encode(['python', $program, $question->tests, true]));
+        $key = $question->results_key('print(input())');
         \cache::make('qtype_codelab', 'results')->set($key, [
             ['status' => 'ok', 'passed' => false, 'got' => '', 'cmpinfo' => '', 'stderr' => ''],
             ['status' => 'ok', 'passed' => true, 'got' => '2', 'cmpinfo' => '', 'stderr' => ''],

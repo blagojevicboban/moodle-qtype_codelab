@@ -41,6 +41,16 @@ class restore_qtype_codelab_plugin extends restore_qtype_extrafields_plugin {
      * @param array $data the options
      */
     public function process_codelab($data) {
+        // Backups from before 0.6.0 have ignorespaces instead of comparison and tolerance.
+        $data = (array) $data;
+        if (!isset($data['comparison'])) {
+            $data['comparison'] = empty($data['ignorespaces']) && isset($data['ignorespaces']) ? 'exact' : 'spaces';
+        }
+        $data['tolerance'] = $data['tolerance'] ?? \qtype_codelab\local\grader::TOLERANCE;
+        unset($data['ignorespaces']);
+        // Backups from before 0.6.0 have no limits: the defaults.
+        $data['cputime'] = $data['cputime'] ?? 0;
+        $data['memorylimit'] = $data['memorylimit'] ?? 0;
         $this->really_process_extra_question_fields($data);
     }
 }

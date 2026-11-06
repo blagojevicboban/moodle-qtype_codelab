@@ -62,9 +62,7 @@ final class question_test extends \advanced_testcase {
      * @param array $results results as grader::run_tests returns them
      */
     protected function cache_results(\qtype_codelab_question $q, string $answer, array $results): void {
-        $program = grader::program((string) $q->prefix, $answer, (string) $q->suffix);
-        $key = sha1(json_encode([$q->language, $program, $q->tests, (bool) $q->ignorespaces]));
-        \cache::make('qtype_codelab', 'results')->set($key, $results);
+        \cache::make('qtype_codelab', 'results')->set($q->results_key($answer), $results);
     }
 
     public function test_responses(): void {
