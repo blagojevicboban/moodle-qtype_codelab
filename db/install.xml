@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="question/type/codelab/db" VERSION="20261105" COMMENT="XMLDB file for Moodle question/type/codelab"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="qtype_codelab_options" COMMENT="Language, code and tests of CodeLab questions.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key linking to the question table."/>
+        <FIELD NAME="language" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="c" SEQUENCE="false" COMMENT="Programming language: c, cpp, python, java or csharp."/>
+        <FIELD NAME="template" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Code students start from."/>
+        <FIELD NAME="solution" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The teacher's program."/>
+        <FIELD NAME="prefix" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Code added before the student's code when it is run, not shown to students."/>
+        <FIELD NAME="suffix" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Code added after the student's code when it is run, not shown to students."/>
+        <FIELD NAME="tests" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of tests: stdin, expected, hidden, weight. No tests: graded manually."/>
+        <FIELD NAME="showtests" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="1 to let students run the tests that are not hidden during the attempt."/>
+        <FIELD NAME="ignorespaces" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="1 when spaces at the end of lines and of the output do not count."/>
+        <FIELD NAME="noassist" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to turn off code completion and hints in the attempt."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="questionid" TYPE="foreign-unique" FIELDS="questionid" REFTABLE="question" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

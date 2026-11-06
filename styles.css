@@ -1,0 +1,21 @@
+.qtype_codelab-results pre,
+.qtype_codelab-cmpinfo,
+.qtype_codelab-solution {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: .875rem;
+}
+
+.qtype_codelab-cmpinfo {
+    color: #a3191f;
+}
+
+.path-question-bank-editquestion textarea[id^="id_teststdin"],
+.path-question-bank-editquestion textarea[id^="id_testexpected"],
+.path-question-bank-editquestion textarea[id^="id_template"],
+.path-question-bank-editquestion textarea[id^="id_solution"],
+.path-question-bank-editquestion textarea[id^="id_prefix"],
+.path-question-bank-editquestion textarea[id^="id_suffix"],
+.qtype_codelab_answer {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
