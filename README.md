@@ -13,6 +13,8 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 
 > Status: **stable** (1.4.0).
 
+> 🌐 **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
+
 ## The teacher sets
 
 - the language (only those that can run on the site are offered), the starting code and a model solution;
