@@ -82,6 +82,10 @@ solution of every CodeLab question in the question banks of the course on its te
 and lists first the questions whose solution fails, does not compile or is missing, with a link to edit each. Use it
 after a change on the Jobe server or after a restore.
 
+## Manual
+
+The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob/main/docs/MANUAL.md) covers the three plugins for teachers, students and administrators.
+
 ## Installation
 
 1. Install **tiny_codelab** first, then **filter_codelab** and **qtype_codelab**.
