@@ -11,7 +11,7 @@ A programming question for Moodle quizzes. The student writes a program in the c
 
 Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal** and **PHP**.
 
-> Status: **stable** (1.3.0).
+> Status: **stable** (1.4.0).
 
 ## The teacher sets
 
@@ -93,7 +93,7 @@ after a change on the Jobe server or after a restore.
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.3.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.4.0 or newer, installed first, with a Jobe
   server in its settings
 
 ## The CodeLab plugins

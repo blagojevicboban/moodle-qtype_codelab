@@ -191,7 +191,20 @@ const button = (text, style) => {
  * @param {string} config.pyodide address of Pyodide for Run and Step of Python in the browser, or ''
  * @param {string[]} [config.interactive] languages that Run sends to the interactive server (input typed while running)
  */
+/**
+ * How the answer runs besides Jobe: Python in the browser, or the interactive server (C and C++ also step by step).
+ *
+ * @param {Object} config of init()
+ * @returns {{browser: boolean, remote: boolean, steps: boolean}}
+ */
+const runModes = (config) => {
+    const browser = Boolean(config.lang === 'python' && config.pyodide && pythonAvailable());
+    const remote = !browser && runsInteractively(config.interactive, config.lang);
+    return {browser, remote, steps: browser || (remote && stepsInteractively(config.interactive, config.lang))};
+};
+
 export const init = async(config) => {
+    const modes = runModes(config);
     const textarea = document.getElementById(config.textareaid);
     if (!textarea) {
         return;
@@ -218,6 +231,8 @@ export const init = async(config) => {
             maxLines: 40,
             label: s.editorlabel,
             pyodide: config.readonly ? '' : config.pyodide,
+            // Breakpoints where Step exists: Python in the browser, C and C++ on the interactive server.
+            breakpoints: !config.readonly && modes.steps,
         });
     } catch (e) {
         host.remove();
@@ -244,11 +259,11 @@ export const init = async(config) => {
     stdin.spellcheck = false;
     const runButton = button(s.run, 'btn-secondary');
     // Python runs in the browser when it can: input() asks while the program runs, Step goes line by line.
-    const browser = config.lang === 'python' && config.pyodide && pythonAvailable();
+    const browser = modes.browser;
     // C, C++, Java and C# run on the interactive server when the site has one (C and C++ also step by step there);
     // the tests and the grade stay on Jobe.
-    const remote = !browser && runsInteractively(config.interactive, config.lang);
-    const steps = browser || (remote && stepsInteractively(config.interactive, config.lang));
+    const remote = modes.remote;
+    const steps = modes.steps;
     const stepButton = steps ? button(s.step, 'btn-secondary') : null;
     const stopButton = browser || remote ? button(s.stop, 'btn-danger') : null;
     const testsButton = config.tests.length ? button(s.runtests, 'btn-secondary') : null;
