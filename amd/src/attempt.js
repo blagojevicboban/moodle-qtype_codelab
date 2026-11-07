@@ -283,7 +283,7 @@ export const init = async(config) => {
     host.after(tools);
     // The editor, its buttons and the console on the whole screen (the block of the answer).
     tools.insertBefore(fullscreenButton({root: host.parentElement, editor, label: s.fullscreen,
-        exitLabel: s.exitfullscreen, className: 'btn btn-secondary'}), panel);
+        exitLabel: s.exitfullscreen}), panel);
 
     const code = () => program(config.prefix, editor.getValue(), config.suffix);
     const busy = (value) => {
