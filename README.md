@@ -11,7 +11,7 @@ A programming question for Moodle quizzes. The student writes a program in the c
 
 Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal** and **PHP**.
 
-> Status: **stable** (1.4.0).
+> Status: **stable** (1.5.0).
 
 > 🌐 **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
 
