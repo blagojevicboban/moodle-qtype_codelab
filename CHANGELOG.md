@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0 (2026-11-08)
+
+- Synchronized with tiny_codelab 1.5.0: questions automatically inherit site theme and dark mode preferences. Needs tiny_codelab 1.5.0.
+
 ## 1.4.0 (2026-11-07)
 
 - Debugger of Step, as in the algorithm plugins, for Python in the browser and C and C++ on the CodeLab runner
