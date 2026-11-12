@@ -90,6 +90,12 @@ class qtype_codelab_renderer extends qtype_renderer {
             'lang' => $question->language,
             'readonly' => (bool) $options->readonly,
             'noassist' => (bool) $question->noassist,
+            // A Parsons problem: the shuffled lines (the same for this attempt each time the page opens).
+            'parsons' => $question->parsons && !$options->readonly ? \qtype_codelab\local\parsons::blocks(
+                (string) $question->solution,
+                (string) $question->distractors,
+                $qa->get_usage_id() . '/' . $qa->get_slot()
+            ) : null,
             'prefix' => (string) $question->prefix,
             'suffix' => (string) $question->suffix,
             'tests' => $tests,

@@ -49,7 +49,7 @@ class qtype_codelab extends question_type {
      */
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
-            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist'];
+            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors'];
     }
 
     /**
@@ -144,10 +144,10 @@ class qtype_codelab extends question_type {
     public function save_question_options($question) {
         $tests = self::tests_from_form($question);
         $question->tests = json_encode(self::fill_expected($question, $tests));
-        foreach (['prefix', 'suffix', 'template', 'solution'] as $field) {
+        foreach (['prefix', 'suffix', 'template', 'solution', 'distractors'] as $field) {
             $question->$field = grader::unix((string) ($question->$field ?? ''));
         }
-        foreach (['showtests', 'noassist'] as $field) {
+        foreach (['showtests', 'noassist', 'parsons'] as $field) {
             $question->$field = empty($question->$field) ? 0 : 1;
         }
         $question->comparison = self::comparison($question);
@@ -322,5 +322,7 @@ class qtype_codelab extends question_type {
         $question->cputime = self::limit($questiondata->options->cputime ?? 0);
         $question->memorylimit = self::limit($questiondata->options->memorylimit ?? 0);
         $question->noassist = !empty($questiondata->options->noassist);
+        $question->parsons = !empty($questiondata->options->parsons);
+        $question->distractors = (string) ($questiondata->options->distractors ?? '');
     }
 }

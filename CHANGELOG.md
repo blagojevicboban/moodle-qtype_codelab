@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.9.0 (2026-11-12)
+
+- Parsons problems: a new option of the question, Answer by putting the lines of the solution in order. Students get
+  the lines of the solution, shuffled the same way for each attempt, with the teacher's distractor lines, and put them
+  into their program by dragging or with buttons (also by keyboard). In Python they also choose the indentation; in
+  the languages with braces it follows the braces. The program goes into the answer, so Run, Step, the tests and the
+  grading work as for a written answer.
+- New fields parsons and distractors (upgrade step, backup and restore through the extra fields), the module
+  qtype_codelab/parsons with Node tests (a new CI job), PHPUnit tests of the lines.
+- Needs tiny_codelab 1.8.0 (step back, the memory view and the complexity chart come with it).
+
 ## 1.5.0 (2026-11-08)
 
 - Synchronized with tiny_codelab 1.5.0: questions automatically inherit site theme and dark mode preferences. Needs tiny_codelab 1.5.0.

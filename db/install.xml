@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="question/type/codelab/db" VERSION="20261108" COMMENT="XMLDB file for Moodle question/type/codelab"
+<XMLDB PATH="question/type/codelab/db" VERSION="20261119" COMMENT="XMLDB file for Moodle question/type/codelab"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -20,6 +20,8 @@
         <FIELD NAME="cputime" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="CPU time limit in seconds; 0 for the setting of tiny_codelab."/>
         <FIELD NAME="memorylimit" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Memory limit in MB; 0 for the default of Jobe."/>
         <FIELD NAME="noassist" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to turn off code completion and hints in the attempt."/>
+        <FIELD NAME="parsons" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 for a Parsons problem: the student puts the shuffled lines of the solution in order."/>
+        <FIELD NAME="distractors" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Lines of a Parsons problem that do not belong to the solution, one per line."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

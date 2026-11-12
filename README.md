@@ -66,6 +66,15 @@ and data; the student writes the SQL; a test may have *test code*, a query that 
 (for INSERT, UPDATE, DELETE). Expected outputs come from the solution, as the result tables of the mysql client.
 Choose *Lines in any order* when the rows of the result may come in any order (a query without ORDER BY).
 
+## Parsons problems
+
+With **Answer by putting the lines of the solution in order** the student does not type the program: the lines of the
+solution come shuffled (the same order each time the attempt is opened), mixed with the **distractor lines** of the
+teacher (one per line, e.g. a wrong condition), and the student drags them into *Your program* or clicks them, and
+moves them with the buttons (also by keyboard). In Python the student also sets the indentation; in C, C++, Java, C#
+and the others the indentation follows the braces. The program made of the lines is the answer: Run, Step and the
+tests use it, and it is graded by the tests as any other answer. The question needs a solution.
+
 ## Check with penalties
 
 In the quiz settings, under *Question behaviour*, choose **Interactive with multiple tries** or **Adaptive mode**.
@@ -99,7 +108,7 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.4.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.8.0 or newer, installed first, with a Jobe
   server in its settings
 
 ## The CodeLab plugins

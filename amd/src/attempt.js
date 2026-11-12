@@ -21,6 +21,7 @@
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+import {Parsons} from 'qtype_codelab/parsons';
 import {createEditor} from 'tiny_codelab/monaco';
 import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
@@ -190,6 +191,7 @@ const button = (text, style) => {
  * @param {number} config.contextid
  * @param {string} config.pyodide address of Pyodide for Run and Step of Python in the browser, or ''
  * @param {string[]} [config.interactive] languages that Run sends to the interactive server (input typed while running)
+ * @param {?string[]} [config.parsons] a Parsons problem: the shuffled lines the student puts in order
  */
 /**
  * How the answer runs besides Jobe: Python in the browser, or the interactive server (C and C++ also step by step).
@@ -201,6 +203,35 @@ const runModes = (config) => {
     const browser = Boolean(config.lang === 'python' && config.pyodide && pythonAvailable());
     const remote = !browser && runsInteractively(config.interactive, config.lang);
     return {browser, remote, steps: browser || (remote && stepsInteractively(config.interactive, config.lang))};
+};
+
+/**
+ * The lists of a Parsons problem, put before the editor; start() connects them to the editor.
+ *
+ * @param {Object} config of init()
+ * @param {HTMLTextAreaElement} textarea the answer
+ * @param {HTMLElement} host the editor's element
+ * @returns {Promise<{start: function(function(string): void): void}>}
+ */
+const parsonsBox = async(config, textarea, host) => {
+    const keys = ['parsonspool', 'parsonsanswer', 'parsonshint', 'parsonsadd', 'parsonsremove', 'parsonsup', 'parsonsdown',
+        'parsonsindent', 'parsonsoutdent', 'parsonsprogram'];
+    const values = await getStrings(keys.map((key) => ({key, component: 'qtype_codelab'})));
+    const strings = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+    const box = document.createElement('div');
+    box.className = 'qtype_codelab-parsons mb-2';
+    box.id = `${config.textareaid}_parsons`;
+    const note = document.createElement('div');
+    note.className = 'qtype_codelab-parsons-note small mb-1';
+    note.textContent = strings.parsonsprogram;
+    host.before(box, note);
+    return {
+        start: (show) => {
+            const widget = new Parsons(box, {blocks: config.parsons, answer: textarea.value, indented: config.lang === 'python',
+                strings, onChange: show});
+            widget.changed();
+        },
+    };
 };
 
 export const init = async(config) => {
@@ -218,13 +249,15 @@ export const init = async(config) => {
     const host = document.createElement('div');
     host.className = 'qtype_codelab-editor border rounded';
     textarea.after(host);
+    const parsons = Array.isArray(config.parsons) ? await parsonsBox(config, textarea, host) : null;
 
     let editor;
     try {
         editor = await createEditor(host, {
             value: textarea.value,
             lang: config.lang,
-            readOnly: config.readonly,
+            // A Parsons problem is answered with the lines: the editor shows the program they make.
+            readOnly: config.readonly || Boolean(parsons),
             noassist: config.noassist,
             // The review shows the whole answer without empty space; the attempt leaves room to write.
             minLines: config.readonly ? 3 : 12,
@@ -242,6 +275,7 @@ export const init = async(config) => {
     editor.onChange((value) => {
         textarea.value = value;
     });
+    parsons?.start((program) => editor.setValue(program));
     if (config.readonly) {
         return;
     }

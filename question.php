@@ -58,6 +58,10 @@ class qtype_codelab_question extends question_graded_automatically {
     public $memorylimit = 0;
     /** @var bool code completion and hints are turned off */
     public $noassist = false;
+    /** @var bool a Parsons problem: the student puts the shuffled lines of the solution in order */
+    public $parsons = false;
+    /** @var string lines of a Parsons problem that do not belong to the solution, one per line */
+    public $distractors = '';
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;

@@ -121,6 +121,7 @@ final class questiontype_test extends \advanced_testcase {
             'generalfeedback' => ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0],
             'defaultmark' => 1, 'penalty' => 0.1, 'language' => 'c', 'template' => 'int main(void) {}',
             'solution' => '', 'prefix' => '', 'suffix' => '', 'noassist' => 1, 'showtests' => 0, 'comparison' => 'numbers',
+            'parsons' => 1, 'distractors' => "x = 0\r\n",
             'tolerance' => '0.01', 'cputime' => '4', 'memorylimit' => '',
             'teststdin' => ['1 2', ''], 'testexpected' => ['3', ''], 'testhidden' => [1, 0], 'testweight' => [2, 1],
         ];
@@ -131,6 +132,8 @@ final class questiontype_test extends \advanced_testcase {
         $this->assertInstanceOf(\qtype_codelab_question::class, $loaded);
         $this->assertSame('c', $loaded->language);
         $this->assertTrue($loaded->noassist);
+        $this->assertTrue($loaded->parsons);
+        $this->assertSame("x = 0\n", $loaded->distractors);
         $this->assertFalse($loaded->showtests);
         $this->assertSame('numbers', $loaded->comparison);
         $this->assertSame(4, $loaded->cputime);

@@ -61,6 +61,24 @@ class qtype_codelab_edit_form extends question_edit_form {
         }
         $mform->setAdvanced('prefix');
         $mform->setAdvanced('suffix');
+
+        // Parsons problem: the student puts the lines of the solution in order instead of writing them.
+        $mform->addElement(
+            'advcheckbox',
+            'parsons',
+            get_string('parsons', 'qtype_codelab'),
+            get_string('parsons_label', 'qtype_codelab')
+        );
+        $mform->addHelpButton('parsons', 'parsons', 'qtype_codelab');
+        $mform->addElement(
+            'textarea',
+            'distractors',
+            get_string('distractors', 'qtype_codelab'),
+            ['rows' => 4, 'cols' => 80, 'spellcheck' => 'false', 'class' => 'text-monospace']
+        );
+        $mform->setType('distractors', PARAM_RAW);
+        $mform->addHelpButton('distractors', 'distractors', 'qtype_codelab');
+        $mform->hideIf('distractors', 'parsons', 'notchecked');
         $mform->addElement(
             'advcheckbox',
             'noassist',
@@ -200,6 +218,9 @@ class qtype_codelab_edit_form extends question_edit_form {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         $hassolution = trim((string) ($data['solution'] ?? '')) !== '';
+        if (!empty($data['parsons']) && !$hassolution) {
+            $errors['solution'] = get_string('parsonsnosolution', 'qtype_codelab');
+        }
         $regex = ($data['comparison'] ?? '') === 'regex';
         foreach ($data['teststdin'] ?? [] as $i => $stdin) {
             $expected = (string) ($data['testexpected'][$i] ?? '');

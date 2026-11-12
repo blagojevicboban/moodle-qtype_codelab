@@ -19,3 +19,77 @@
 .qtype_codelab_answer {
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+
+/* Parsons problem (qtype_codelab/parsons): the lines given and the program made of them. */
+.qtype_codelab-parsons-lists {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.qtype_codelab-parsons-box {
+    flex: 1 1 18rem;
+    min-width: 0;
+    padding: .5rem;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: #f8f9fa;
+}
+
+.qtype_codelab-parsons-program {
+    background: #fff;
+    border-color: #0f6cbf;
+}
+
+.qtype_codelab-parsons-title {
+    font-weight: bold;
+    margin-bottom: .25rem;
+}
+
+.qtype_codelab-parsons-list {
+    min-height: 3rem;
+    counter-reset: parsons;
+}
+
+.qtype_codelab-parsons-list.qtype_codelab-parsons-over {
+    outline: 2px dashed #0f6cbf;
+    outline-offset: 2px;
+}
+
+.qtype_codelab-parsons-item {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    margin-bottom: .25rem;
+}
+
+.qtype_codelab-parsons-line {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding: .2rem .5rem;
+    border: 1px solid #8f959e;
+    border-radius: .25rem;
+    background: #fff;
+    color: #1d2125;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: .875rem;
+    text-align: left;
+    white-space: pre;
+    overflow-x: auto;
+    cursor: grab;
+}
+
+.qtype_codelab-parsons-line:focus {
+    outline: 2px solid #0f6cbf;
+}
+
+.qtype_codelab-parsons-tools {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: auto;
+}
+
+.qtype_codelab-parsons-tool {
+    padding: 0 .4rem;
+    line-height: 1.4;
+}
