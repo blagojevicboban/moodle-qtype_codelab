@@ -26,8 +26,8 @@ use tiny_codelab\local\jobe;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class grader {
-    /** Statuses meaning Jobe could not check the program: the answer is then left for the teacher. */
-    const SANDBOX_FAILURES = ['error', 'busy', 'notconfigured', 'nolanguage'];
+    /** Statuses meaning the server could not check the program: the answer is then left for the teacher. */
+    const SANDBOX_FAILURES = ['error', 'busy', 'notconfigured', 'nolanguage', 'quota', 'suspended', 'expired'];
 
     /** Place of the test code in the hidden code (see test_program()). */
     const MARKER = '{{TEST}}';

@@ -68,8 +68,10 @@ class question_jobe extends jobe {
      * @return jobe|null
      */
     public static function client_for(string $lang, int $cputime, int $memorylimit): ?jobe {
-        if (in_array($lang, \tiny_codelab\local\interactive::ONLY, true)) {
-            return new \tiny_codelab\local\runner_client();
+        if (in_array($lang, \tiny_codelab\local\interactive::ONLY, true) || !(new jobe())->is_configured()) {
+            $cpu = $cputime > 0 ? min($cputime, self::max_cputime()) : null;
+            $mem = $memorylimit > 0 ? min($memorylimit, self::max_memory()) : 0;
+            return new \tiny_codelab\local\runner_client($cpu, $mem);
         }
         return self::for_limits($cputime, $memorylimit);
     }
