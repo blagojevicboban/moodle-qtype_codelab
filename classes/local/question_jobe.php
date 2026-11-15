@@ -68,7 +68,7 @@ class question_jobe extends jobe {
      * @return jobe|null
      */
     public static function client_for(string $lang, int $cputime, int $memorylimit): ?jobe {
-        if (in_array($lang, \tiny_codelab\local\interactive::ONLY, true) || !(new jobe())->is_configured()) {
+        if (\tiny_codelab\local\backend::on_runner($lang)) {
             $cpu = $cputime > 0 ? min($cputime, self::max_cputime()) : null;
             $mem = $memorylimit > 0 ? min($memorylimit, self::max_memory()) : 0;
             return new \tiny_codelab\local\runner_client($cpu, $mem);
@@ -94,6 +94,15 @@ class question_jobe extends jobe {
     public static function max_memory(): int {
         $max = (int) get_config('qtype_codelab', 'maxmemory');
         return $max > 0 ? $max : self::MAX_MEMORY;
+    }
+
+    /**
+     * The memory limit of the question, kept when Jobe cannot be reached and the runner runs the program.
+     *
+     * @return int MB, 0 for the runner's default
+     */
+    protected function fallback_memory(): int {
+        return $this->memorylimit;
     }
 
     /**
