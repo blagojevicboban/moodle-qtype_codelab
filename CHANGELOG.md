@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.10.0 (2026-11-16)
+
+- Grading follows the setting Server for running and grading of tiny_codelab 1.13: on Jobe, on the CodeLab runner
+  (no Jobe needed), or Automatic. The CPU time and memory limits of a question also apply on the runner, and are kept
+  when Automatic moves a run from an unreachable Jobe to the runner.
+- The states quota, suspended and expired of a hosted runner count as the server not being able to check the program:
+  the answer is left for the teacher, never graded as wrong.
+- Needs tiny_codelab 1.13.0.
+
 ## 1.9.0 (2026-11-12)
 
 - Parsons problems: a new option of the question, Answer by putting the lines of the solution in order. Students get

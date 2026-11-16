@@ -1,6 +1,6 @@
 <div>
   <p><strong>CodeLab Question Type: Programming Questions Graded with Tests</strong></p>
-  <p><em>Students write a program in the code editor of VS Code. It is run on the teacher's tests on a Jobe server, and the grade is the weighted share of the tests it passes.</em></p>
+  <p><em>Students write a program in the code editor of VS Code. It is run on the teacher's tests on a Jobe server or the CodeLab runner, and the grade is the weighted share of the tests it passes.</em></p>
   <div>
     <a href="https://github.com/blagojevicboban/moodle-qtype_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-qtype_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
     <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
@@ -10,11 +10,11 @@
   <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
 
   <hr>
-  <p><strong>What's New in v1.9.0</strong></p>
+  <p><strong>What's New in v1.10.0</strong></p>
   <ul>
-    <li><strong>Parsons problems:</strong> a new option lets students answer by putting the shuffled lines of the solution in order, with distractor lines from the teacher. Lines are dragged or clicked into the program and moved with buttons, also by keyboard; Python lines are indented by the student, other languages follow the braces. The program is graded by the tests as any other answer.</li>
-    <li><strong>Debugger and more:</strong> with CodeLab for TinyMCE 1.8 the Step panel of an attempt has Step back, a timeline slider and a memory view with arrows and array cells.</li>
-    <li><strong>From 1.5.0, themes:</strong> the editor of the answer follows the dark or light mode of the site and the system.</li>
+    <li><strong>Grading without Jobe:</strong> with CodeLab for TinyMCE 1.13 and CodeLab runner 0.8.0, questions are graded on the runner, your own or a hosted one. The setting Server for running and grading chooses Jobe, the runner, or Automatic, which moves a run to the runner when Jobe does not answer.</li>
+    <li><strong>Same limits everywhere:</strong> the time and memory limits of a question also apply on the runner.</li>
+    <li><strong>Never wrong by accident:</strong> when the server cannot check a program (busy, or a hosted runner over its quota), the answer is left for the teacher.</li>
   </ul>
 
   <hr>
@@ -24,9 +24,10 @@
     <li><strong>Tests:</strong> each test has an input, an expected output, a weight, and can be hidden. Students see only how many hidden tests passed. Empty expected outputs are filled in by running the model solution when the question is saved.</li>
     <li><strong>Hidden code before and after the answer:</strong> for example the class and Main around a few statements.</li>
     <li><strong>For the student:</strong> the code editor with typing help, Run with their own input, and Run the tests for the tests that are not hidden.</li>
-    <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load Jobe again. When Jobe cannot check a program at the final submit, the answer waits for the teacher.</li>
+    <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load the server again. When the server cannot check a program at the final submit, the answer waits for the teacher.</li>
     <li><strong>Check with penalties</strong> in Interactive and Adaptive mode, and output compared exactly, without trailing spaces, as numbers with a tolerance or by a regular expression.</li>
     <li><strong>Options:</strong> time and memory limits, and turning off typing help for tests. A question without tests is graded by the teacher.</li>
+    <li><strong>Parsons problems:</strong> students put the shuffled lines of the solution in order, with distractor lines; Python lines are indented by the student.</li>
     <li><strong>Backup and restore</strong> keep all settings and tests.</li>
   </ul>
 
@@ -35,19 +36,19 @@
   <ul>
     <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab for TinyMCE</a></strong>: inserts examples in the TinyMCE editor. The other two plugins use its editor and runner.</li>
     <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab filter</a></strong>: turns examples into code editors that readers can edit and run.</li>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong> (this plugin): programming questions graded on Jobe with tests.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong> (this plugin): programming questions graded with tests on Jobe or the CodeLab runner.</li>
   </ul>
 
   <hr>
   <p><strong>Requirements</strong></p>
   <ul>
     <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
-    <li><strong>tiny_codelab:</strong> version 1.8.0 or newer, installed first, with a Jobe server in its settings.</li>
+    <li><strong>tiny_codelab:</strong> version 1.13.0 or newer, installed first, with a Jobe server or the CodeLab runner in its settings.</li>
   </ul>
 
   <hr>
   <p><strong>Privacy</strong></p>
-  <p>Answers are stored like any quiz answer. Programs and their input are sent to the Jobe server set by the administrator to be compiled and run. The plugin implements the Moodle Privacy API.</p>
+  <p>Answers are stored like any quiz answer. Programs and their input are sent to the server set by the administrator (Jobe or the CodeLab runner, own or hosted) to be compiled and run. The plugin implements the Moodle Privacy API.</p>
 
   <hr>
   <p>Developed by <strong>Boban Blagojevi&#263;</strong>. Languages: English and Serbian (Latin and Cyrillic).<br>

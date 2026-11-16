@@ -53,9 +53,9 @@ A question without tests is graded by the teacher.
 
 ## Grading
 
-- The grade is computed on the server only, on Jobe. The browser never sends a grade.
-- Results are cached by program and tests, so the review and regrading do not load Jobe again.
-- When Jobe cannot check the program (it is down, busy or not set up) at the final submit, the answer waits for grading
+- The grade is computed on the server only, on Jobe or the CodeLab runner. The browser never sends a grade.
+- Results are cached by program and tests, so the review and regrading do not load the server again.
+- When the server cannot check the program (it is down, busy, over a quota or not set up) at the final submit, the answer waits for grading
   by the teacher. During Check the try does not count (see below).
 - Backup and restore keep all the settings and tests.
 
@@ -100,7 +100,9 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 ## Installation
 
 1. Install **tiny_codelab** first, then **filter_codelab** and **qtype_codelab**.
-2. In the settings of tiny_codelab, set the address and the API key of your Jobe server.
+2. In the settings of tiny_codelab, set your Jobe server (address and API key) or a
+   [CodeLab runner](https://github.com/blagojevicboban/codelab-runner) 0.8.0+, and choose it in *Server for running and
+   grading*. *Test the servers* on the same page checks them.
 3. **Important: switch the filter on.** Go to *Site administration → Plugins → Filters → Manage filters* and set
    **CodeLab** to **On**. Until the filter is on, readers see the examples as plain code: they cannot edit or run them.
 
@@ -108,8 +110,8 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.8.0 or newer, installed first, with a Jobe
-  server in its settings
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.13.0 or newer, installed first, with a Jobe
+  server or a CodeLab runner in its settings
 
 ## The CodeLab plugins
 
@@ -121,8 +123,8 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 
 ## Privacy
 
-The answers are stored like any quiz answer. Programs and their input are sent to the Jobe server set by the
-administrator to be compiled and run.
+The answers are stored like any quiz answer. Programs and their input are sent to the server set by the administrator
+(Jobe or the CodeLab runner, own or hosted) to be compiled and run.
 
 ## License
 
