@@ -58,6 +58,8 @@ final class grader_test extends \advanced_testcase {
              * @param string $code
              * @param string $stdin
              * @param array $files
+             * @param string $compiler
+             * @param string $std
              * @return array
              */
             public function run(

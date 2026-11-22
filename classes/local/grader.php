@@ -380,6 +380,8 @@ class grader {
      * @param string $comparison one of COMPARISONS
      * @param float $tolerance for the comparison numbers
      * @param array $files input files placed in the working folder before each run
+     * @param string $compiler C/C++ compiler profile
+     * @param string $std C/C++ language standard
      * @return array list of ['status', 'passed', 'got', 'cmpinfo', 'stderr', 'time'] in the order of the tests; time is the
      *     seconds of the run when the server reports it (the CodeLab runner 0.9.0), otherwise null
      */

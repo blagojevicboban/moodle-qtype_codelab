@@ -113,6 +113,8 @@ class question_jobe extends jobe {
      * @param string $code
      * @param string $stdin
      * @param array $files
+     * @param string $compiler
+     * @param string $std
      * @return array
      */
     public function run_spec(
