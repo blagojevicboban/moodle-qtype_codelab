@@ -202,7 +202,8 @@ class grader {
 
     /**
      * Lines of an output for the display of a test: spaces and tabs at the end of a line become visible (as a middle dot
-     * and an arrow), the new line at the end is not shown as an empty line, and the line $differs is marked.
+     * and an arrow), each new line as a return arrow at the end of its line (so the new line at the end is not an empty
+     * line), and the line $differs is marked.
      *
      * @param string $text
      * @param int|null $differs line from 0 to mark (see first_difference())
@@ -210,6 +211,8 @@ class grader {
      */
     public static function display_lines(string $text, ?int $differs = null): array {
         $lines = explode("\n", self::unix($text));
+        // Lines before this one end with a new line, shown as a return arrow.
+        $newlines = count($lines) - 1;
         if (count($lines) > 1 && end($lines) === '' && $differs !== count($lines) - 1) {
             array_pop($lines);
         }
@@ -224,7 +227,7 @@ class grader {
                 fn($m) => strtr($m[0], [' ' => "\u{00B7}", "\t" => "\u{2192}"]),
                 $line
             );
-            $out[] = ['text' => $visible, 'differs' => $i === $differs];
+            $out[] = ['text' => $visible . ($i < $newlines ? "\u{21B5}" : ''), 'differs' => $i === $differs];
         }
         return $out;
     }

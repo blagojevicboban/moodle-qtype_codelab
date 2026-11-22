@@ -579,12 +579,27 @@
     ],
     "displayLines": [
         {
-            "name": "lines without a mark",
+            "name": "each new line is an arrow at the end of its line",
             "text": "a\nb\n",
             "differs": null,
             "result": [
                 {
-                    "text": "a",
+                    "text": "a↵",
+                    "differs": false
+                },
+                {
+                    "text": "b↵",
+                    "differs": false
+                }
+            ]
+        },
+        {
+            "name": "no arrow when the output does not end with a new line",
+            "text": "a\nb",
+            "differs": null,
+            "result": [
+                {
+                    "text": "a↵",
                     "differs": false
                 },
                 {
@@ -599,7 +614,7 @@
             "differs": null,
             "result": [
                 {
-                    "text": "x",
+                    "text": "x↵",
                     "differs": false
                 }
             ]
@@ -610,15 +625,15 @@
             "differs": null,
             "result": [
                 {
-                    "text": "a",
+                    "text": "a↵",
                     "differs": false
                 },
                 {
-                    "text": "",
+                    "text": "↵",
                     "differs": false
                 },
                 {
-                    "text": "",
+                    "text": "↵",
                     "differs": false
                 },
                 {
@@ -633,11 +648,11 @@
             "differs": null,
             "result": [
                 {
-                    "text": "a b··",
+                    "text": "a b··↵",
                     "differs": false
                 },
                 {
-                    "text": "c→",
+                    "text": "c→↵",
                     "differs": false
                 }
             ]
@@ -659,11 +674,11 @@
             "differs": 1,
             "result": [
                 {
-                    "text": "a",
+                    "text": "a↵",
                     "differs": false
                 },
                 {
-                    "text": "b",
+                    "text": "b↵",
                     "differs": true
                 },
                 {
@@ -678,7 +693,7 @@
             "differs": 2,
             "result": [
                 {
-                    "text": "a",
+                    "text": "a↵",
                     "differs": false
                 },
                 {
@@ -692,12 +707,12 @@
             ]
         },
         {
-            "name": "a missing new line at the end is marked",
+            "name": "a missing new line at the end: the empty last line is marked",
             "text": "a\n",
             "differs": 1,
             "result": [
                 {
-                    "text": "a",
+                    "text": "a↵",
                     "differs": false
                 },
                 {
@@ -723,11 +738,11 @@
             "differs": null,
             "result": [
                 {
-                    "text": "a",
+                    "text": "a↵",
                     "differs": false
                 },
                 {
-                    "text": "b",
+                    "text": "b↵",
                     "differs": false
                 }
             ]

@@ -189,7 +189,7 @@ export const firstDifference = (expected, got, comparison) => {
 
 /**
  * Lines of an output for the display of a test (as grader::display_lines on the server): spaces and tabs at the end of
- * a line visible, no empty line for the new line at the end, the line differs marked.
+ * a line visible, each new line as a return arrow at the end of its line, the line differs marked.
  *
  * @param {string} text
  * @param {number|null} differs line from 0 to mark
@@ -197,6 +197,8 @@ export const firstDifference = (expected, got, comparison) => {
  */
 export const displayLines = (text, differs = null) => {
     const lines = text.replace(/\r\n?/g, '\n').split('\n');
+    // Lines before this one end with a new line, shown as a return arrow.
+    const newlines = lines.length - 1;
     if (lines.length > 1 && lines[lines.length - 1] === '' && differs !== lines.length - 1) {
         lines.pop();
     }
@@ -205,7 +207,8 @@ export const displayLines = (text, differs = null) => {
         lines.push(...Array(differs + 1 - lines.length).fill(''));
     }
     return lines.map((line, i) => ({
-        text: line.replace(/[ \t]+$/, (tail) => tail.replace(/ /g, '\u00B7').replace(/\t/g, '\u2192')),
+        text: line.replace(/[ \t]+$/, (tail) => tail.replace(/ /g, '\u00B7').replace(/\t/g, '\u2192'))
+            + (i < newlines ? '\u21B5' : ''),
         differs: i === differs,
     }));
 };

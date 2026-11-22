@@ -183,9 +183,9 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
         $this->finish();
         $this->check_current_state(\question_state::$gradedwrong);
         $this->render();
-        // The visible test: expected 4, got 2 with a space at the end; the line is marked in both outputs.
+        // The visible test: expected 4, got 2 with a space and a new line at the end; the line is marked in both outputs.
         $this->assertSame(2, substr_count($this->currentoutput, 'qtype_codelab-line-diff'));
         $this->assertStringContainsString('qtype_codelab-line-diff">4</span>', $this->currentoutput);
-        $this->assertStringContainsString("qtype_codelab-line-diff\">2\u{00B7}</span>", $this->currentoutput);
+        $this->assertStringContainsString("qtype_codelab-line-diff\">2\u{00B7}\u{21B5}</span>", $this->currentoutput);
     }
 }
