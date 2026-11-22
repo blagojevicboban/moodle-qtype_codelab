@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.14.0 (2026-11-22)
+
+- Time of each test: Run tests and the feedback show how long each test ran, when the CodeLab runner (0.9.0) runs
+  it. Jobe reports no times.
+- New optional field Time limit per test (s), 0.1 to 30: a test that runs longer fails with "Too slow: 1.42 s, the
+  limit is 1 s", also when its output is right. It has no effect on Jobe, and its help says so. The times are kept
+  with the results, so a regrade does not change a grade because the server is busier. Database upgrade: new field
+  timelimit.
+- The interface in 12 more languages: German, French, Spanish, Italian, Portuguese, Polish, Croatian, Bosnian,
+  Slovenian, Macedonian, Slovak and Czech (15 with English and Serbian).
+- Needs tiny_codelab 1.21.0.
+
 ## 1.13.1 (2026-11-22)
 
 - Accessibility: the console of the attempt is a region that can be scrolled with the keyboard; screen readers hear

@@ -37,6 +37,9 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
   - **numbers with a tolerance**: word by word, numbers may differ by the tolerance (absolute, or relative to the larger
     number; 0.001 by default), so `3.14159` matches `3.1416`;
   - **regular expression**: the expected output of each test is a PCRE pattern that must match the whole output;
+- a **time limit per test** in seconds (0.1 to 30): with the CodeLab runner 0.9.0 or later, Run tests and the feedback
+  show the time of each test, and a test over the limit fails as too slow; Jobe reports no times, so there the field
+  has no effect;
 - a **CPU time limit** and a **memory limit** for grading, when the defaults are not enough (the administrator sets
   the largest values, 10 s and 2000 MB by default, in the settings of the question type);
 - whether typing help is turned off, for tests.
