@@ -129,5 +129,19 @@ function xmldb_qtype_codelab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112906, 'qtype', 'codelab');
     }
 
+    if ($oldversion < 2026113001) {
+        // C/C++ compiler profile and language standard.
+        $table = new xmldb_table('qtype_codelab_options');
+        $compiler = new xmldb_field('compiler', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, 'gaps');
+        if (!$dbman->field_exists($table, $compiler)) {
+            $dbman->add_field($table, $compiler);
+        }
+        $std = new xmldb_field('std', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, 'compiler');
+        if (!$dbman->field_exists($table, $std)) {
+            $dbman->add_field($table, $std);
+        }
+        upgrade_plugin_savepoint(true, 2026113001, 'qtype', 'codelab');
+    }
+
     return true;
 }

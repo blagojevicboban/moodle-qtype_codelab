@@ -60,11 +60,18 @@ final class grader_test extends \advanced_testcase {
              * @param array $files
              * @return array
              */
-            public function run(string $lang, string $code, string $stdin = '', array $files = []): array {
+            public function run(
+                string $lang,
+                string $code,
+                string $stdin = '',
+                array $files = [],
+                string $compiler = '',
+                string $std = ''
+            ): array {
                 $this->runs++;
                 return array_merge(
                     ['status' => 'ok', 'outcome' => 15, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''],
-                    ($this->answer)($lang, $code, $stdin, $files)
+                    ($this->answer)($lang, $code, $stdin, $files, $compiler, $std)
                 );
             }
         };

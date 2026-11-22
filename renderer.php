@@ -104,6 +104,8 @@ class qtype_codelab_renderer extends qtype_renderer {
             'prefix' => (string) $question->prefix,
             'suffix' => (string) $question->suffix,
             'files' => $question->files,
+            'compiler' => (string) $question->compiler,
+            'std' => (string) $question->std,
             'tests' => $tests,
             'comparison' => (string) $question->comparison,
             'tolerance' => (float) $question->tolerance,

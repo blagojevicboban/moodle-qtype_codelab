@@ -115,8 +115,15 @@ class question_jobe extends jobe {
      * @param array $files
      * @return array
      */
-    public function run_spec(string $lang, string $code, string $stdin = '', array $files = []): array {
-        $spec = parent::run_spec($lang, $code, $stdin, $files);
+    public function run_spec(
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
+        $spec = parent::run_spec($lang, $code, $stdin, $files, $compiler, $std);
         if ($this->memorylimit > 0) {
             $parameters = &$spec['run_spec']['parameters'];
             $parameters['memorylimit'] = max($this->memorylimit, (int) ($parameters['memorylimit'] ?? 0));

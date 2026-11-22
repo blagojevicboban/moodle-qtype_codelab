@@ -52,7 +52,7 @@ class qtype_codelab extends question_type {
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
             'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints',
-            'timelimit', 'ordercheck', 'files', 'gaps'];
+            'timelimit', 'ordercheck', 'files', 'gaps', 'compiler', 'std'];
     }
 
     /**
@@ -184,6 +184,8 @@ class qtype_codelab extends question_type {
         $question->timelimit = self::time_limit($question->timelimit ?? 0);
         $question->ordercheck = self::order_check($question->ordercheck ?? 0);
         $question->gaps = self::gaps_count($question->gaps ?? 0);
+        $question->compiler = trim((string) ($question->compiler ?? ''));
+        $question->std = trim((string) ($question->std ?? ''));
         $result = parent::save_question_options($question);
         $this->save_hints($question);
         return $result;
@@ -224,7 +226,16 @@ class qtype_codelab extends question_type {
         $grader = $grader ?? new grader(self::jobe_for($question));
         $subset = array_map(fn($i) => $tests[$i], $missing);
         $files = $files ?? self::files_from_form($question);
-        $results = $grader->run_tests((string) $question->language, $program, $subset, 'spaces', grader::TOLERANCE, $files);
+        $results = $grader->run_tests(
+            (string) $question->language,
+            $program,
+            $subset,
+            'spaces',
+            grader::TOLERANCE,
+            $files,
+            (string) ($question->compiler ?? ''),
+            (string) ($question->std ?? '')
+        );
         $regex = self::comparison($question) === 'regex';
         foreach ($missing as $n => $i) {
             if (($results[$n]['status'] ?? '') === 'ok') {
@@ -273,7 +284,9 @@ class qtype_codelab extends question_type {
             array_values($tests),
             self::comparison((object) $data),
             self::tolerance($data['tolerance'] ?? null),
-            self::files_from_form((object) $data)
+            self::files_from_form((object) $data),
+            (string) ($data['compiler'] ?? ''),
+            (string) ($data['std'] ?? '')
         );
         // A server that is down must not keep the teacher from saving.
         if (grader::sandbox_failed($results)) {
@@ -400,5 +413,7 @@ class qtype_codelab extends question_type {
         $question->ordercheck = $question->parsons ? self::order_check($questiondata->options->ordercheck ?? 0) : order::OFF;
         $question->gaps = $question->parsons ? self::gaps_count($questiondata->options->gaps ?? 0) : 0;
         $question->files = grader::decode_files($questiondata->options->files ?? '');
+        $question->compiler = (string) ($questiondata->options->compiler ?? '');
+        $question->std = (string) ($questiondata->options->std ?? '');
     }
 }

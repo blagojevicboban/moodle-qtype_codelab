@@ -52,6 +52,20 @@ class qtype_codelab_edit_form extends question_edit_form {
         $mform->addElement('select', 'language', get_string('language', 'qtype_codelab'), $languages);
         $mform->setDefault('language', 'c');
 
+        $mform->addElement('select', 'compiler', get_string('compiler', 'tiny_codelab'), [
+            '' => get_string('compiler_default', 'tiny_codelab'),
+            'gcc' => get_string('compiler_gcc', 'tiny_codelab'),
+            'msvc' => get_string('compiler_msvc', 'tiny_codelab'),
+            'clang' => get_string('compiler_clang', 'tiny_codelab'),
+        ]);
+        $mform->setAdvanced('compiler');
+        $stdoptions = ['' => get_string('standard_default', 'tiny_codelab')];
+        foreach (array_merge(\tiny_codelab\local\compiler::C_STANDARDS, \tiny_codelab\local\compiler::CPP_STANDARDS) as $s) {
+            $stdoptions[$s] = strtoupper($s);
+        }
+        $mform->addElement('select', 'std', get_string('standard', 'tiny_codelab'), $stdoptions);
+        $mform->setAdvanced('std');
+
         // The module qtype_codelab/edit turns these fields into code editors (found by their ids).
         $code = ['rows' => 10, 'cols' => 80, 'spellcheck' => 'false'];
         foreach (['template', 'solution', 'prefix', 'suffix'] as $field) {

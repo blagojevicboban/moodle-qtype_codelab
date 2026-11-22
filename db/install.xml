@@ -27,6 +27,8 @@
         <FIELD NAME="ordercheck" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Parsons: 1 to let students check how many lines are in their place, 2 also with a part of the mark for the order when the tests fail."/>
         <FIELD NAME="files" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of input files placed in the working folder before each run: name, text."/>
         <FIELD NAME="gaps" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Parsons: number of expressions hidden as fill-in gaps (0..10)."/>
+        <FIELD NAME="compiler" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="C/C++ compiler profile (gcc, msvc, clang; empty for site default)."/>
+        <FIELD NAME="std" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="C/C++ language standard (c99..c23, c++11..c++23; empty for default)."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

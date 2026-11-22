@@ -56,6 +56,8 @@ class restore_qtype_codelab_plugin extends restore_qtype_extrafields_plugin {
         $data['ordercheck'] = $data['ordercheck'] ?? 0;
         $data['files'] = $data['files'] ?? '';
         $data['gaps'] = $data['gaps'] ?? 0;
+        $data['compiler'] = $data['compiler'] ?? '';
+        $data['std'] = $data['std'] ?? '';
         $this->really_process_extra_question_fields($data);
     }
 }

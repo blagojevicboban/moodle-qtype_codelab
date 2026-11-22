@@ -530,6 +530,8 @@ export const init = async(config) => {
             panel,
             vars,
             files: () => questionFiles,
+            compiler: () => config.compiler || '',
+            std: () => config.std || '',
             // As Run on the server: the call of the first test with test code, after the student's lines.
             program: () => testProgram(config.lang, code(), config.tests.find((tc) => tc.code)?.code || ''),
             offset: prefixLines(config.prefix),
@@ -578,7 +580,7 @@ export const init = async(config) => {
             // A question with function tests has no main of its own: Run calls the function as the first test does.
             const first = config.tests.find((tc) => tc.code)?.code || '';
             await showResult(panel, await run(config.lang, testProgram(config.lang, code(), first), stdin.value,
-                config.contextid, questionFiles));
+                config.contextid, questionFiles, config.compiler || '', config.std || ''));
         } catch (e) {
             await showError(panel, e);
         } finally {
@@ -598,7 +600,8 @@ export const init = async(config) => {
             // Up to three tests at the same time; the first result that is not a normal end (a compilation error, the
             // rate limit, a server problem) stops the tests that have not started, and is shown once.
             const results = await runPool(config.tests,
-                (tc) => run(config.lang, testProgram(config.lang, answer, tc.code), tc.stdin, config.contextid, questionFiles),
+                (tc) => run(config.lang, testProgram(config.lang, answer, tc.code), tc.stdin, config.contextid,
+                    questionFiles, config.compiler || '', config.std || ''),
                 PARALLEL_TESTS, (result) => result.status !== 'ok');
             for (const [i, tc] of config.tests.entries()) {
                 const result = results[i];

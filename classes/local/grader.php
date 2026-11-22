@@ -389,14 +389,23 @@ class grader {
         array $tests,
         string $comparison = 'spaces',
         float $tolerance = self::TOLERANCE,
-        array $files = []
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
     ): array {
         $this->jobe = $this->jobe ?? new jobe();
         $results = [];
         // With test code every test is another program, so a compilation error may belong to one test only.
         $sameprogram = !array_filter($tests, fn($tc) => ($tc['code'] ?? '') !== '');
         foreach ($tests as $tc) {
-            $run = $this->jobe->run($lang, self::test_program($lang, $program, $tc['code'] ?? ''), $tc['stdin'], $files);
+            $run = $this->jobe->run(
+                $lang,
+                self::test_program($lang, $program, $tc['code'] ?? ''),
+                $tc['stdin'],
+                $files,
+                $compiler,
+                $std
+            );
             $results[] = [
                 'status' => $run['status'],
                 'passed' => $run['status'] === 'ok' && self::matches($tc['expected'], $run['stdout'], $comparison, $tolerance),

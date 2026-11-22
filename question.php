@@ -74,6 +74,10 @@ class qtype_codelab_question extends question_graded_automatically {
     public $files = [];
     /** @var int Parsons: number of fill-in gaps (0..10) */
     public $gaps = 0;
+    /** @var string C/C++ compiler profile (gcc, msvc, clang; empty for site default) */
+    public $compiler = '';
+    /** @var string C/C++ language standard (empty for default) */
+    public $std = '';
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;
@@ -122,7 +126,7 @@ class qtype_codelab_question extends question_graded_automatically {
     public function results_key(string $answer): string {
         $program = grader::program((string) $this->prefix, $answer, (string) $this->suffix);
         return sha1(json_encode([$this->language, $program, $this->tests, $this->comparison, (float) $this->tolerance,
-            (int) $this->cputime, (int) $this->memorylimit, $this->files]));
+            (int) $this->cputime, (int) $this->memorylimit, $this->files, (string) $this->compiler, (string) $this->std]));
     }
 
     /**
@@ -154,7 +158,9 @@ class qtype_codelab_question extends question_graded_automatically {
                 $this->tests,
                 $this->comparison,
                 (float) $this->tolerance,
-                $this->files
+                $this->files,
+                (string) $this->compiler,
+                (string) $this->std
             );
             // A failure of the sandbox is not kept: the next try may work.
             if (!grader::sandbox_failed($results)) {
