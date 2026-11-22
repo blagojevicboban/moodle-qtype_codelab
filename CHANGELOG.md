@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.13.1 (2026-11-22)
+
+- Accessibility: the console of the attempt is a region that can be scrolled with the keyboard; screen readers hear
+  the end of a run with the start of its output, and the result of Run tests (2 of 3 tests passed), instead of every
+  line while it is written.
+- Requires tiny_codelab 1.20.0.
+
 ## 1.13.0 (2026-11-22)
 
 - A failed test shows the input, the expected and the actual output side by side, in the attempt and in the
