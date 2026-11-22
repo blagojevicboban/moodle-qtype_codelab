@@ -127,7 +127,7 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.19.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.20.0 or newer, installed first, with a Jobe
   server or a CodeLab runner in its settings
 
 ## The CodeLab plugins
