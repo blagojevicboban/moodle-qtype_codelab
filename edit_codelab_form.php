@@ -167,6 +167,11 @@ class qtype_codelab_edit_form extends question_edit_form {
             $mform->addHelpButton($field, $field, 'qtype_codelab', '', false, $limits->$field);
             $mform->setAdvanced($field);
         }
+        // Seconds a test may take; only the CodeLab runner reports the times (see the help).
+        $mform->addElement('text', 'timelimit', get_string('timelimit', 'qtype_codelab'), ['size' => 6]);
+        $mform->setType('timelimit', PARAM_RAW_TRIMMED);
+        $mform->addHelpButton('timelimit', 'timelimit', 'qtype_codelab');
+        $mform->setAdvanced('timelimit');
 
         // Not saved with the question: only for this save.
         $mform->addElement(
@@ -205,6 +210,8 @@ class qtype_codelab_edit_form extends question_edit_form {
                 $question->$field = (int) $question->options->$field;
             }
         }
+        $question->timelimit = empty((float) ($question->options->timelimit ?? 0))
+            ? '' : format_float((float) $question->options->timelimit, 2, false, true);
         // Empty tests (and those added with the button) start with weight 1.
         $count = max(self::START_TESTS, count($question->options->testlist ?? []) + 1) + 20;
         for ($i = 0; $i < $count; $i++) {
@@ -250,6 +257,10 @@ class qtype_codelab_edit_form extends question_edit_form {
             if ($value !== '' && (!ctype_digit($value) || (int) $value < 1 || (int) $value > $limit)) {
                 $errors[$field] = get_string('badlimit', 'qtype_codelab', $limit);
             }
+        }
+        $timelimit = trim((string) ($data['timelimit'] ?? ''));
+        if ($timelimit !== '' && qtype_codelab::time_limit($timelimit) === 0.0) {
+            $errors['timelimit'] = get_string('badtimelimit', 'qtype_codelab');
         }
 
         // The solution must pass the tests; it runs on Jobe only when the rest of the form is right.

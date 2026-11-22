@@ -65,6 +65,8 @@ class qtype_codelab_question extends question_graded_automatically {
     public $aihints = false;
     /** @var string lines of a Parsons problem that do not belong to the solution, one per line */
     public $distractors = '';
+    /** @var float seconds a test may take where the server reports times (CodeLab runner), 0 for no limit */
+    public $timelimit = 0.0;
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;
@@ -118,10 +120,12 @@ class qtype_codelab_question extends question_graded_automatically {
 
     /**
      * Results of the tests for an answer: kept in the application cache, so a review or a regrade of the same answer does
-     * not run it on Jobe again.
+     * not run it on Jobe again. The times are kept with them and the time limit is applied to the kept times, so a
+     * regrade does not change a grade because the server is busier another day.
      *
      * @param array $response
-     * @return array results of grader::run_tests, empty without tests or an answer
+     * @return array results of grader::run_tests with 'slow' (see grader::apply_time_limit), empty without tests or an
+     *     answer
      */
     public function test_results(array $response): array {
         $answer = (string) ($response['answer'] ?? '');
@@ -131,7 +135,7 @@ class qtype_codelab_question extends question_graded_automatically {
         $program = grader::program((string) $this->prefix, $answer, (string) $this->suffix);
         $key = $this->results_key($answer);
         if (isset($this->resultcache[$key])) {
-            return $this->resultcache[$key];
+            return grader::apply_time_limit($this->resultcache[$key], (float) $this->timelimit);
         }
         $cache = \cache::make('qtype_codelab', 'results');
         $results = $cache->get($key);
@@ -149,7 +153,8 @@ class qtype_codelab_question extends question_graded_automatically {
                 $cache->set($key, $results);
             }
         }
-        return $this->resultcache[$key] = $results;
+        $this->resultcache[$key] = $results;
+        return grader::apply_time_limit($results, (float) $this->timelimit);
     }
 
     /**

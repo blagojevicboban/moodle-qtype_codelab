@@ -101,6 +101,8 @@ class qtype_codelab_renderer extends qtype_renderer {
             'tests' => $tests,
             'comparison' => (string) $question->comparison,
             'tolerance' => (float) $question->tolerance,
+            // Seconds a test may take; Run tests applies it to the times the runner reports (none from Jobe).
+            'timelimit' => (float) $question->timelimit,
             'contextid' => $options->context->id,
             // Run and Step of a Python answer in the browser; the tests and the grade still come from Jobe.
             'pyodide' => \tiny_codelab\local\runtime::config()['pyodide'],
@@ -176,7 +178,8 @@ class qtype_codelab_renderer extends qtype_renderer {
         // Hidden tests are given only as a count, so their order does not tell which input failed.
         $hidden = ['passed' => 0, 'total' => 0];
         foreach ($question->tests as $i => $tc) {
-            $r = $results[$i] ?? ['passed' => false, 'got' => '', 'status' => 'error', 'stderr' => ''];
+            $r = ($results[$i] ?? []) + ['passed' => false, 'got' => '', 'status' => 'error', 'stderr' => '', 'time' => null,
+                'slow' => false];
             if ($tc['hidden']) {
                 $hidden['total']++;
                 $hidden['passed'] += $r['passed'] ? 1 : 0;
@@ -185,6 +188,13 @@ class qtype_codelab_renderer extends qtype_renderer {
             $mark = $r['passed']
                 ? html_writer::span(get_string('passed', 'qtype_codelab'), 'badge bg-success')
                 : html_writer::span(get_string('failed', 'qtype_codelab'), 'badge bg-danger');
+            // The time of the test, when the server reported one (the CodeLab runner).
+            if ($r['time'] !== null) {
+                $mark .= html_writer::div(
+                    get_string('testtime', 'qtype_codelab', self::seconds((float) $r['time'])),
+                    'qtype_codelab-time small text-muted text-nowrap'
+                );
+            }
             $got = $r['got'];
             // The first line that differs is marked in both outputs; not when the program did not end well.
             $differs = $r['passed'] || $r['status'] !== 'ok'
@@ -194,13 +204,21 @@ class qtype_codelab_renderer extends qtype_renderer {
                 $got .= ($got === '' ? '' : "\n") . get_string('status_' . $r['status'], 'tiny_codelab') .
                     ($detail !== '' ? "\n" . $detail : '');
             }
+            // A right output that came too late: the output as it is, and why it failed under it.
+            $slow = '';
+            if ($r['slow']) {
+                $slow = html_writer::div(get_string('tooslow', 'qtype_codelab', [
+                    'time' => self::seconds((float) $r['time']),
+                    'limit' => format_float((float) $question->timelimit, 2, true, true),
+                ]), 'qtype_codelab-slow text-danger');
+            }
             $table->data[] = array_merge(
                 [$i + 1],
                 $withcode ? [html_writer::tag('pre', s($tc['code'] ?? ''))] : [],
                 [
                     html_writer::tag('pre', s($tc['stdin'])),
                     $this->output_lines($tc['expected'], $differs),
-                    $this->output_lines($got, $differs),
+                    $this->output_lines($got, $differs) . $slow,
                     $mark,
                 ]
             );
@@ -212,6 +230,16 @@ class qtype_codelab_renderer extends qtype_renderer {
             $out .= html_writer::div(get_string('hiddensummary', 'qtype_codelab', $hidden), 'qtype_codelab-hidden');
         }
         return $out;
+    }
+
+    /**
+     * Seconds of a test as shown to students: 2 decimals, at least 0.01 so a quick test does not show 0.
+     *
+     * @param float $time
+     * @return string
+     */
+    public static function seconds(float $time): string {
+        return format_float(max(0.01, $time), 2);
     }
 
     /**

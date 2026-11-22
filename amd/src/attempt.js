@@ -329,16 +329,33 @@ export const runPool = async(items, task, limit = PARALLEL_TESTS, stop = () => f
     return results;
 };
 
+/**
+ * Whether a test ran longer than the time limit of the question.
+ *
+ * @param {number|null} time seconds of the run, null when the server gave none
+ * @param {number} limit seconds, 0 for no limit
+ * @returns {boolean}
+ */
+export const tooSlow = (time, limit) => limit > 0 && time !== null && time > limit;
+
+/**
+ * Seconds of a test as shown to students: 2 decimals, at least 0.01 (as the feedback shows them).
+ *
+ * @param {number} time
+ * @returns {string}
+ */
+export const seconds = (time) => Math.max(0.01, time).toFixed(2);
+
 export const init = async(config) => {
     const modes = runModes(config);
     const textarea = document.getElementById(config.textareaid);
     if (!textarea) {
         return;
     }
-    const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'editorlabel', 'step', 'stop',
-        'fullscreen', 'exitfullscreen'];
+    const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'testtime', 'tooslow',
+        'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen'];
     const values = await getStrings(keys.map((key) => ({key, component: key.startsWith('test') || key === 'runtests'
-        ? 'qtype_codelab' : 'tiny_codelab'})));
+        || key === 'tooslow' ? 'qtype_codelab' : 'tiny_codelab'})));
     const s = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
 
     const host = document.createElement('div');
@@ -519,12 +536,23 @@ export const init = async(config) => {
                     await showResult(panel, result);
                     return;
                 }
-                const ok = matches(tc.expected, result.stdout, config.comparison, config.tolerance);
+                const same = matches(tc.expected, result.stdout, config.comparison, config.tolerance);
+                // The time comes only from the CodeLab runner (0.9.0); without it the time limit has no effect.
+                const time = typeof result.time === 'number' ? result.time : null;
+                const slow = tooSlow(time, config.timelimit);
+                const ok = same && !slow;
                 passed += ok ? 1 : 0;
                 const item = document.createElement('li');
                 item.className = ok ? 'text-success' : 'text-danger';
-                item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1);
-                if (!ok) {
+                item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1) +
+                    (time === null ? '' : ` (${s.testtime.replace('{$a}', seconds(time))})`);
+                if (slow) {
+                    const detail = document.createElement('div');
+                    detail.textContent = s.tooslow.replace('{$a->time}', seconds(time))
+                        .replace('{$a->limit}', String(config.timelimit));
+                    item.append(detail);
+                }
+                if (!same) {
                     // Input, expected and got side by side, the first different line marked (as in the feedback).
                     const differs = firstDifference(tc.expected, result.stdout, config.comparison);
                     const {html, js} = await Templates.renderForPromise('qtype_codelab/testcompare', {

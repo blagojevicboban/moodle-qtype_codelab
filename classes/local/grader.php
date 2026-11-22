@@ -38,6 +38,12 @@ class grader {
     /** Default tolerance of the comparison numbers. */
     const TOLERANCE = 0.001;
 
+    /** Smallest time limit per test, in seconds. */
+    const MIN_TIMELIMIT = 0.1;
+
+    /** Largest time limit per test, in seconds. */
+    const MAX_TIMELIMIT = 30.0;
+
     /** @var jobe|null client, made when first needed */
     protected $jobe;
 
@@ -335,7 +341,8 @@ class grader {
      * @param array $tests decoded tests
      * @param string $comparison one of COMPARISONS
      * @param float $tolerance for the comparison numbers
-     * @return array list of ['status', 'passed', 'got', 'cmpinfo', 'stderr'] in the order of the tests
+     * @return array list of ['status', 'passed', 'got', 'cmpinfo', 'stderr', 'time'] in the order of the tests; time is the
+     *     seconds of the run when the server reports it (the CodeLab runner 0.9.0), otherwise null
      */
     public function run_tests(
         string $lang,
@@ -356,14 +363,35 @@ class grader {
                 'got' => $run['stdout'],
                 'cmpinfo' => $run['cmpinfo'],
                 'stderr' => $run['stderr'],
+                'time' => isset($run['time']) ? (float) $run['time'] : null,
             ];
             // The same program does not compile on the next tests either, and a sandbox failure would repeat.
             if (($run['status'] === 'compile' && $sameprogram) || in_array($run['status'], self::SANDBOX_FAILURES, true)) {
                 while (count($results) < count($tests)) {
                     $results[] = ['status' => $run['status'], 'passed' => false, 'got' => '', 'cmpinfo' => $run['cmpinfo'],
-                        'stderr' => $run['stderr']];
+                        'stderr' => $run['stderr'], 'time' => null];
                 }
                 break;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * The time limit per test applied to results: a test that ran longer than the limit fails and is marked slow. A
+     * result without a time (Jobe, a runner before 0.9.0, results kept from before) is not changed, so the limit has no
+     * effect there.
+     *
+     * @param array $results of run_tests()
+     * @param float $limit seconds, 0 for no limit
+     * @return array the results, each with 'slow' (bool)
+     */
+    public static function apply_time_limit(array $results, float $limit): array {
+        foreach ($results as &$r) {
+            $time = $r['time'] ?? null;
+            $r['slow'] = $limit > 0 && $time !== null && ($r['status'] ?? '') === 'ok' && $time > $limit;
+            if ($r['slow']) {
+                $r['passed'] = false;
             }
         }
         return $results;

@@ -161,6 +161,33 @@ final class grader_test extends \advanced_testcase {
         $this->assertFalse(grader::sandbox_failed($results));
     }
 
+    public function test_times_and_the_time_limit(): void {
+        // The runner reports times (0.9.0): the second test is right but slow. Jobe reports none.
+        $jobe = self::fake_jobe(fn($lang, $code, $stdin) => ['stdout' => (string) ((int) $stdin * 2) . "\n",
+            'time' => $stdin === '3' ? 1.5 : 0.25]);
+        $tests = grader::decode_tests(json_encode([['stdin' => '2', 'expected' => '4'], ['stdin' => '3', 'expected' => '6']]));
+        $results = (new grader($jobe))->run_tests('python', 'x', $tests);
+        $this->assertSame([0.25, 1.5], array_column($results, 'time'));
+        $this->assertSame([true, true], array_column($results, 'passed'));
+
+        $limited = grader::apply_time_limit($results, 1.0);
+        $this->assertSame([true, false], array_column($limited, 'passed'));
+        $this->assertSame([false, true], array_column($limited, 'slow'));
+        $this->assertEqualsWithDelta(0.5, grader::fraction($tests, $limited), 1e-9);
+        // No limit: nothing changes.
+        $this->assertSame([true, true], array_column(grader::apply_time_limit($results, 0.0), 'passed'));
+
+        // Without a time (Jobe, results kept from before) the limit has no effect; a run that failed is not slow.
+        $nojobe = self::fake_jobe(fn($lang, $code, $stdin) => ['stdout' => (string) ((int) $stdin * 2) . "\n"]);
+        $plain = (new grader($nojobe))->run_tests('python', 'x', $tests);
+        $this->assertSame([null, null], array_column($plain, 'time'));
+        $this->assertSame([true, true], array_column(grader::apply_time_limit($plain, 0.1), 'passed'));
+        $old = [['status' => 'ok', 'passed' => true, 'got' => '4', 'cmpinfo' => '', 'stderr' => '']];
+        $this->assertTrue(grader::apply_time_limit($old, 0.1)[0]['passed']);
+        $crashed = [['status' => 'runtime', 'passed' => false, 'got' => '', 'cmpinfo' => '', 'stderr' => 'x', 'time' => 5.0]];
+        $this->assertFalse(grader::apply_time_limit($crashed, 1.0)[0]['slow']);
+    }
+
     public function test_compile_error_stops_after_first_test(): void {
         $jobe = self::fake_jobe(fn() => ['status' => 'compile', 'cmpinfo' => 'error: x undeclared']);
         $tests = grader::decode_tests('[{"stdin":"1","expected":"1"},{"stdin":"2","expected":"2"}]');

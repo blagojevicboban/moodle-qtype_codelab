@@ -56,6 +56,8 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
         $q = new class extends \qtype_codelab_question {
             /** @var int how many times the program was sent to Jobe */
             public $runs = 0;
+            /** @var float|null seconds of each run, as the CodeLab runner reports them; null as from Jobe */
+            public $time = null;
 
             /**
              * Fixed results instead of a run on Jobe.
@@ -76,10 +78,11 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
                         'passed' => $answer === walkthrough_test::RIGHT,
                         // The wrong program prints the number itself; a space at the end shows as a dot.
                         'got' => $answer === walkthrough_test::WRONG ? "2 \n" : '', 'cmpinfo' => '', 'stderr' => '',
+                        'time' => $this->time,
                     ];
                     $this->resultcache[$key] = array_fill(0, count($this->tests), $result);
                 }
-                return $this->resultcache[$key];
+                return \qtype_codelab\local\grader::apply_time_limit($this->resultcache[$key], (float) $this->timelimit);
             }
         };
         \test_question_maker::initialise_a_question($q);
@@ -187,5 +190,31 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
         $this->assertSame(2, substr_count($this->currentoutput, 'qtype_codelab-line-diff'));
         $this->assertStringContainsString('qtype_codelab-line-diff">4</span>', $this->currentoutput);
         $this->assertStringContainsString("qtype_codelab-line-diff\">2\u{00B7}\u{21B5}</span>", $this->currentoutput);
+    }
+
+    public function test_time_limit_fails_a_right_but_slow_answer(): void {
+        $q = $this->make_question();
+        $q->time = 1.5;
+        $q->timelimit = 1.0;
+        $this->start_attempt_at_question($q, 'deferredfeedback', 1);
+        $this->process_submission(['answer' => self::RIGHT]);
+        $this->finish();
+        $this->check_current_state(\question_state::$gradedwrong);
+        $this->render();
+        // The time of the visible test and why it failed.
+        $this->assertStringContainsString(get_string('testtime', 'qtype_codelab', format_float(1.5, 2)), $this->currentoutput);
+        $slow = get_string('tooslow', 'qtype_codelab', ['time' => format_float(1.5, 2), 'limit' => '1']);
+        $this->assertStringContainsString(s($slow), $this->currentoutput);
+    }
+
+    public function test_time_limit_has_no_effect_without_times(): void {
+        $q = $this->make_question();
+        $q->timelimit = 0.1;
+        $this->start_attempt_at_question($q, 'deferredfeedback', 1);
+        $this->process_submission(['answer' => self::RIGHT]);
+        $this->finish();
+        $this->check_current_state(\question_state::$gradedright);
+        $this->render();
+        $this->assertStringNotContainsString('qtype_codelab-time', $this->currentoutput);
     }
 }

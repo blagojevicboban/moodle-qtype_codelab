@@ -122,7 +122,7 @@ final class questiontype_test extends \advanced_testcase {
             'defaultmark' => 1, 'penalty' => 0.1, 'language' => 'c', 'template' => 'int main(void) {}',
             'solution' => '', 'prefix' => '', 'suffix' => '', 'noassist' => 1, 'showtests' => 0, 'comparison' => 'numbers',
             'parsons' => 1, 'distractors' => "x = 0\r\n",
-            'tolerance' => '0.01', 'cputime' => '4', 'memorylimit' => '',
+            'tolerance' => '0.01', 'cputime' => '4', 'memorylimit' => '', 'timelimit' => '1.5',
             'teststdin' => ['1 2', ''], 'testexpected' => ['3', ''], 'testhidden' => [1, 0], 'testweight' => [2, 1],
         ];
         $question = (object) ['category' => $category->id, 'qtype' => 'codelab'];
@@ -138,6 +138,7 @@ final class questiontype_test extends \advanced_testcase {
         $this->assertSame('numbers', $loaded->comparison);
         $this->assertSame(4, $loaded->cputime);
         $this->assertSame(0, $loaded->memorylimit);
+        $this->assertSame(1.5, $loaded->timelimit);
         $this->assertEqualsWithDelta(0.01, $loaded->tolerance, 1e-12);
         $this->assertSame([['stdin' => '1 2', 'expected' => '3', 'code' => '', 'hidden' => true, 'weight' => 2.0]], $loaded->tests);
         $this->assertTrue($loaded->has_tests());
