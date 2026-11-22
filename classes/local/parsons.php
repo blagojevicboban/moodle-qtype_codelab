@@ -47,17 +47,30 @@ class parsons {
 
     /**
      * The blocks of an attempt: the lines of the solution and the distractors, shuffled with the seed (the same seed
-     * gives the same order, so a page that is opened again does not change).
+     * gives the same order, so a page that is opened again does not change). When $gaps > 0, up to $gaps expressions in
+     * the solution lines (never in distractors) become ['before' => string, 'after' => string, 'size' => int].
      *
      * @param string $solution
      * @param string $distractors one line each
      * @param string $seed e.g. the usage and slot of the attempt
-     * @return string[]
+     * @param int $gaps number of fill-in gaps (0 for ordering only)
+     * @param string $lang language of the question (used to find gap candidates)
+     * @return array list of string or ['before' => string, 'after' => string, 'size' => int]
      */
-    public static function blocks(string $solution, string $distractors, string $seed): array {
-        $all = array_slice(array_merge(self::lines($solution), self::lines($distractors)), 0, self::MAX_LINES);
+    public static function blocks(
+        string $solution,
+        string $distractors,
+        string $seed,
+        int $gaps = 0,
+        string $lang = ''
+    ): array {
+        $sollines = self::lines($solution);
+        $distlines = self::lines($distractors);
+        $orig = array_slice(array_merge($sollines, $distlines), 0, self::MAX_LINES);
+        $gappedsol = $gaps > 0 ? gaps::apply($sollines, $lang, $gaps, $seed) : $sollines;
+        $all = array_slice(array_merge($gappedsol, $distlines), 0, self::MAX_LINES);
         $keys = [];
-        foreach ($all as $i => $line) {
+        foreach ($orig as $i => $line) {
             $keys[$i] = sha1($seed . '|' . $i . '|' . $line);
         }
         asort($keys);

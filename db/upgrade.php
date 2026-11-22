@@ -119,5 +119,15 @@ function xmldb_qtype_codelab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112905, 'qtype', 'codelab');
     }
 
+    if ($oldversion < 2026112906) {
+        // Parsons fill-in gaps: number of expressions hidden as gaps (0..10).
+        $table = new xmldb_table('qtype_codelab_options');
+        $field = new xmldb_field('gaps', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'files');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026112906, 'qtype', 'codelab');
+    }
+
     return true;
 }

@@ -29,30 +29,85 @@ const INDENT = 4;
 /** Most levels of indentation. */
 const MAX_LEVEL = 8;
 
+/** Maximum length of text typed into a single-line gap. */
+const MAX_GAP_LENGTH = 80;
+
+/**
+ * Normalise a raw block (plain string or {before, after, size}) into an internal block object.
+ *
+ * @param {string|{before: string, after: string, size?: number}} block
+ * @param {number} id
+ * @returns {Object}
+ */
+const makeBlock = (block, id) => (typeof block === 'string'
+    ? {id, text: block, gap: false}
+    : {id, before: String(block.before || ''), after: String(block.after || ''),
+        size: Number(block.size) || 10, value: '', gap: true});
+
+/**
+ * The text of a block as written into the program (with the student's gap value inserted).
+ *
+ * @param {Object} item
+ * @returns {string}
+ */
+export const lineText = (item) => (item.gap ? `${item.before}${item.value || ''}${item.after}` : item.text);
+
+/**
+ * Match a trimmed saved line against a gapped block, returning the extracted gap value or null.
+ *
+ * @param {Object} block
+ * @param {string} text trimmed line
+ * @returns {?string}
+ */
+const matchGap = (block, text) => {
+    const b = block.before.trimStart();
+    const a = block.after.trimEnd();
+    if (!text.startsWith(b) || !text.endsWith(a) || text.length < b.length + a.length) {
+        return null;
+    }
+    const raw = text.slice(b.length, a.length ? text.length - a.length : text.length);
+    return raw.replace(/[\r\n]+/g, '').slice(0, MAX_GAP_LENGTH);
+};
+
 /**
  * The state of a saved answer: its lines (with their level) taken from the blocks, the other blocks left in the pool.
  * A line of the answer that is no block (changed by hand) is left out.
  *
- * @param {string[]} blocks lines given to the student, in their shuffled order
+ * @param {Array<string|{before: string, after: string, size?: number}>} blocks lines given to the student, shuffled
  * @param {string} answer the program saved so far
  * @param {boolean} indented whether the levels come from the answer (Python)
- * @returns {{pool: Array<{id: number, text: string}>, program: Array<{id: number, text: string, level: number}>}}
+ * @returns {{pool: Array<Object>, program: Array<Object>}}
  */
 export const restore = (blocks, answer, indented) => {
-    const free = blocks.map((text, id) => ({id, text}));
+    const free = blocks.map(makeBlock);
     const program = [];
     String(answer || '').replace(/\r\n?/g, '\n').split('\n').forEach((line) => {
         const text = line.trim();
         if (text === '') {
             return;
         }
-        const at = free.findIndex((b) => b.text === text);
+        let at = free.findIndex((b) => !b.gap && b.text === text);
+        let value = '';
+        if (at < 0) {
+            at = free.findIndex((b) => {
+                if (!b.gap) {
+                    return false;
+                }
+                const matched = matchGap(b, text);
+                if (matched !== null) {
+                    value = matched;
+                    return true;
+                }
+                return false;
+            });
+        }
         if (at < 0) {
             return;
         }
         const [block] = free.splice(at, 1);
         const spaces = line.replace(/\t/g, ' '.repeat(INDENT)).search(/\S/);
-        program.push({...block, level: indented ? Math.min(MAX_LEVEL, Math.round(spaces / INDENT)) : 0});
+        const level = indented ? Math.min(MAX_LEVEL, Math.round(spaces / INDENT)) : 0;
+        program.push(block.gap ? {...block, value, level} : {...block, level});
     });
     return {pool: free, program};
 };
@@ -60,7 +115,7 @@ export const restore = (blocks, answer, indented) => {
 /**
  * The program made of the lines: with their levels (Python), or indented by the braces (C and the others).
  *
- * @param {Array<{text: string, level: number}>} program
+ * @param {Array<Object>} program
  * @param {boolean} indented
  * @returns {string}
  */
@@ -70,15 +125,16 @@ export const assemble = (program, indented) => {
     }
     let depth = 0;
     return program.map((line) => {
+        const text = lineText(line);
         let level = line.level;
         if (!indented) {
-            const opens = (line.text.match(/[{]/g) || []).length;
-            const closes = (line.text.match(/[}]/g) || []).length;
+            const opens = (text.match(/[{]/g) || []).length;
+            const closes = (text.match(/[}]/g) || []).length;
             // A line that starts by closing a block stands at the level of the block's head.
-            level = Math.max(0, line.text.startsWith('}') ? depth - 1 : depth);
+            level = Math.max(0, text.startsWith('}') ? depth - 1 : depth);
             depth = Math.max(0, depth + opens - closes);
         }
-        return ' '.repeat(INDENT * level) + line.text;
+        return ' '.repeat(INDENT * level) + text;
     }).join('\n') + '\n';
 };
 
@@ -162,10 +218,12 @@ export class Parsons {
             [block] = this.pool.splice(at, 1);
         }
         if (to === 'pool') {
-            this.pool.push({id: block.id, text: block.text});
+            const copy = {...block};
+            delete copy.level;
+            this.pool.push(copy);
         } else {
             const level = block.level ?? (this.program.length ? this.program[this.program.length - 1].level : 0);
-            this.program.splice(index === null ? this.program.length : index, 0, {id: block.id, text: block.text, level});
+            this.program.splice(index === null ? this.program.length : index, 0, {...block, level});
         }
     }
 
@@ -236,6 +294,62 @@ export class Parsons {
     }
 
     /**
+     * Build the line element: a plain button, or a gapped line with an inline text input in the program.
+     *
+     * @param {string} name pool or program
+     * @param {Object} item
+     * @param {number} index
+     * @returns {HTMLElement}
+     */
+    lineElement(name, item, index) {
+        if (item.gap && name === 'program') {
+            const box = document.createElement('div');
+            box.className = 'qtype_codelab-parsons-line qtype_codelab-parsons-gapped';
+            box.style.marginLeft = `${(this.indented ? item.level : 0) * 1.5}rem`;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'qtype_codelab-parsons-gap font-monospace';
+            input.maxLength = MAX_GAP_LENGTH;
+            input.size = Math.max(4, Math.min(30, item.size));
+            input.spellcheck = false;
+            input.value = item.value || '';
+            input.setAttribute('aria-label', (this.s.parsonsgap || 'Gap {$a}').replace('{$a}', index + 1));
+            input.addEventListener('input', () => {
+                item.value = input.value.replace(/[\r\n]+/g, '').slice(0, MAX_GAP_LENGTH);
+                this.onChange(assemble(this.program, this.indented));
+            });
+            // Keep dragging from stealing focus from the text field.
+            input.addEventListener('mousedown', (e) => e.stopPropagation());
+            box.append(document.createTextNode(item.before), input, document.createTextNode(item.after));
+            return box;
+        }
+        const line = document.createElement('button');
+        line.type = 'button';
+        line.className = 'qtype_codelab-parsons-line';
+        const shown = lineText(item);
+        if (item.gap) {
+            const blank = document.createElement('span');
+            blank.className = 'qtype_codelab-parsons-blank';
+            blank.textContent = item.value || '';
+            line.append(document.createTextNode(item.before), blank, document.createTextNode(item.after));
+        } else {
+            line.textContent = item.text;
+        }
+        line.dataset.action = name === 'pool' ? 'add' : 'remove';
+        if (name === 'program') {
+            line.style.marginLeft = `${(this.indented ? item.level : 0) * 1.5}rem`;
+            line.setAttribute('aria-label', `${index + 1}. ${shown} (${this.s.parsonsremove})`);
+        } else {
+            line.setAttribute('aria-label', this.s.parsonsadd.replace('{$a}', shown));
+        }
+        line.addEventListener('click', () => {
+            this.move(item.id, name === 'pool' ? 'program' : 'pool');
+            this.changed(`[data-list="${name}"] .qtype_codelab-parsons-line`);
+        });
+        return line;
+    }
+
+    /**
      * One line: its text (draggable; a click moves it to the other list) and, in the program, its buttons.
      *
      * @param {string} name pool or program
@@ -252,27 +366,12 @@ export class Parsons {
         li.addEventListener('dragstart', (e) => {
             this.dragged = item.id;
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', item.text);
+            e.dataTransfer.setData('text/plain', lineText(item));
         });
         li.addEventListener('dragend', () => {
             this.dragged = null;
         });
-        const line = document.createElement('button');
-        line.type = 'button';
-        line.className = 'qtype_codelab-parsons-line';
-        line.textContent = item.text;
-        line.dataset.action = name === 'pool' ? 'add' : 'remove';
-        if (name === 'program') {
-            line.style.marginLeft = `${(this.indented ? item.level : 0) * 1.5}rem`;
-            line.setAttribute('aria-label', `${index + 1}. ${item.text} (${this.s.parsonsremove})`);
-        } else {
-            line.setAttribute('aria-label', this.s.parsonsadd.replace('{$a}', item.text));
-        }
-        line.addEventListener('click', () => {
-            this.move(item.id, name === 'pool' ? 'program' : 'pool');
-            this.changed(`[data-list="${name}"] .qtype_codelab-parsons-line`);
-        });
-        li.append(line);
+        li.append(this.lineElement(name, item, index));
         if (name === 'program') {
             const tools = document.createElement('span');
             tools.className = 'qtype_codelab-parsons-tools';
@@ -304,6 +403,14 @@ export class Parsons {
                     this.changed(at('indent'));
                 });
                 tools.append(left, right);
+            }
+            if (item.gap) {
+                const remove = tool('×', this.s.parsonsremove, 'remove');
+                remove.addEventListener('click', () => {
+                    this.move(item.id, 'pool');
+                    this.changed('[data-list="program"] .qtype_codelab-parsons-line');
+                });
+                tools.append(remove);
             }
             li.append(tools);
         }

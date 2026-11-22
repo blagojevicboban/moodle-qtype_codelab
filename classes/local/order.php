@@ -87,17 +87,59 @@ class order {
     }
 
     /**
+     * Normalise lines that match a gap template to a placeholder so a wrong or empty gap text does not move the line
+     * out of its place when checking order.
+     *
+     * @param array $entries of entries()
+     * @param array $templates list of ['before' => string, 'after' => string] (spaces already removed)
+     * @return array
+     */
+    protected static function apply_templates(array $entries, array $templates): array {
+        if (empty($templates)) {
+            return $entries;
+        }
+        foreach ($entries as &$entry) {
+            foreach ($templates as $tpl) {
+                $b = $tpl['before'];
+                $a = $tpl['after'];
+                $okbefore = $b === '' || str_starts_with($entry['text'], $b);
+                $okafter = $a === '' || str_ends_with($entry['text'], $a);
+                if ($okbefore && $okafter && strlen($entry['text']) >= strlen($b) + strlen($a)) {
+                    $entry['text'] = $b . "\0" . $a;
+                    break;
+                }
+            }
+        }
+        unset($entry);
+        return $entries;
+    }
+
+    /**
      * Check order of a program against the solution.
      *
      * @param string $answer the student's program
      * @param string $solution the teacher's program
      * @param string $lang language of the question (Python: the levels count)
+     * @param int $gaps number of fill-in gaps (0 when none)
+     * @param string $seed attempt seed for the gaps
      * @return array ['placed' => int, 'total' => int] total is the number of lines of the solution
      */
-    public static function check(string $answer, string $solution, string $lang): array {
+    public static function check(string $answer, string $solution, string $lang, int $gaps = 0, string $seed = ''): array {
         $indented = $lang === 'python';
-        $expected = self::entries($solution, $indented);
-        return ['placed' => self::placed(self::entries($answer, $indented), $expected), 'total' => count($expected)];
+        $templates = [];
+        if ($gaps > 0 && $seed !== '') {
+            foreach (gaps::apply(parsons::lines($solution), $lang, $gaps, $seed) as $item) {
+                if (is_array($item)) {
+                    $templates[] = [
+                        'before' => (string) preg_replace('/\s+/u', '', $item['before']),
+                        'after' => (string) preg_replace('/\s+/u', '', $item['after']),
+                    ];
+                }
+            }
+        }
+        $expected = self::apply_templates(self::entries($solution, $indented), $templates);
+        $got = self::apply_templates(self::entries($answer, $indented), $templates);
+        return ['placed' => self::placed($got, $expected), 'total' => count($expected)];
     }
 
     /**

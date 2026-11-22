@@ -306,7 +306,7 @@ const checkOrderButton = (config, textarea, before, strings) => {
 
 const parsonsBox = async(config, textarea, host) => {
     const keys = ['parsonspool', 'parsonsanswer', 'parsonshint', 'parsonsadd', 'parsonsremove', 'parsonsup', 'parsonsdown',
-        'parsonsindent', 'parsonsoutdent', 'parsonsprogram', 'checkorder', 'orderresult', 'ordercheckfailed'];
+        'parsonsindent', 'parsonsoutdent', 'parsonsprogram', 'parsonsgap', 'checkorder', 'orderresult', 'ordercheckfailed'];
     const values = await getStrings(keys.map((key) => ({key, component: 'qtype_codelab'})));
     const strings = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
     const box = document.createElement('div');

@@ -46,3 +46,14 @@ test('C: the indentation follows the braces', () => {
         'int main() {\n    for (;;) {\n        x++;\n    }\n    return 0;\n}\n');
     assert.equal(assemble([], false), '');
 });
+
+test('gapped blocks: restore extracts gap values and assemble puts them back', () => {
+    const blocks = [{before: 'print(', after: ')', size: 7}, 's = 0', {before: 'for i in ', after: ':', size: 10}];
+    const answer = 's = 0\nfor i in range(5):\n    print(s)\n';
+    const {pool, program} = restore(blocks, answer, true);
+    assert.equal(pool.length, 0);
+    assert.equal(program.length, 3);
+    assert.equal(program[1].value, 'range(5)');
+    assert.equal(program[2].value, 's');
+    assert.equal(assemble(program, true), answer);
+});

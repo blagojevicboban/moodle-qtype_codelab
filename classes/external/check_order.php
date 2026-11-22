@@ -83,7 +83,14 @@ class check_order extends external_api {
         if (!$allowed || $qa->get_state()->is_finished()) {
             throw new \moodle_exception('nopermissions', 'error', '', 'check order');
         }
-        return order::check($params['answer'], (string) $question->solution, (string) $question->language);
+        $seed = $params['usageid'] . '/' . $params['slot'];
+        return order::check(
+            $params['answer'],
+            (string) $question->solution,
+            (string) $question->language,
+            (int) $question->gaps,
+            $seed
+        );
     }
 
     /**

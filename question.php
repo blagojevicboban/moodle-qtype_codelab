@@ -72,6 +72,8 @@ class qtype_codelab_question extends question_graded_automatically {
     public $ordercheck = order::OFF;
     /** @var array decoded input files: [['name' => string, 'text' => string], ...] */
     public $files = [];
+    /** @var int Parsons: number of fill-in gaps (0..10) */
+    public $gaps = 0;
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;

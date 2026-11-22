@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.0 (2026-11-23)
+
+- Parsons problems: Check order button with optional partial mark for lines in their place (`ordercheck`), and fill-in
+  gaps (0 to 10 expressions hidden in solution lines, never in distractors, single-line inputs, `gaps`).
+- Input files for questions (`files`): up to 5 input files placed in the working folder before each run (Run, Run tests
+  and grading on CodeLab runner 0.10.0, Jobe and Pyodide), shown read-only to students.
+- Database upgrade (`2026112904`–`2026112906`): new fields `ordercheck`, `files` and `gaps`.
+
 ## 1.14.0 (2026-11-22)
 
 - Time of each test: Run tests and the feedback show how long each test ran, when the CodeLab runner (0.9.0) runs

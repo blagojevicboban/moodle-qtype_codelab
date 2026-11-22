@@ -86,6 +86,13 @@ class qtype_codelab_edit_form extends question_edit_form {
         ]);
         $mform->addHelpButton('ordercheck', 'ordercheck', 'qtype_codelab');
         $mform->hideIf('ordercheck', 'parsons', 'notchecked');
+        $gapoptions = [0 => get_string('gaps_none', 'qtype_codelab')];
+        for ($i = 1; $i <= \qtype_codelab\local\gaps::MAX_GAPS; $i++) {
+            $gapoptions[$i] = (string) $i;
+        }
+        $mform->addElement('select', 'gaps', get_string('gaps', 'qtype_codelab'), $gapoptions);
+        $mform->addHelpButton('gaps', 'gaps', 'qtype_codelab');
+        $mform->hideIf('gaps', 'parsons', 'notchecked');
         $mform->addElement(
             'advcheckbox',
             'noassist',

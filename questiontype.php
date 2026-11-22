@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_codelab\local\gaps;
 use qtype_codelab\local\grader;
 use qtype_codelab\local\order;
 use qtype_codelab\local\question_jobe;
@@ -51,7 +52,7 @@ class qtype_codelab extends question_type {
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
             'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints',
-            'timelimit', 'ordercheck', 'files'];
+            'timelimit', 'ordercheck', 'files', 'gaps'];
     }
 
     /**
@@ -182,6 +183,7 @@ class qtype_codelab extends question_type {
         $question->memorylimit = self::limit($question->memorylimit ?? 0);
         $question->timelimit = self::time_limit($question->timelimit ?? 0);
         $question->ordercheck = self::order_check($question->ordercheck ?? 0);
+        $question->gaps = self::gaps_count($question->gaps ?? 0);
         $result = parent::save_question_options($question);
         $this->save_hints($question);
         return $result;
@@ -342,6 +344,16 @@ class qtype_codelab extends question_type {
     }
 
     /**
+     * Number of fill-in gaps in a Parsons problem (0..gaps::MAX_GAPS).
+     *
+     * @param mixed $value
+     * @return int
+     */
+    public static function gaps_count($value): int {
+        return is_numeric($value) ? max(0, min(gaps::MAX_GAPS, (int) $value)) : 0;
+    }
+
+    /**
      * Jobe client with the limits of a question or of form data, or null for the default client.
      *
      * @param stdClass $data
@@ -384,8 +396,9 @@ class qtype_codelab extends question_type {
         $question->distractors = (string) ($questiondata->options->distractors ?? '');
         $question->aihints = !empty($questiondata->options->aihints);
         $question->timelimit = self::time_limit($questiondata->options->timelimit ?? 0);
-        // Check order only for a Parsons problem.
+        // Check order and fill-in gaps only for a Parsons problem.
         $question->ordercheck = $question->parsons ? self::order_check($questiondata->options->ordercheck ?? 0) : order::OFF;
+        $question->gaps = $question->parsons ? self::gaps_count($questiondata->options->gaps ?? 0) : 0;
         $question->files = grader::decode_files($questiondata->options->files ?? '');
     }
 }

@@ -94,7 +94,9 @@ class qtype_codelab_renderer extends qtype_renderer {
             'parsons' => $question->parsons && !$options->readonly ? \qtype_codelab\local\parsons::blocks(
                 (string) $question->solution,
                 (string) $question->distractors,
-                $qa->get_usage_id() . '/' . $qa->get_slot()
+                $qa->get_usage_id() . '/' . $qa->get_slot(),
+                (int) $question->gaps,
+                (string) $question->language
             ) : null,
             // Check order of a Parsons problem: the service needs the attempt (usage and slot).
             'ordercheck' => $question->parsons && $question->ordercheck && !$options->readonly

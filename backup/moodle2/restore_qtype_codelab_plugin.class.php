@@ -55,6 +55,7 @@ class restore_qtype_codelab_plugin extends restore_qtype_extrafields_plugin {
         $data['timelimit'] = $data['timelimit'] ?? 0;
         $data['ordercheck'] = $data['ordercheck'] ?? 0;
         $data['files'] = $data['files'] ?? '';
+        $data['gaps'] = $data['gaps'] ?? 0;
         $this->really_process_extra_question_fields($data);
     }
 }
