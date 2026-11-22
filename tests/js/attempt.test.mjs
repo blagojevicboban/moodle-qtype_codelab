@@ -30,7 +30,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 // The module imports Moodle and tiny_codelab modules, which Node cannot load. The functions tested here use none of
 // them and nothing runs when the module loads, so the module is loaded without its import lines.
 const source = read('../../amd/src/attempt.js').replace(/^import .*;$/gm, '');
-const {program, testProgram, prefixLines, matches, firstDifference, displayLines} =
+const {program, testProgram, prefixLines, matches, firstDifference, displayLines, runPool, PARALLEL_TESTS} =
     await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const cases = JSON.parse(read('../fixtures/comparison-cases.json'));
@@ -66,4 +66,60 @@ test('displayLines() gives the lines of grader::display_lines()', () => {
     for (const c of cases.displayLines) {
         assert.deepEqual(displayLines(c.text, c.differs), c.result, c.name);
     }
+});
+
+/**
+ * A task that ends after the given milliseconds, counting how many run at the same time.
+ *
+ * @param {Object} counter {now, most, started}
+ * @returns {function(Object, number): Promise<Object>}
+ */
+const timedTask = (counter) => async(item, i) => {
+    counter.now++;
+    counter.started.push(i);
+    counter.most = Math.max(counter.most, counter.now);
+    await new Promise((resolve) => setTimeout(resolve, item.ms));
+    counter.now--;
+    return {i, status: item.status || 'ok'};
+};
+
+test('the pool runs at most three tasks at once and keeps the order', async() => {
+    const items = [40, 5, 30, 1, 20, 10, 15, 2].map((ms) => ({ms}));
+    const counter = {now: 0, most: 0, started: []};
+    const results = await runPool(items, timedTask(counter));
+    assert.equal(PARALLEL_TESTS, 3);
+    assert.equal(counter.most, 3);
+    assert.deepEqual(results.map((r) => r.i), [0, 1, 2, 3, 4, 5, 6, 7]);
+});
+
+test('the pool with fewer items than lanes, and with none', async() => {
+    const counter = {now: 0, most: 0, started: []};
+    assert.deepEqual((await runPool([{ms: 1}, {ms: 1}], timedTask(counter))).map((r) => r.i), [0, 1]);
+    assert.deepEqual(await runPool([], timedTask(counter)), []);
+});
+
+test('a final result starts no new task, the started ones finish', async() => {
+    const items = [{ms: 30}, {ms: 5, status: 'ratelimit'}, {ms: 30}, {ms: 1}, {ms: 1}];
+    const counter = {now: 0, most: 0, started: []};
+    const results = await runPool(items, timedTask(counter), 3, (r) => r.status !== 'ok');
+    assert.deepEqual(counter.started, [0, 1, 2]);
+    assert.equal(results[0].status, 'ok');
+    assert.equal(results[1].status, 'ratelimit');
+    assert.equal(results[2].status, 'ok');
+    assert.equal(results[3], undefined);
+    assert.equal(results.findIndex((r) => r?.status !== 'ok'), 1, 'the first result that is not ok comes before any missing one');
+});
+
+test('a failed task fails the pool and starts no new task', async() => {
+    const started = [];
+    const task = async(item, i) => {
+        started.push(i);
+        await new Promise((resolve) => setTimeout(resolve, item.ms));
+        if (item.fail) {
+            throw new Error('network');
+        }
+        return {i};
+    };
+    await assert.rejects(runPool([{ms: 1, fail: true}, {ms: 20}, {ms: 20}, {ms: 1}, {ms: 1}], task), /network/);
+    assert.deepEqual(started, [0, 1, 2]);
 });
