@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.12.0 (2026-11-22)
+
+- New option AI explanations: with the AI explanations of errors of tiny_codelab 1.19 turned on by the administrator,
+  students get a button under a compiler message or an error in the attempt that asks the AI of the site to explain
+  it, without writing the fix. Off by default; without it the button is never shown in a quiz. Kept in backup,
+  restore, import and export.
+- Requires tiny_codelab 1.19.0.
+
 ## 1.11.0 (2026-11-22)
 
 - Class work in the quiz: a teacher who may see the reports of the quiz (mod/quiz:viewreports) gets a Class work

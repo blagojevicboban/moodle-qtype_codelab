@@ -22,6 +22,7 @@
         <FIELD NAME="noassist" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to turn off code completion and hints in the attempt."/>
         <FIELD NAME="parsons" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 for a Parsons problem: the student puts the shuffled lines of the solution in order."/>
         <FIELD NAME="distractors" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Lines of a Parsons problem that do not belong to the solution, one per line."/>
+        <FIELD NAME="aihints" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to let students ask the AI of the site to explain a compiler message or an error (also in a quiz)."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

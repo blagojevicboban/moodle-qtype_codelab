@@ -25,6 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['addtests'] = 'Dodaj još {no} testa';
+$string['aihints'] = 'AI objašnjenja';
+$string['aihints_help'] = 'Kada administrator uključi AI objašnjenja grešaka u CodeLab za TinyMCE, učenici ispod poruke kompajlera ili greške svog programa dobijaju dugme koje traži od AI sajta da je objasni. AI dobija uputstvo da nikad ne piše ispravku. Bez ove opcije dugme se u testu nikad ne prikazuje.';
+$string['aihints_label'] = 'Učenici mogu da traže od AI da objasni poruku kompajlera ili grešku';
 $string['answer'] = 'Program';
 $string['answerlabel'] = 'Vaš program ({$a})';
 $string['assist'] = 'Pomoć pri kucanju';

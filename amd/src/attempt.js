@@ -31,6 +31,7 @@ import {fullscreenButton} from 'tiny_codelab/fullscreen';
 import {RemoteSession, runsInteractively, stepsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
 import {addClassWork} from './classwork';
+import {watchErrors} from 'tiny_codelab/aihint';
 
 /**
  * The program that is run: hidden code before and after the student's code (as grader::program on the server).
@@ -320,6 +321,11 @@ export const init = async(config) => {
     vars.hidden = true;
     tools.append(panel, vars);
     host.after(tools);
+    // AI explanations of a compiler message or an error, when the question allows them (tiny_codelab 1.19).
+    if (config.aihints) {
+        watchErrors(panel, {contextid: config.contextid, lang: () => config.lang, code: () => code(),
+            questionid: config.questionid});
+    }
     // The editor, its buttons and the console on the whole screen (the block of the answer).
     tools.insertBefore(fullscreenButton({root: host.parentElement, editor, label: s.fullscreen,
         exitLabel: s.exitfullscreen}), panel);

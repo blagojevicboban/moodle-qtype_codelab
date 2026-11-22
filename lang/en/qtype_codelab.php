@@ -25,6 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['addtests'] = 'Add {no} more tests';
+$string['aihints'] = 'AI explanations';
+$string['aihints_help'] = 'With the AI explanations of errors of CodeLab for TinyMCE turned on by the administrator, students get a button under a compiler message or an error of their program that asks the AI of the site to explain it. The AI is told never to write the fix. Without this option the button is never shown in a quiz.';
+$string['aihints_label'] = 'Students may ask the AI to explain a compiler message or an error';
 $string['answer'] = 'Program';
 $string['answerlabel'] = 'Your program ({$a})';
 $string['assist'] = 'Typing help';

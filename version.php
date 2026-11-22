@@ -25,9 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_codelab';
-$plugin->version   = 2026112800;
+$plugin->version   = 2026112900;
 $plugin->requires  = 2024100700; // Moodle 4.5.
 $plugin->supported = [405, 503];
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.11.0';
-$plugin->dependencies = ['tiny_codelab' => 2026112800];
+$plugin->release   = '1.12.0';
+$plugin->dependencies = ['tiny_codelab' => 2026112900];

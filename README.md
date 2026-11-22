@@ -95,6 +95,12 @@ frequent wrong outputs and compiler messages, how many answers do not compile, e
 and the grades in ten groups. Previews are left out and separate groups are respected; the answers come from the
 quiz attempts, so students send nothing extra.
 
+## AI explanations
+
+With the option **AI explanations** of a question and the AI explanations of errors turned on in tiny_codelab (1.19,
+with an AI provider of the site), students get a button under a compiler message or an error in the attempt that asks
+the AI to explain it; the AI is told never to write the fix. Without the option the button is never shown in a quiz.
+
 ## Check all solutions of a course
 
 Teachers who can edit questions find **Check CodeLab solutions** in the course menu (*More*). The page runs the
@@ -119,7 +125,7 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.18.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.19.0 or newer, installed first, with a Jobe
   server or a CodeLab runner in its settings
 
 ## The CodeLab plugins

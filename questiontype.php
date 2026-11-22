@@ -49,7 +49,7 @@ class qtype_codelab extends question_type {
      */
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
-            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors'];
+            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints'];
     }
 
     /**
@@ -147,7 +147,7 @@ class qtype_codelab extends question_type {
         foreach (['prefix', 'suffix', 'template', 'solution', 'distractors'] as $field) {
             $question->$field = grader::unix((string) ($question->$field ?? ''));
         }
-        foreach (['showtests', 'noassist', 'parsons'] as $field) {
+        foreach (['showtests', 'noassist', 'parsons', 'aihints'] as $field) {
             $question->$field = empty($question->$field) ? 0 : 1;
         }
         $question->comparison = self::comparison($question);
@@ -324,5 +324,6 @@ class qtype_codelab extends question_type {
         $question->noassist = !empty($questiondata->options->noassist);
         $question->parsons = !empty($questiondata->options->parsons);
         $question->distractors = (string) ($questiondata->options->distractors ?? '');
+        $question->aihints = !empty($questiondata->options->aihints);
     }
 }

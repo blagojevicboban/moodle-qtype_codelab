@@ -106,6 +106,10 @@ class qtype_codelab_renderer extends qtype_renderer {
             'pyodide' => \tiny_codelab\local\runtime::config()['pyodide'],
             // Run with the input typed while the program runs, on the interactive server of the site (if any).
             'interactive' => \tiny_codelab\local\runtime::config()['interactive'] ?? [],
+            // AI explanations of errors, when the question allows them and the site offers them here.
+            'aihints' => !$options->readonly && $question->aihints
+                && \tiny_codelab\local\ai_hint::available($options->context, (int) $question->id),
+            'questionid' => (int) $question->id,
             // The teacher in a quiz: the answers of the class and their analysis.
             'classwork' => $this->class_work($qa),
         ]]);

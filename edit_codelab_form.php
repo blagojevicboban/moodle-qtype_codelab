@@ -85,6 +85,13 @@ class qtype_codelab_edit_form extends question_edit_form {
             get_string('assist', 'qtype_codelab'),
             get_string('noassist', 'qtype_codelab')
         );
+        $mform->addElement(
+            'advcheckbox',
+            'aihints',
+            get_string('aihints', 'qtype_codelab'),
+            get_string('aihints_label', 'qtype_codelab')
+        );
+        $mform->addHelpButton('aihints', 'aihints', 'qtype_codelab');
 
         $mform->addElement('header', 'testsheader', get_string('tests', 'qtype_codelab'));
         $mform->setExpanded('testsheader');
