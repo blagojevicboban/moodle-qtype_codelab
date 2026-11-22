@@ -217,4 +217,28 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
         $this->render();
         $this->assertStringNotContainsString('qtype_codelab-time', $this->currentoutput);
     }
+
+    public function test_partial_mark_for_the_order(): void {
+        $q = $this->make_question();
+        $q->parsons = true;
+        $q->ordercheck = \qtype_codelab\local\order::PARTIAL;
+        $q->solution = "a = 1\nb = 2\nprint(a + b)\n";
+        $this->start_attempt_at_question($q, 'deferredfeedback', 1);
+        // The tests fail (only RIGHT passes them); 2 of the 3 lines are in their place: half of 2/3 of the mark.
+        $this->process_submission(['answer' => "b = 2\na = 1\nprint(a + b)\n"]);
+        $this->finish();
+        $this->check_current_state(\question_state::$gradedpartial);
+        $this->check_current_mark(1 / 3);
+    }
+
+    public function test_no_mark_for_the_order_without_the_option(): void {
+        $q = $this->make_question();
+        $q->parsons = true;
+        $q->ordercheck = \qtype_codelab\local\order::ON;
+        $q->solution = "a = 1\nb = 2\nprint(a + b)\n";
+        $this->start_attempt_at_question($q, 'deferredfeedback', 1);
+        $this->process_submission(['answer' => "b = 2\na = 1\nprint(a + b)\n"]);
+        $this->finish();
+        $this->check_current_state(\question_state::$gradedwrong);
+    }
 }

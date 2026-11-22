@@ -31,6 +31,7 @@ import {PythonSession} from 'tiny_codelab/session';
 import {fullscreenButton} from 'tiny_codelab/fullscreen';
 import {RemoteSession, runsInteractively, stepsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
+import Ajax from 'core/ajax';
 import Templates from 'core/templates';
 import {addClassWork} from './classwork';
 import {watchErrors} from 'tiny_codelab/aihint';
@@ -267,9 +268,45 @@ const runModes = (config) => {
  * @param {HTMLElement} host the editor's element
  * @returns {Promise<{start: function(function(string): void): void}>}
  */
+/**
+ * Check order of a Parsons problem: a button that asks the server how many lines are in their place (never which) and
+ * says it in a live region.
+ *
+ * @param {Object} config of init, with ordercheck {usageid, slot}
+ * @param {HTMLTextAreaElement} textarea the answer: the program made of the lines
+ * @param {HTMLElement} before the button and its result go before this element
+ * @param {Object<string, string>} strings
+ */
+const checkOrderButton = (config, textarea, before, strings) => {
+    const row = document.createElement('div');
+    row.className = 'qtype_codelab-checkorder d-flex align-items-center gap-2 mb-2';
+    const checkButton = document.createElement('button');
+    checkButton.type = 'button';
+    checkButton.className = 'btn btn-secondary btn-sm';
+    checkButton.textContent = strings.checkorder;
+    const result = document.createElement('span');
+    result.setAttribute('role', 'status');
+    row.append(checkButton, result);
+    before.before(row);
+    checkButton.addEventListener('click', async() => {
+        checkButton.disabled = true;
+        result.textContent = '';
+        try {
+            const [answer] = await Promise.all(Ajax.call([{methodname: 'qtype_codelab_check_order', args: {
+                usageid: config.ordercheck.usageid, slot: config.ordercheck.slot, answer: textarea.value}}]));
+            result.textContent = strings.orderresult.replace('{$a->placed}', answer.placed)
+                .replace('{$a->total}', answer.total);
+        } catch (e) {
+            result.textContent = strings.ordercheckfailed;
+        } finally {
+            checkButton.disabled = false;
+        }
+    });
+};
+
 const parsonsBox = async(config, textarea, host) => {
     const keys = ['parsonspool', 'parsonsanswer', 'parsonshint', 'parsonsadd', 'parsonsremove', 'parsonsup', 'parsonsdown',
-        'parsonsindent', 'parsonsoutdent', 'parsonsprogram'];
+        'parsonsindent', 'parsonsoutdent', 'parsonsprogram', 'checkorder', 'orderresult', 'ordercheckfailed'];
     const values = await getStrings(keys.map((key) => ({key, component: 'qtype_codelab'})));
     const strings = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
     const box = document.createElement('div');
@@ -279,6 +316,9 @@ const parsonsBox = async(config, textarea, host) => {
     note.className = 'qtype_codelab-parsons-note small mb-1';
     note.textContent = strings.parsonsprogram;
     host.before(box, note);
+    if (config.ordercheck) {
+        checkOrderButton(config, textarea, note, strings);
+    }
     return {
         start: (show) => {
             const widget = new Parsons(box, {blocks: config.parsons, answer: textarea.value, indented: config.lang === 'python',

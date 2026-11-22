@@ -39,4 +39,10 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/quiz:viewreports',
     ],
+    'qtype_codelab_check_order' => [
+        'classname' => \qtype_codelab\external\check_order::class,
+        'description' => 'Check order of a Parsons problem in an attempt: how many lines are in their place.',
+        'type' => 'read',
+        'ajax' => true,
+    ],
 ];

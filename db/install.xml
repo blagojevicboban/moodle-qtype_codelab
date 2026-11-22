@@ -24,6 +24,7 @@
         <FIELD NAME="distractors" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Lines of a Parsons problem that do not belong to the solution, one per line."/>
         <FIELD NAME="aihints" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 to let students ask the AI of the site to explain a compiler message or an error (also in a quiz)."/>
         <FIELD NAME="timelimit" TYPE="number" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="2" COMMENT="Seconds a test may take on the CodeLab runner, which reports the time of a run; 0 for no limit."/>
+        <FIELD NAME="ordercheck" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Parsons: 1 to let students check how many lines are in their place, 2 also with a part of the mark for the order when the tests fail."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

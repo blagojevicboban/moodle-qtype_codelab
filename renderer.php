@@ -96,6 +96,9 @@ class qtype_codelab_renderer extends qtype_renderer {
                 (string) $question->distractors,
                 $qa->get_usage_id() . '/' . $qa->get_slot()
             ) : null,
+            // Check order of a Parsons problem: the service needs the attempt (usage and slot).
+            'ordercheck' => $question->parsons && $question->ordercheck && !$options->readonly
+                ? ['usageid' => (int) $qa->get_usage_id(), 'slot' => (int) $qa->get_slot()] : null,
             'prefix' => (string) $question->prefix,
             'suffix' => (string) $question->suffix,
             'tests' => $tests,
