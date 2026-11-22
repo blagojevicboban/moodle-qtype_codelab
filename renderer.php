@@ -204,11 +204,13 @@ class qtype_codelab_renderer extends qtype_renderer {
                 $got .= ($got === '' ? '' : "\n") . get_string('status_' . $r['status'], 'tiny_codelab') .
                     ($detail !== '' ? "\n" . $detail : '');
             }
+            // A right output that came too late: the output as it is, and why it failed under it.
+            $slow = '';
             if ($r['slow']) {
-                $got .= ($got === '' ? '' : "\n") . get_string('tooslow', 'qtype_codelab', [
+                $slow = html_writer::div(get_string('tooslow', 'qtype_codelab', [
                     'time' => self::seconds((float) $r['time']),
                     'limit' => format_float((float) $question->timelimit, 2, true, true),
-                ]);
+                ]), 'qtype_codelab-slow text-danger');
             }
             $table->data[] = array_merge(
                 [$i + 1],
@@ -216,7 +218,7 @@ class qtype_codelab_renderer extends qtype_renderer {
                 [
                     html_writer::tag('pre', s($tc['stdin'])),
                     $this->output_lines($tc['expected'], $differs),
-                    $this->output_lines($got, $differs),
+                    $this->output_lines($got, $differs) . $slow,
                     $mark,
                 ]
             );
