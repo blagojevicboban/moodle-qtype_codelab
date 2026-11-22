@@ -30,6 +30,7 @@ import {PythonSession} from 'tiny_codelab/session';
 import {fullscreenButton} from 'tiny_codelab/fullscreen';
 import {RemoteSession, runsInteractively, stepsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
+import Templates from 'core/templates';
 import {addClassWork} from './classwork';
 import {watchErrors} from 'tiny_codelab/aihint';
 
@@ -160,6 +161,53 @@ export const matches = (expected, got, comparison, tolerance) => {
         default:
             return normalise(expected, true) === normalise(got, true);
     }
+};
+
+/**
+ * The first line where the output differs from the expected output (as grader::first_difference on the server), or null
+ * for the comparisons that do not compare line by line.
+ *
+ * @param {string} expected
+ * @param {string} got
+ * @param {string} comparison
+ * @returns {number|null} line from 0
+ */
+export const firstDifference = (expected, got, comparison) => {
+    if (['numbers', 'regex', 'unordered'].includes(comparison)) {
+        return null;
+    }
+    const ignorespaces = comparison !== 'exact';
+    const a = normalise(expected, ignorespaces).split('\n');
+    const b = normalise(got, ignorespaces).split('\n');
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        if (a[i] !== b[i]) {
+            return i;
+        }
+    }
+    return null;
+};
+
+/**
+ * Lines of an output for the display of a test (as grader::display_lines on the server): spaces and tabs at the end of
+ * a line visible, no empty line for the new line at the end, the line differs marked.
+ *
+ * @param {string} text
+ * @param {number|null} differs line from 0 to mark
+ * @returns {Array<{text: string, differs: boolean}>}
+ */
+export const displayLines = (text, differs = null) => {
+    const lines = text.replace(/\r\n?/g, '\n').split('\n');
+    if (lines.length > 1 && lines[lines.length - 1] === '' && differs !== lines.length - 1) {
+        lines.pop();
+    }
+    if (differs !== null && differs >= lines.length) {
+        // The other output is longer: the missing line is shown empty and marked.
+        lines.push(...Array(differs + 1 - lines.length).fill(''));
+    }
+    return lines.map((line, i) => ({
+        text: line.replace(/[ \t]+$/, (tail) => tail.replace(/ /g, '\u00B7').replace(/\t/g, '\u2192')),
+        differs: i === differs,
+    }));
 };
 
 /**
@@ -423,10 +471,16 @@ export const init = async(config) => {
                 item.className = ok ? 'text-success' : 'text-danger';
                 item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1);
                 if (!ok) {
-                    const detail = document.createElement('pre');
-                    detail.className = 'tiny_codelab-console-output';
-                    detail.textContent = `${tc.stdin ? `${s.input}:\n${tc.stdin}\n` : ''}${s.output}:\n${result.stdout}`;
+                    // Input, expected and got side by side, the first different line marked (as in the feedback).
+                    const differs = firstDifference(tc.expected, result.stdout, config.comparison);
+                    const {html, js} = await Templates.renderForPromise('qtype_codelab/testcompare', {
+                        stdin: tc.stdin,
+                        expected: {lines: displayLines(tc.expected, differs)},
+                        got: {lines: displayLines(result.stdout, differs)},
+                    });
+                    const detail = document.createElement('div');
                     item.append(detail);
+                    Templates.replaceNodeContents(detail, html, js);
                 }
                 list.append(item);
             }

@@ -30,7 +30,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 // The module imports Moodle and tiny_codelab modules, which Node cannot load. The functions tested here use none of
 // them and nothing runs when the module loads, so the module is loaded without its import lines.
 const source = read('../../amd/src/attempt.js').replace(/^import .*;$/gm, '');
-const {program, testProgram, prefixLines, matches} =
+const {program, testProgram, prefixLines, matches, firstDifference, displayLines} =
     await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const cases = JSON.parse(read('../fixtures/comparison-cases.json'));
@@ -53,5 +53,17 @@ test('program() gives the program of grader::program(), and prefixLines() the li
         assert.equal(prefixLines(c.prefix), c.studentline, c.name);
         // The student's code really starts there.
         assert.equal(c.result.split('\n')[c.studentline], c.code.split('\n')[0], c.name);
+    }
+});
+
+test('firstDifference() gives the line of grader::first_difference()', () => {
+    for (const c of cases.firstDifference) {
+        assert.equal(firstDifference(c.expected, c.got, c.comparison), c.result, c.name);
+    }
+});
+
+test('displayLines() gives the lines of grader::display_lines()', () => {
+    for (const c of cases.displayLines) {
+        assert.deepEqual(displayLines(c.text, c.differs), c.result, c.name);
     }
 });
