@@ -1,0 +1,494 @@
+{
+    "_comment": "Shared cases of the comparison in grader.php and attempt.js: tests/js/attempt.test.mjs and tests/local/comparison_cases_test.php read this file. studentline is the line (from 0) where the student's code starts in program(), the offset of prefixLines().",
+    "matches": [
+        {
+            "name": "spaces: trailing spaces and empty lines at the end do not count",
+            "expected": "5\n5.15",
+            "got": "5  \n5.15\n\n",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "spaces: tabs at the end of a line do not count",
+            "expected": "x",
+            "got": "x\t \n",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "spaces: Windows line ends",
+            "expected": "a\nb",
+            "got": "a\r\nb\r\n",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "spaces: spaces inside a line count",
+            "expected": "1 2",
+            "got": "1  2",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "spaces: an empty line at the start counts",
+            "expected": "x",
+            "got": "\nx",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "spaces: other output",
+            "expected": "5",
+            "got": "6",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "spaces: empty output",
+            "expected": "",
+            "got": "",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "spaces: only empty lines are empty output",
+            "expected": "",
+            "got": "\n\n",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "spaces: empty output when some is expected",
+            "expected": "0",
+            "got": "",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "exact: trailing spaces count",
+            "expected": "5\n5.15",
+            "got": "5  \n5.15\n\n",
+            "comparison": "exact",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "exact: Windows line ends do not count",
+            "expected": "a\r\nb",
+            "got": "a\nb",
+            "comparison": "exact",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "exact: a new line at the end counts",
+            "expected": "",
+            "got": "\n",
+            "comparison": "exact",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "exact: the same output",
+            "expected": "a b\n",
+            "got": "a b\n",
+            "comparison": "exact",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "numbers: absolute tolerance",
+            "expected": "Average: 2.333",
+            "got": "Average: 2.3333333\n",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "numbers: over the absolute tolerance",
+            "expected": "Average: 2.333",
+            "got": "Average: 2.336",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "numbers: relative tolerance for large numbers",
+            "expected": "1000000",
+            "got": "1000400",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "numbers: over the relative tolerance",
+            "expected": "1000000",
+            "got": "1002000",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "numbers: spaces and line ends between words do not count",
+            "expected": "1 2\n3",
+            "got": "1\n2  3\n",
+            "comparison": "numbers",
+            "tolerance": 0,
+            "result": true
+        },
+        {
+            "name": "numbers: other words must be the same",
+            "expected": "Sum: 5",
+            "got": "Zbir: 5",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "numbers: another number of words",
+            "expected": "1 2",
+            "got": "1 2 3",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "numbers: signs, exponents and leading dots",
+            "expected": "-0.5 1e3 .25",
+            "got": "-0.5000 1000 0.25",
+            "comparison": "numbers",
+            "tolerance": 0,
+            "result": true
+        },
+        {
+            "name": "numbers: a plus sign and a trailing dot",
+            "expected": "+12.",
+            "got": "12",
+            "comparison": "numbers",
+            "tolerance": 0,
+            "result": true
+        },
+        {
+            "name": "numbers: a decimal comma is a word, not a number",
+            "expected": "1,5",
+            "got": "1,50",
+            "comparison": "numbers",
+            "tolerance": 0.1,
+            "result": false
+        },
+        {
+            "name": "numbers: hexadecimal is a word, not a number",
+            "expected": "0x1A",
+            "got": "26",
+            "comparison": "numbers",
+            "tolerance": 1,
+            "result": false
+        },
+        {
+            "name": "numbers: NaN is a word",
+            "expected": "NaN",
+            "got": "nan",
+            "comparison": "numbers",
+            "tolerance": 1,
+            "result": false
+        },
+        {
+            "name": "numbers: empty output",
+            "expected": "",
+            "got": "\n",
+            "comparison": "numbers",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "numbers: Windows line ends",
+            "expected": "1\r\n2",
+            "got": "1\n2\n",
+            "comparison": "numbers",
+            "tolerance": 0,
+            "result": true
+        },
+        {
+            "name": "unordered: rows in another order",
+            "expected": "+-----+\n| ime |\n+-----+\n| Ivo |\n| Ana |\n+-----+\n",
+            "got": "+-----+\n| ime |\n+-----+\n| Ana |\n| Ivo |\n+-----+\n\n",
+            "comparison": "unordered",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "unordered: the same table with spaces",
+            "expected": "+-----+\n| ime |\n+-----+\n| Ivo |\n| Ana |\n+-----+\n",
+            "got": "+-----+\n| ime |\n+-----+\n| Ana |\n| Ivo |\n+-----+\n\n",
+            "comparison": "spaces",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "unordered: another row",
+            "expected": "+-----+\n| ime |\n+-----+\n| Ivo |\n| Ana |\n+-----+\n",
+            "got": "+-----+\n| ime |\n+-----+\n| Eva |\n| Ivo |\n+-----+\n\n",
+            "comparison": "unordered",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "unordered: the same lines as many times",
+            "expected": "a\na\nb",
+            "got": "a\nb\nb",
+            "comparison": "unordered",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "unordered: trailing spaces and empty lines at the end do not count",
+            "expected": "a \nb",
+            "got": "b\na\n\n",
+            "comparison": "unordered",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "unordered: Windows line ends",
+            "expected": "b\r\na",
+            "got": "a\nb\n",
+            "comparison": "unordered",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: the whole output, trailing spaces and empty lines at the end do not count",
+            "expected": "Sum: [0-9]+",
+            "got": "Sum: 42  \n\n",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: anchored at the start",
+            "expected": "Sum: [0-9]+",
+            "got": "The sum: 42\n",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "regex: anchored at the end",
+            "expected": "[0-9]+",
+            "got": "42\n43",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "regex: a pattern of more lines",
+            "expected": "[0-9]+\n[0-9]+\n",
+            "got": "42\n43\n",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: slashes and tildes need no escaping; a UTF-8 letter is one character",
+            "expected": "a/b~č.",
+            "got": "a/b~čx",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: alternatives are anchored together",
+            "expected": "yes|da",
+            "got": "da",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: alternatives do not match part of the output",
+            "expected": "yes|da",
+            "got": "dada",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "regex: anchors in the pattern",
+            "expected": "^\\d+$",
+            "got": "12",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: a dot does not match a line end",
+            "expected": ".*",
+            "got": "a\nb",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "regex: empty pattern and empty output",
+            "expected": "",
+            "got": "\n",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        },
+        {
+            "name": "regex: an invalid pattern never matches",
+            "expected": "[0-9",
+            "got": "5",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": false
+        },
+        {
+            "name": "regex: Windows line ends in the pattern",
+            "expected": "a\r\nb\r\n",
+            "got": "a\nb",
+            "comparison": "regex",
+            "tolerance": 0.001,
+            "result": true
+        }
+    ],
+    "testProgram": [
+        {
+            "name": "C without main gets a main around the test code",
+            "lang": "c",
+            "program": "int zbir(int a, int b)\n{\n    return a + b;\n}\n",
+            "code": "printf(\"%d\\n\", zbir(2, 3));\n",
+            "result": "int zbir(int a, int b)\n{\n    return a + b;\n}\n\nint main(void)\n{\n    printf(\"%d\\n\", zbir(2, 3));\n    return 0;\n}\n"
+        },
+        {
+            "name": "C++ without main gets int main()",
+            "lang": "cpp",
+            "program": "int zbir(int a, int b)\n{\n    return a + b;\n}\n",
+            "code": "int x = 1;\ncout << x;",
+            "result": "int zbir(int a, int b)\n{\n    return a + b;\n}\n\nint main()\n{\n    int x = 1;\n    cout << x;\n    return 0;\n}\n"
+        },
+        {
+            "name": "the marker takes the test code with its indentation",
+            "lang": "c",
+            "program": "int zbir(int a, int b)\n{\n    return a + b;\n}\nint main(void)\n{\n    {{TEST}}\n    return 0;\n}\n",
+            "code": "int s = zbir(1, 2);\nprintf(\"%d\", s);",
+            "result": "int zbir(int a, int b)\n{\n    return a + b;\n}\nint main(void)\n{\n    int s = zbir(1, 2);\n    printf(\"%d\", s);\n    return 0;\n}\n"
+        },
+        {
+            "name": "without test code the marker is left out",
+            "lang": "c",
+            "program": "int zbir(int a, int b)\n{\n    return a + b;\n}\nint main(void)\n{\n    {{TEST}}\n    return 0;\n}\n",
+            "code": "",
+            "result": "int zbir(int a, int b)\n{\n    return a + b;\n}\nint main(void)\n{\n    \n    return 0;\n}\n"
+        },
+        {
+            "name": "a program without test code is not changed",
+            "lang": "c",
+            "program": "int zbir(int a, int b)\n{\n    return a + b;\n}\n",
+            "code": "",
+            "result": "int zbir(int a, int b)\n{\n    return a + b;\n}\n"
+        },
+        {
+            "name": "C with main and no marker: the test code at the end",
+            "lang": "c",
+            "program": "int zbir(int a, int b)\n{\n    return a + b;\n}\nint main(void) { return 0; }\n",
+            "code": "zbir(1, 2);",
+            "result": "int zbir(int a, int b)\n{\n    return a + b;\n}\nint main(void) { return 0; }\nzbir(1, 2);\n"
+        },
+        {
+            "name": "other languages: the test code at the end",
+            "lang": "python",
+            "program": "def zbir(a, b):\n    return a + b\n",
+            "code": "print(zbir(2, 3))",
+            "result": "def zbir(a, b):\n    return a + b\nprint(zbir(2, 3))\n"
+        },
+        {
+            "name": "the marker after code on its line keeps only the leading indentation",
+            "lang": "python",
+            "program": "def f():\n    x = [{{TEST}}]\n    return x\n",
+            "code": "1,\n2",
+            "result": "def f():\n    x = [1,\n    2]\n    return x\n"
+        },
+        {
+            "name": "a tab before the marker",
+            "lang": "python",
+            "program": "if True:\n\t{{TEST}}\n",
+            "code": "a = 1\nprint(a)",
+            "result": "if True:\n\ta = 1\n\tprint(a)\n"
+        },
+        {
+            "name": "only the first marker takes the test code",
+            "lang": "python",
+            "program": "{{TEST}}\n{{TEST}}\n",
+            "code": "x",
+            "result": "x\n{{TEST}}\n"
+        },
+        {
+            "name": "Windows line ends and empty lines at the end of the test code",
+            "lang": "python",
+            "program": "a = 1\n",
+            "code": "print(a)\r\n\r\n",
+            "result": "a = 1\nprint(a)\n"
+        }
+    ],
+    "program": [
+        {
+            "name": "hidden code before and after, empty lines at the ends dropped",
+            "prefix": "int main() {\n",
+            "code": "  f();\n\n",
+            "suffix": "}\n",
+            "result": "int main() {\n  f();\n}\n",
+            "studentline": 1
+        },
+        {
+            "name": "only the student's code",
+            "prefix": "",
+            "code": "print(1)",
+            "suffix": "",
+            "result": "print(1)\n",
+            "studentline": 0
+        },
+        {
+            "name": "empty lines at the end of the code before",
+            "prefix": "import sys\nimport os\n\n\n",
+            "code": "x = 1",
+            "suffix": "",
+            "result": "import sys\nimport os\nx = 1\n",
+            "studentline": 2
+        },
+        {
+            "name": "parts without line ends",
+            "prefix": "a",
+            "code": "b",
+            "suffix": "c",
+            "result": "a\nb\nc\n",
+            "studentline": 1
+        },
+        {
+            "name": "code before of only empty lines is left out",
+            "prefix": "\n\n",
+            "code": "x",
+            "suffix": "",
+            "result": "x\n",
+            "studentline": 0
+        },
+        {
+            "name": "an empty line inside the code before",
+            "prefix": "a\n\nb\n",
+            "code": "x",
+            "suffix": "",
+            "result": "a\n\nb\nx\n",
+            "studentline": 3
+        }
+    ]
+}
