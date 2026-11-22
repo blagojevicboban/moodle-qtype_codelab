@@ -71,4 +71,24 @@ final class comparison_cases_test extends \basic_testcase {
             );
         }
     }
+
+    public function test_first_difference(): void {
+        $cases = self::cases()['firstDifference'];
+        $this->assertNotEmpty($cases);
+        foreach ($cases as $case) {
+            $this->assertSame(
+                $case['result'],
+                grader::first_difference($case['expected'], $case['got'], $case['comparison']),
+                $case['name']
+            );
+        }
+    }
+
+    public function test_display_lines(): void {
+        $cases = self::cases()['displayLines'];
+        $this->assertNotEmpty($cases);
+        foreach ($cases as $case) {
+            $this->assertSame($case['result'], grader::display_lines($case['text'], $case['differs']), $case['name']);
+        }
+    }
 }

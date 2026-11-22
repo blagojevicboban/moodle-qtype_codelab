@@ -176,6 +176,63 @@ class grader {
     }
 
     /**
+     * The first line where the output differs from the expected output, as the comparison sees lines: exact (only line
+     * ends of Windows do not count) or spaces (spaces at the end of lines and empty lines at the end do not count). The
+     * comparisons numbers, regex and unordered do not compare line by line, so they give null.
+     *
+     * @param string $expected
+     * @param string $got
+     * @param string $comparison one of COMPARISONS
+     * @return int|null line from 0, null when no line differs or the comparison has no lines
+     */
+    public static function first_difference(string $expected, string $got, string $comparison): ?int {
+        if (in_array($comparison, ['numbers', 'regex', 'unordered'], true)) {
+            return null;
+        }
+        $ignorespaces = $comparison !== 'exact';
+        $a = explode("\n", self::normalise($expected, $ignorespaces));
+        $b = explode("\n", self::normalise($got, $ignorespaces));
+        for ($i = 0; $i < max(count($a), count($b)); $i++) {
+            if (($a[$i] ?? null) !== ($b[$i] ?? null)) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Lines of an output for the display of a test: spaces and tabs at the end of a line become visible (as a middle dot
+     * and an arrow), each new line as a return arrow at the end of its line (so the new line at the end is not an empty
+     * line), and the line $differs is marked.
+     *
+     * @param string $text
+     * @param int|null $differs line from 0 to mark (see first_difference())
+     * @return array list of ['text' => string, 'differs' => bool]
+     */
+    public static function display_lines(string $text, ?int $differs = null): array {
+        $lines = explode("\n", self::unix($text));
+        // Lines before this one end with a new line, shown as a return arrow.
+        $newlines = count($lines) - 1;
+        if (count($lines) > 1 && end($lines) === '' && $differs !== count($lines) - 1) {
+            array_pop($lines);
+        }
+        if ($differs !== null && $differs >= count($lines)) {
+            // The other output is longer: the missing line is shown empty and marked.
+            $lines = array_merge($lines, array_fill(0, $differs + 1 - count($lines), ''));
+        }
+        $out = [];
+        foreach ($lines as $i => $line) {
+            $visible = preg_replace_callback(
+                '/[ \t]+$/',
+                fn($m) => strtr($m[0], [' ' => "\u{00B7}", "\t" => "\u{2192}"]),
+                $line
+            );
+            $out[] = ['text' => $visible . ($i < $newlines ? "\u{21B5}" : ''), 'differs' => $i === $differs];
+        }
+        return $out;
+    }
+
+    /**
      * The lines of an output without trailing spaces and empty lines at the end, sorted: for results whose rows may come
      * in any order (SQL without ORDER BY).
      *

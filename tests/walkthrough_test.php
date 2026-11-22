@@ -74,7 +74,8 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
                     $result = [
                         'status' => $answer === walkthrough_test::DOWN ? 'busy' : 'ok',
                         'passed' => $answer === walkthrough_test::RIGHT,
-                        'got' => '', 'cmpinfo' => '', 'stderr' => '',
+                        // The wrong program prints the number itself; a space at the end shows as a dot.
+                        'got' => $answer === walkthrough_test::WRONG ? "2 \n" : '', 'cmpinfo' => '', 'stderr' => '',
                     ];
                     $this->resultcache[$key] = array_fill(0, count($this->tests), $result);
                 }
@@ -174,5 +175,17 @@ final class walkthrough_test extends \qbehaviour_walkthrough_test_base {
         $this->finish();
         $this->check_current_state(\question_state::$gradedright);
         $this->assertSame(1, $q->runs);
+    }
+
+    public function test_feedback_marks_the_line_that_differs(): void {
+        $this->start_attempt_at_question($this->make_question(), 'deferredfeedback', 1);
+        $this->process_submission(['answer' => self::WRONG]);
+        $this->finish();
+        $this->check_current_state(\question_state::$gradedwrong);
+        $this->render();
+        // The visible test: expected 4, got 2 with a space and a new line at the end; the line is marked in both outputs.
+        $this->assertSame(2, substr_count($this->currentoutput, 'qtype_codelab-line-diff'));
+        $this->assertStringContainsString('qtype_codelab-line-diff">4</span>', $this->currentoutput);
+        $this->assertStringContainsString("qtype_codelab-line-diff\">2\u{00B7}\u{21B5}</span>", $this->currentoutput);
     }
 }

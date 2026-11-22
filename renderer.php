@@ -186,6 +186,9 @@ class qtype_codelab_renderer extends qtype_renderer {
                 ? html_writer::span(get_string('passed', 'qtype_codelab'), 'badge bg-success')
                 : html_writer::span(get_string('failed', 'qtype_codelab'), 'badge bg-danger');
             $got = $r['got'];
+            // The first line that differs is marked in both outputs; not when the program did not end well.
+            $differs = $r['passed'] || $r['status'] !== 'ok'
+                ? null : grader::first_difference($tc['expected'], $got, $question->comparison);
             if ($r['status'] !== 'ok') {
                 $detail = $r['status'] === 'compile' ? ($r['cmpinfo'] ?? '') : $r['stderr'];
                 $got .= ($got === '' ? '' : "\n") . get_string('status_' . $r['status'], 'tiny_codelab') .
@@ -194,8 +197,12 @@ class qtype_codelab_renderer extends qtype_renderer {
             $table->data[] = array_merge(
                 [$i + 1],
                 $withcode ? [html_writer::tag('pre', s($tc['code'] ?? ''))] : [],
-                [html_writer::tag('pre', s($tc['stdin'])), html_writer::tag('pre', s($tc['expected'])),
-                    html_writer::tag('pre', s($got)), $mark]
+                [
+                    html_writer::tag('pre', s($tc['stdin'])),
+                    $this->output_lines($tc['expected'], $differs),
+                    $this->output_lines($got, $differs),
+                    $mark,
+                ]
             );
         }
         if ($table->data) {
@@ -205,6 +212,17 @@ class qtype_codelab_renderer extends qtype_renderer {
             $out .= html_writer::div(get_string('hiddensummary', 'qtype_codelab', $hidden), 'qtype_codelab-hidden');
         }
         return $out;
+    }
+
+    /**
+     * One output of a test, with visible spaces at the ends of lines and the line that differs marked.
+     *
+     * @param string $text
+     * @param int|null $differs line from 0, see grader::first_difference()
+     * @return string HTML
+     */
+    protected function output_lines(string $text, ?int $differs): string {
+        return $this->render_from_template('qtype_codelab/output', ['lines' => grader::display_lines($text, $differs)]);
     }
 
     /**

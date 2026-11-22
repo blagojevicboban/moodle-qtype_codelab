@@ -10,6 +10,37 @@
     color: #a3191f;
 }
 
+/* Outputs of a failed test (qtype_codelab/output, qtype_codelab/testcompare): the line that differs is marked. */
+.qtype_codelab-compare {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin: .25rem 0 .5rem;
+    color: var(--bs-body-color, #1d2125);
+}
+
+.qtype_codelab-compare-col {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.qtype_codelab-compare .qtype_codelab-output {
+    margin: 0;
+    padding: .25rem .5rem;
+    white-space: pre-wrap;
+    font-size: .875rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .25rem;
+}
+
+.qtype_codelab-line-diff {
+    display: inline-block;
+    width: 100%;
+    min-height: 1.2em;
+    background-color: rgba(220, 53, 69, .15);
+    outline: 1px solid rgba(220, 53, 69, .5);
+}
+
 .path-question-bank-editquestion textarea[id^="id_teststdin"],
 .path-question-bank-editquestion textarea[id^="id_testexpected"],
 .path-question-bank-editquestion textarea[id^="id_template"],
