@@ -46,7 +46,9 @@ A question without tests is graded by the teacher.
 ## The student
 
 - writes the program in the code editor, with typing help;
-- can **Run** it with their own input, and **Run the tests** to check the tests that are not hidden;
+- can **Run** it with their own input, and **Run the tests** to check the tests that are not hidden (up to three at
+  the same time); a failed test shows the input, the expected and the actual output side by side, with the first line
+  that differs marked, also in the feedback;
 - for Python, in browsers that support it, can run the program in the browser: `input()` asks in the console, and
   **Step** goes line by line with the variables. The hidden code is passed over, and the student's lines are marked.
   Python answers also get typing help from Jedi.
