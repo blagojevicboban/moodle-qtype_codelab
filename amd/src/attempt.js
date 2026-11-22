@@ -287,6 +287,47 @@ const parsonsBox = async(config, textarea, host) => {
     };
 };
 
+/** Tests of "Run the tests" that run at the same time. */
+export const PARALLEL_TESTS = 3;
+
+/**
+ * Run a task for each item, at most limit at the same time; the results come in the order of the items. When a
+ * result is final (stop gives true, for example a compilation error or the rate limit), or a task fails, no new task
+ * starts: the results of the items not started are missing (undefined), and the ones already started still finish.
+ *
+ * @param {Array} items
+ * @param {function(*, number): Promise<*>} task
+ * @param {number} [limit]
+ * @param {function(*): boolean} [stop]
+ * @returns {Promise<Array>}
+ */
+export const runPool = async(items, task, limit = PARALLEL_TESTS, stop = () => false) => {
+    const results = new Array(items.length);
+    let next = 0;
+    let stopped = false;
+    const lane = async() => {
+        while (!stopped && next < items.length) {
+            const i = next++;
+            try {
+                results[i] = await task(items[i], i);
+            } catch (e) {
+                stopped = true;
+                throw e;
+            }
+            if (stop(results[i])) {
+                stopped = true;
+            }
+        }
+    };
+    const lanes = Array.from({length: Math.max(1, Math.min(limit, items.length))}, lane);
+    const settled = await Promise.allSettled(lanes);
+    const failed = settled.find((r) => r.status === 'rejected');
+    if (failed) {
+        throw failed.reason;
+    }
+    return results;
+};
+
 export const init = async(config) => {
     const modes = runModes(config);
     const textarea = document.getElementById(config.textareaid);
@@ -461,8 +502,14 @@ export const init = async(config) => {
             const list = document.createElement('ul');
             list.className = 'list-unstyled mb-0';
             let passed = 0;
+            const answer = code();
+            // Up to three tests at the same time; the first result that is not a normal end (a compilation error, the
+            // rate limit, a server problem) stops the tests that have not started, and is shown once.
+            const results = await runPool(config.tests,
+                (tc) => run(config.lang, testProgram(config.lang, answer, tc.code), tc.stdin, config.contextid),
+                PARALLEL_TESTS, (result) => result.status !== 'ok');
             for (const [i, tc] of config.tests.entries()) {
-                const result = await run(config.lang, testProgram(config.lang, code(), tc.code), tc.stdin, config.contextid);
+                const result = results[i];
                 if (result.status !== 'ok') {
                     // A compilation error or a server problem: show it as a normal run.
                     await showResult(panel, result);
