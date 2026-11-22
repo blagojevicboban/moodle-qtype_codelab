@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.0 (2026-11-22)
+
+- A failed test shows the input, the expected and the actual output side by side, in the attempt and in the
+  feedback; the first line that differs is marked, and spaces at the end of a line and line ends are made visible.
+- Run tests runs up to three tests at the same time; the results keep the order of the tests, and a compilation error
+  or the rate limit is shown once.
+- Privacy: the CodeLab runner and Pyodide are declared as places the program is sent to or loaded from.
+- Question form: the memory limit says that it does not apply to Java, C# and JavaScript on the runner.
+
 ## 1.12.0 (2026-11-22)
 
 - New option AI explanations: with the AI explanations of errors of tiny_codelab 1.19 turned on by the administrator,
