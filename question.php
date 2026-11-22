@@ -23,6 +23,7 @@
  */
 
 use qtype_codelab\local\grader;
+use qtype_codelab\local\order;
 use qtype_codelab\local\question_jobe;
 
 /**
@@ -67,6 +68,8 @@ class qtype_codelab_question extends question_graded_automatically {
     public $distractors = '';
     /** @var float seconds a test may take where the server reports times (CodeLab runner), 0 for no limit */
     public $timelimit = 0.0;
+    /** @var int Parsons: Check order off, on or on with a part of the mark for the order (order::OFF, ON, PARTIAL) */
+    public $ordercheck = order::OFF;
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;
@@ -169,6 +172,14 @@ class qtype_codelab_question extends question_graded_automatically {
             return [0, question_state::$needsgrading];
         }
         $fraction = grader::fraction($this->tests, $results);
+        // A Parsons problem with a part of the mark for the order: lines in their place count when the tests fail.
+        if ($fraction < 1 && $this->parsons && (int) $this->ordercheck === order::PARTIAL) {
+            $fraction = max($fraction, order::partial_fraction(
+                (string) ($response['answer'] ?? ''),
+                (string) $this->solution,
+                (string) $this->language
+            ));
+        }
         return [$fraction, question_state::graded_state_for_fraction($fraction)];
     }
 

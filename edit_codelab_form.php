@@ -79,6 +79,13 @@ class qtype_codelab_edit_form extends question_edit_form {
         $mform->setType('distractors', PARAM_RAW);
         $mform->addHelpButton('distractors', 'distractors', 'qtype_codelab');
         $mform->hideIf('distractors', 'parsons', 'notchecked');
+        $mform->addElement('select', 'ordercheck', get_string('ordercheck', 'qtype_codelab'), [
+            0 => get_string('ordercheck_off', 'qtype_codelab'),
+            1 => get_string('ordercheck_on', 'qtype_codelab'),
+            2 => get_string('ordercheck_partial', 'qtype_codelab'),
+        ]);
+        $mform->addHelpButton('ordercheck', 'ordercheck', 'qtype_codelab');
+        $mform->hideIf('ordercheck', 'parsons', 'notchecked');
         $mform->addElement(
             'advcheckbox',
             'noassist',

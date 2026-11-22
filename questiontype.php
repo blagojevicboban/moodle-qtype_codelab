@@ -23,6 +23,7 @@
  */
 
 use qtype_codelab\local\grader;
+use qtype_codelab\local\order;
 use qtype_codelab\local\question_jobe;
 
 defined('MOODLE_INTERNAL') || die();
@@ -50,7 +51,7 @@ class qtype_codelab extends question_type {
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
             'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints',
-            'timelimit'];
+            'timelimit', 'ordercheck'];
     }
 
     /**
@@ -156,6 +157,7 @@ class qtype_codelab extends question_type {
         $question->cputime = self::limit($question->cputime ?? 0);
         $question->memorylimit = self::limit($question->memorylimit ?? 0);
         $question->timelimit = self::time_limit($question->timelimit ?? 0);
+        $question->ordercheck = self::order_check($question->ordercheck ?? 0);
         $result = parent::save_question_options($question);
         $this->save_hints($question);
         return $result;
@@ -301,6 +303,17 @@ class qtype_codelab extends question_type {
     }
 
     /**
+     * The option Check order: off, on or on with a partial grade (see order), off for anything else.
+     *
+     * @param mixed $value
+     * @return int
+     */
+    public static function order_check($value): int {
+        $value = is_numeric($value) ? (int) $value : order::OFF;
+        return in_array($value, [order::ON, order::PARTIAL], true) ? $value : order::OFF;
+    }
+
+    /**
      * Jobe client with the limits of a question or of form data, or null for the default client.
      *
      * @param stdClass $data
@@ -343,5 +356,7 @@ class qtype_codelab extends question_type {
         $question->distractors = (string) ($questiondata->options->distractors ?? '');
         $question->aihints = !empty($questiondata->options->aihints);
         $question->timelimit = self::time_limit($questiondata->options->timelimit ?? 0);
+        // Check order only for a Parsons problem.
+        $question->ordercheck = $question->parsons ? self::order_check($questiondata->options->ordercheck ?? 0) : order::OFF;
     }
 }
