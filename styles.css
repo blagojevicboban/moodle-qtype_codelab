@@ -93,3 +93,130 @@
     padding: 0 .4rem;
     line-height: 1.4;
 }
+
+/* Class work of a question in a quiz, for the teacher (qtype_codelab/classwork). */
+.qtype_codelab-class-panel {
+    padding: .5rem;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: #fff;
+    color: #1d2125;
+}
+
+.qtype_codelab-class-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: .5rem;
+}
+
+.qtype_codelab-class-card {
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    padding: .25rem .5rem;
+    min-width: 0;
+}
+
+.qtype_codelab-class-head {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    font-size: .85rem;
+}
+
+.qtype_codelab-class-grade {
+    font-weight: bold;
+}
+
+.qtype_codelab-class-full {
+    color: #357a32;
+}
+
+.qtype_codelab-class-zero {
+    color: #ca3120;
+}
+
+.qtype_codelab-class-code {
+    margin: .25rem 0 0;
+    font-size: .75rem;
+    max-height: 16rem;
+    overflow: auto;
+    white-space: pre;
+}
+
+.qtype_codelab-class-more {
+    cursor: pointer;
+}
+
+.qtype_codelab-class-note,
+.qtype_codelab-class-summary {
+    margin: 0 0 .25rem;
+    font-size: .9rem;
+}
+
+.qtype_codelab-class-note {
+    color: #4b5563;
+}
+
+.qtype_codelab-class-test {
+    margin-bottom: .5rem;
+}
+
+.qtype_codelab-class-bar {
+    height: .5rem;
+    max-width: 24rem;
+    background: #fde2e1;
+    border-radius: .25rem;
+    overflow: hidden;
+}
+
+.qtype_codelab-class-bar-fill {
+    height: 100%;
+    background: #357a32;
+}
+
+.qtype_codelab-class-wrong,
+.qtype_codelab-class-messages {
+    margin: .25rem 0 0;
+    font-size: .85rem;
+}
+
+.qtype_codelab-class-wrong-title {
+    list-style: none;
+    margin-left: -1rem;
+    color: #4b5563;
+}
+
+.qtype_codelab-class-subtitle {
+    margin-top: .5rem;
+    font-weight: bold;
+    font-size: .9rem;
+}
+
+.qtype_codelab-class-grades {
+    display: flex;
+    align-items: flex-end;
+    gap: .25rem;
+    height: 7rem;
+    max-width: 24rem;
+}
+
+.qtype_codelab-class-gradecol {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+    font-size: .7rem;
+}
+
+.qtype_codelab-class-gradebar {
+    width: 100%;
+    background: #0f6cbf;
+    min-height: 1px;
+}
+
+.qtype_codelab-class-wrong code,
+.qtype_codelab-class-messages code {
+    white-space: pre-wrap;
+}

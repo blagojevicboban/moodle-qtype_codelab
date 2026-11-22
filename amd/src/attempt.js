@@ -30,6 +30,7 @@ import {PythonSession} from 'tiny_codelab/session';
 import {fullscreenButton} from 'tiny_codelab/fullscreen';
 import {RemoteSession, runsInteractively, stepsInteractively} from 'tiny_codelab/remote';
 import {getStrings} from 'core/str';
+import {addClassWork} from './classwork';
 
 /**
  * The program that is run: hidden code before and after the student's code (as grader::program on the server).
@@ -276,6 +277,10 @@ export const init = async(config) => {
         textarea.value = value;
     });
     parsons?.start((program) => editor.setValue(program));
+    // The teacher in a quiz (review, preview, grading): the answers of the class and their analysis.
+    if (config.classwork) {
+        addClassWork(host, config.classwork);
+    }
     if (config.readonly) {
         return;
     }

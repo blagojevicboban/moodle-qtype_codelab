@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.11.0 (2026-11-22)
+
+- Class work in the quiz: a teacher who may see the reports of the quiz (mod/quiz:viewreports) gets a Class work
+  button in a CodeLab question (review of an attempt, preview, manual grading). It shows the last answer of every
+  student to that question as a card with the grade, newest first, refreshed every 10 seconds; a long program opens
+  with a click, and the names can be hidden for the projector. Previews are left out, separate groups are respected,
+  at most 200 answers; students send nothing extra (the answers come from the quiz attempts).
+- Analysis tab: for each test how many answers pass it and the three most frequent wrong outputs, the most frequent
+  compiler messages, how many answers do not compile, end with an error or go over the time or memory limit, and the
+  grades in ten groups. Results come from the results cache of the question; answers not in it are run at most 20 per
+  request, the rest follow with the next refresh. Only the version of the question most students got is analysed.
+- Web services qtype_codelab_get_class_answers and qtype_codelab_get_class_analysis.
+- Requires tiny_codelab 1.18.0.
+
 ## 1.10.0 (2026-11-16)
 
 - Grading follows the setting Server for running and grading of tiny_codelab 1.13: on Jobe, on the CodeLab runner

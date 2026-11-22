@@ -106,8 +106,28 @@ class qtype_codelab_renderer extends qtype_renderer {
             'pyodide' => \tiny_codelab\local\runtime::config()['pyodide'],
             // Run with the input typed while the program runs, on the interactive server of the site (if any).
             'interactive' => \tiny_codelab\local\runtime::config()['interactive'] ?? [],
+            // The teacher in a quiz: the answers of the class and their analysis.
+            'classwork' => $this->class_work($qa),
         ]]);
         return $result;
+    }
+
+    /**
+     * The class work of this question for the teacher (the answers of the students and their analysis), when the
+     * question is shown in a quiz to someone who may see its reports.
+     *
+     * @param question_attempt $qa
+     * @return array|null cmid and slot for qtype_codelab_get_class_answers, or null
+     */
+    protected function class_work(question_attempt $qa): ?array {
+        $cm = $this->page->cm;
+        if (!$cm || $cm->modname !== 'quiz' || !$qa->get_slot()) {
+            return null;
+        }
+        if (!has_capability('mod/quiz:viewreports', context_module::instance($cm->id))) {
+            return null;
+        }
+        return ['cmid' => (int) $cm->id, 'slot' => (int) $qa->get_slot()];
     }
 
     /**

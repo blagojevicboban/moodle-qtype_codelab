@@ -86,6 +86,15 @@ the number of tries is the number of hints plus one.
 If Jobe cannot check the program during Check, the try does not count: the student sees a message and presses Check
 again. Only at the final submit does such an answer wait for the teacher.
 
+## Class work in a quiz
+
+A teacher who may see the reports of the quiz gets a **Class work** button in a CodeLab question (review of an attempt,
+preview, manual grading): the last answer of every student as a card with the grade, newest first, refreshed every 10
+seconds, with **Hide names** for the projector. The **Analysis** tab shows how many answers pass each test, the most
+frequent wrong outputs and compiler messages, how many answers do not compile, end with an error or go over a limit,
+and the grades in ten groups. Previews are left out and separate groups are respected; the answers come from the
+quiz attempts, so students send nothing extra.
+
 ## Check all solutions of a course
 
 Teachers who can edit questions find **Check CodeLab solutions** in the course menu (*More*). The page runs the
@@ -110,7 +119,7 @@ The [CodeLab manual](https://github.com/blagojevicboban/moodle-tiny_codelab/blob
 
 - Moodle 4.5 to 5.3
 - PHP 8.2+
-- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.13.0 or newer, installed first, with a Jobe
+- [tiny_codelab](https://github.com/blagojevicboban/moodle-tiny_codelab) 1.18.0 or newer, installed first, with a Jobe
   server or a CodeLab runner in its settings
 
 ## The CodeLab plugins
