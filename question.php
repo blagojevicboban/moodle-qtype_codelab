@@ -70,6 +70,8 @@ class qtype_codelab_question extends question_graded_automatically {
     public $timelimit = 0.0;
     /** @var int Parsons: Check order off, on or on with a part of the mark for the order (order::OFF, ON, PARTIAL) */
     public $ordercheck = order::OFF;
+    /** @var array decoded input files: [['name' => string, 'text' => string], ...] */
+    public $files = [];
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;
@@ -118,7 +120,7 @@ class qtype_codelab_question extends question_graded_automatically {
     public function results_key(string $answer): string {
         $program = grader::program((string) $this->prefix, $answer, (string) $this->suffix);
         return sha1(json_encode([$this->language, $program, $this->tests, $this->comparison, (float) $this->tolerance,
-            (int) $this->cputime, (int) $this->memorylimit]));
+            (int) $this->cputime, (int) $this->memorylimit, $this->files]));
     }
 
     /**
@@ -149,7 +151,8 @@ class qtype_codelab_question extends question_graded_automatically {
                 $program,
                 $this->tests,
                 $this->comparison,
-                (float) $this->tolerance
+                (float) $this->tolerance,
+                $this->files
             );
             // A failure of the sandbox is not kept: the next try may work.
             if (!grader::sandbox_failed($results)) {

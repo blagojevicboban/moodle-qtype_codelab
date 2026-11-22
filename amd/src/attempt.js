@@ -386,6 +386,34 @@ export const tooSlow = (time, limit) => limit > 0 && time !== null && time > lim
  */
 export const seconds = (time) => Math.max(0.01, time).toFixed(2);
 
+/**
+ * Read-only preview of the question's input files under the input area.
+ *
+ * @param {Object<string, string>} s strings
+ * @param {Array<{name: string, text: string}>} files
+ * @returns {?HTMLElement}
+ */
+const questionFilesBox = (s, files) => {
+    if (!files.length) {
+        return null;
+    }
+    const details = document.createElement('details');
+    details.className = 'qtype_codelab-files mb-2';
+    const summary = document.createElement('summary');
+    summary.textContent = s.filescount.replace('{$a}', files.length);
+    details.append(summary);
+    for (const file of files) {
+        const title = document.createElement('div');
+        title.className = 'font-monospace fw-bold small mt-1';
+        title.textContent = file.name;
+        const pre = document.createElement('pre');
+        pre.className = 'border rounded p-2 mb-1 bg-light';
+        pre.textContent = file.text;
+        details.append(title, pre);
+    }
+    return details;
+};
+
 export const init = async(config) => {
     const modes = runModes(config);
     const textarea = document.getElementById(config.textareaid);
@@ -393,7 +421,7 @@ export const init = async(config) => {
         return;
     }
     const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'testtime', 'tooslow',
-        'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen'];
+        'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen', 'filescount'];
     const values = await getStrings(keys.map((key) => ({key, component: key.startsWith('test') || key === 'runtests'
         || key === 'tooslow' ? 'qtype_codelab' : 'tiny_codelab'})));
     const s = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
@@ -467,7 +495,9 @@ export const init = async(config) => {
     panel.hidden = true;
     // SQL reads no input.
     stdinLabel.hidden = stdin.hidden = config.lang === 'mysql';
-    tools.append(stdinLabel, stdin, runButton);
+    const questionFiles = Array.isArray(config.files) ? config.files : [];
+    const filesDetails = questionFilesBox(s, questionFiles);
+    tools.append(...[stdinLabel, stdin, filesDetails, runButton].filter(Boolean));
     [stepButton, stopButton, testsButton].filter(Boolean).forEach((b) => tools.append(b));
     const vars = document.createElement('div');
     vars.className = 'tiny_codelab-vars mt-2';
@@ -499,6 +529,7 @@ export const init = async(config) => {
             editor,
             panel,
             vars,
+            files: () => questionFiles,
             // As Run on the server: the call of the first test with test code, after the student's lines.
             program: () => testProgram(config.lang, code(), config.tests.find((tc) => tc.code)?.code || ''),
             offset: prefixLines(config.prefix),
@@ -547,7 +578,7 @@ export const init = async(config) => {
             // A question with function tests has no main of its own: Run calls the function as the first test does.
             const first = config.tests.find((tc) => tc.code)?.code || '';
             await showResult(panel, await run(config.lang, testProgram(config.lang, code(), first), stdin.value,
-                config.contextid));
+                config.contextid, questionFiles));
         } catch (e) {
             await showError(panel, e);
         } finally {
@@ -567,7 +598,7 @@ export const init = async(config) => {
             // Up to three tests at the same time; the first result that is not a normal end (a compilation error, the
             // rate limit, a server problem) stops the tests that have not started, and is shown once.
             const results = await runPool(config.tests,
-                (tc) => run(config.lang, testProgram(config.lang, answer, tc.code), tc.stdin, config.contextid),
+                (tc) => run(config.lang, testProgram(config.lang, answer, tc.code), tc.stdin, config.contextid, questionFiles),
                 PARALLEL_TESTS, (result) => result.status !== 'ok');
             for (const [i, tc] of config.tests.entries()) {
                 const result = results[i];

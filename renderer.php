@@ -101,6 +101,7 @@ class qtype_codelab_renderer extends qtype_renderer {
                 ? ['usageid' => (int) $qa->get_usage_id(), 'slot' => (int) $qa->get_slot()] : null,
             'prefix' => (string) $question->prefix,
             'suffix' => (string) $question->suffix,
+            'files' => $question->files,
             'tests' => $tests,
             'comparison' => (string) $question->comparison,
             'tolerance' => (float) $question->tolerance,

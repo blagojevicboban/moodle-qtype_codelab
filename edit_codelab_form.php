@@ -100,6 +100,40 @@ class qtype_codelab_edit_form extends question_edit_form {
         );
         $mform->addHelpButton('aihints', 'aihints', 'qtype_codelab');
 
+        $mform->addElement('header', 'filesheader', get_string('files', 'tiny_codelab'));
+        if (!empty($this->question->options->filelist)) {
+            $mform->setExpanded('filesheader');
+        }
+        $filerepeated = [
+            $mform->createElement(
+                'text',
+                'filename',
+                get_string('filename', 'tiny_codelab'),
+                ['size' => 24, 'maxlength' => 40, 'class' => 'font-monospace']
+            ),
+            $mform->createElement(
+                'textarea',
+                'filetext',
+                get_string('files', 'tiny_codelab'),
+                ['rows' => 4, 'cols' => 60, 'spellcheck' => 'false', 'class' => 'font-monospace']
+            ),
+        ];
+        $fileoptions = [
+            'filename' => ['type' => PARAM_RAW_TRIMMED],
+            'filetext' => ['type' => PARAM_RAW],
+        ];
+        $filecount = max(1, count($this->question->options->filelist ?? []));
+        $this->repeat_elements(
+            $filerepeated,
+            $filecount,
+            $fileoptions,
+            'filecount',
+            'addfiles',
+            1,
+            get_string('addfile', 'tiny_codelab'),
+            true
+        );
+
         $mform->addElement('header', 'testsheader', get_string('tests', 'qtype_codelab'));
         $mform->setExpanded('testsheader');
         $mform->addElement('static', 'testsnote', '', get_string('tests_desc', 'qtype_codelab'));
@@ -202,6 +236,10 @@ class qtype_codelab_edit_form extends question_edit_form {
     protected function data_preprocessing($question) {
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_hints($question);
+        foreach ($question->options->filelist ?? [] as $i => $file) {
+            $question->filename[$i] = $file['name'];
+            $question->filetext[$i] = $file['text'];
+        }
         foreach ($question->options->testlist ?? [] as $i => $tc) {
             $question->teststdin[$i] = $tc['stdin'];
             $question->testexpected[$i] = $tc['expected'];
@@ -268,6 +306,25 @@ class qtype_codelab_edit_form extends question_edit_form {
         $timelimit = trim((string) ($data['timelimit'] ?? ''));
         if ($timelimit !== '' && qtype_codelab::time_limit($timelimit) === 0.0) {
             $errors['timelimit'] = get_string('badtimelimit', 'qtype_codelab');
+        }
+
+        $seenfiles = [];
+        $usedfiles = 0;
+        foreach ($data['filename'] ?? [] as $i => $rawname) {
+            $name = trim((string) $rawname);
+            $text = (string) ($data['filetext'][$i] ?? '');
+            if ($name === '' && $text === '') {
+                continue;
+            }
+            $usedfiles++;
+            if ($usedfiles > grader::MAX_FILES || !grader::valid_file_name($name)) {
+                $errors["filename[$i]"] = get_string('badfilename', 'tiny_codelab');
+            } else if (isset($seenfiles[$name])) {
+                $errors["filename[$i]"] = get_string('samefilename', 'tiny_codelab', $name);
+            } else if (strlen(grader::unix($text)) > \tiny_codelab\local\jobe::MAX_SIZE) {
+                $errors["filetext[$i]"] = get_string('filetoolarge', 'tiny_codelab', $name);
+            }
+            $seenfiles[$name] = true;
         }
 
         // The solution must pass the tests; it runs on Jobe only when the rest of the form is right.

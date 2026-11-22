@@ -54,6 +54,7 @@ class restore_qtype_codelab_plugin extends restore_qtype_extrafields_plugin {
         // Backups from before the time limit per test have none.
         $data['timelimit'] = $data['timelimit'] ?? 0;
         $data['ordercheck'] = $data['ordercheck'] ?? 0;
+        $data['files'] = $data['files'] ?? '';
         $this->really_process_extra_question_fields($data);
     }
 }

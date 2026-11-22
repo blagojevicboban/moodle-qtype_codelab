@@ -56,6 +56,44 @@ class grader {
         $this->jobe = $jobe;
     }
 
+    /** At most this many input files per question (matches tiny_codelab). */
+    const MAX_FILES = 5;
+
+    /**
+     * Whether an input file name is safe (matches tiny_codelab).
+     *
+     * @param string $name
+     * @return bool
+     */
+    public static function valid_file_name(string $name): bool {
+        return strlen($name) <= 40 && (bool) preg_match('/^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)?$/', $name);
+    }
+
+    /**
+     * Input files from their JSON, validated.
+     *
+     * @param string|null $json
+     * @return array list of ['name' => string, 'text' => string]
+     */
+    public static function decode_files(?string $json): array {
+        $files = json_decode((string) $json, true);
+        $out = [];
+        $seen = [];
+        foreach (is_array($files) ? $files : [] as $file) {
+            if (!is_array($file) || count($out) >= self::MAX_FILES) {
+                continue;
+            }
+            $name = trim((string) ($file['name'] ?? ''));
+            $text = self::unix((string) ($file['text'] ?? ''));
+            if (!self::valid_file_name($name) || isset($seen[$name]) || strlen($text) > jobe::MAX_SIZE) {
+                continue;
+            }
+            $seen[$name] = true;
+            $out[] = ['name' => $name, 'text' => $text];
+        }
+        return $out;
+    }
+
     /**
      * Tests from their JSON, with every field.
      *
@@ -341,6 +379,7 @@ class grader {
      * @param array $tests decoded tests
      * @param string $comparison one of COMPARISONS
      * @param float $tolerance for the comparison numbers
+     * @param array $files input files placed in the working folder before each run
      * @return array list of ['status', 'passed', 'got', 'cmpinfo', 'stderr', 'time'] in the order of the tests; time is the
      *     seconds of the run when the server reports it (the CodeLab runner 0.9.0), otherwise null
      */
@@ -349,14 +388,15 @@ class grader {
         string $program,
         array $tests,
         string $comparison = 'spaces',
-        float $tolerance = self::TOLERANCE
+        float $tolerance = self::TOLERANCE,
+        array $files = []
     ): array {
         $this->jobe = $this->jobe ?? new jobe();
         $results = [];
         // With test code every test is another program, so a compilation error may belong to one test only.
         $sameprogram = !array_filter($tests, fn($tc) => ($tc['code'] ?? '') !== '');
         foreach ($tests as $tc) {
-            $run = $this->jobe->run($lang, self::test_program($lang, $program, $tc['code'] ?? ''), $tc['stdin']);
+            $run = $this->jobe->run($lang, self::test_program($lang, $program, $tc['code'] ?? ''), $tc['stdin'], $files);
             $results[] = [
                 'status' => $run['status'],
                 'passed' => $run['status'] === 'ok' && self::matches($tc['expected'], $run['stdout'], $comparison, $tolerance),

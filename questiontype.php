@@ -51,7 +51,7 @@ class qtype_codelab extends question_type {
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
             'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints',
-            'timelimit', 'ordercheck'];
+            'timelimit', 'ordercheck', 'files'];
     }
 
     /**
@@ -138,14 +138,38 @@ class qtype_codelab extends question_type {
     }
 
     /**
+     * Input files from the editing form (repeated fields), or the JSON given directly (scripts, import).
+     *
+     * @param stdClass $form
+     * @return array decoded files
+     */
+    public static function files_from_form($form): array {
+        if (!isset($form->filename) || !is_array($form->filename)) {
+            return grader::decode_files(is_string($form->files ?? null) ? $form->files : '');
+        }
+        $raw = [];
+        foreach ($form->filename as $i => $name) {
+            $name = trim((string) $name);
+            $text = grader::unix((string) ($form->filetext[$i] ?? ''));
+            if ($name === '' && $text === '') {
+                continue;
+            }
+            $raw[] = ['name' => $name, 'text' => $text];
+        }
+        return grader::decode_files(json_encode($raw));
+    }
+
+    /**
      * Save the options; tests without an expected output get the output of the teacher's solution.
      *
      * @param stdClass $question form data
      * @return bool|stdClass
      */
     public function save_question_options($question) {
+        $files = self::files_from_form($question);
+        $question->files = json_encode($files);
         $tests = self::tests_from_form($question);
-        $question->tests = json_encode(self::fill_expected($question, $tests));
+        $question->tests = json_encode(self::fill_expected($question, $tests, null, $files));
         foreach (['prefix', 'suffix', 'template', 'solution', 'distractors'] as $field) {
             $question->$field = grader::unix((string) ($question->$field ?? ''));
         }
@@ -172,6 +196,7 @@ class qtype_codelab extends question_type {
     public function get_question_options($question) {
         $result = parent::get_question_options($question);
         $question->options->testlist = grader::decode_tests($question->options->tests ?? '');
+        $question->options->filelist = grader::decode_files($question->options->files ?? '');
         return $result;
     }
 
@@ -181,9 +206,10 @@ class qtype_codelab extends question_type {
      * @param stdClass $question form data
      * @param array $tests decoded tests
      * @param grader|null $grader
+     * @param array|null $files decoded input files (null to read from $question)
      * @return array tests
      */
-    public static function fill_expected($question, array $tests, ?grader $grader = null): array {
+    public static function fill_expected($question, array $tests, ?grader $grader = null, ?array $files = null): array {
         $missing = array_keys(array_filter($tests, fn($tc) => $tc['expected'] === ''));
         if (!$missing || trim((string) ($question->solution ?? '')) === '') {
             return $tests;
@@ -195,7 +221,8 @@ class qtype_codelab extends question_type {
         );
         $grader = $grader ?? new grader(self::jobe_for($question));
         $subset = array_map(fn($i) => $tests[$i], $missing);
-        $results = $grader->run_tests((string) $question->language, $program, $subset);
+        $files = $files ?? self::files_from_form($question);
+        $results = $grader->run_tests((string) $question->language, $program, $subset, 'spaces', grader::TOLERANCE, $files);
         $regex = self::comparison($question) === 'regex';
         foreach ($missing as $n => $i) {
             if (($results[$n]['status'] ?? '') === 'ok') {
@@ -243,7 +270,8 @@ class qtype_codelab extends question_type {
             $program,
             array_values($tests),
             self::comparison((object) $data),
-            self::tolerance($data['tolerance'] ?? null)
+            self::tolerance($data['tolerance'] ?? null),
+            self::files_from_form((object) $data)
         );
         // A server that is down must not keep the teacher from saving.
         if (grader::sandbox_failed($results)) {
@@ -358,5 +386,6 @@ class qtype_codelab extends question_type {
         $question->timelimit = self::time_limit($questiondata->options->timelimit ?? 0);
         // Check order only for a Parsons problem.
         $question->ordercheck = $question->parsons ? self::order_check($questiondata->options->ordercheck ?? 0) : order::OFF;
+        $question->files = grader::decode_files($questiondata->options->files ?? '');
     }
 }

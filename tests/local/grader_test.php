@@ -57,13 +57,14 @@ final class grader_test extends \advanced_testcase {
              * @param string $lang
              * @param string $code
              * @param string $stdin
+             * @param array $files
              * @return array
              */
-            public function run(string $lang, string $code, string $stdin = ''): array {
+            public function run(string $lang, string $code, string $stdin = '', array $files = []): array {
                 $this->runs++;
                 return array_merge(
                     ['status' => 'ok', 'outcome' => 15, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''],
-                    ($this->answer)($lang, $code, $stdin)
+                    ($this->answer)($lang, $code, $stdin, $files)
                 );
             }
         };
@@ -77,6 +78,30 @@ final class grader_test extends \advanced_testcase {
         $this->assertSame(3.0, $tests[1]['weight']);
         $this->assertSame([], grader::decode_tests('not json'));
         $this->assertSame([], grader::decode_tests(null));
+    }
+
+    public function test_decode_files_and_pass_to_jobe(): void {
+        $json = json_encode([
+            ['name' => 'ulaz.txt', 'text' => "1 2\r\n"],
+            ['name' => '../bad', 'text' => 'x'],
+            ['name' => 'ulaz.txt', 'text' => 'dup'],
+            ['name' => 'data.csv', 'text' => 'a,b'],
+        ]);
+        $files = grader::decode_files($json);
+        $this->assertSame([
+            ['name' => 'ulaz.txt', 'text' => "1 2\n"],
+            ['name' => 'data.csv', 'text' => 'a,b'],
+        ], $files);
+
+        $seen = null;
+        $jobe = self::fake_jobe(function ($lang, $code, $stdin, $gotfiles) use (&$seen) {
+            $seen = $gotfiles;
+            return ['stdout' => "3\n"];
+        });
+        $tests = grader::decode_tests('[{"stdin":"","expected":"3"}]');
+        $results = (new grader($jobe))->run_tests('c', 'int main(){}', $tests, 'spaces', grader::TOLERANCE, $files);
+        $this->assertTrue($results[0]['passed']);
+        $this->assertSame($files, $seen);
     }
 
     public function test_program(): void {

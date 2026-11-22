@@ -109,5 +109,15 @@ function xmldb_qtype_codelab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112904, 'qtype', 'codelab');
     }
 
+    if ($oldversion < 2026112905) {
+        // Input files placed in the working folder before each run (JSON list of name and text).
+        $table = new xmldb_table('qtype_codelab_options');
+        $field = new xmldb_field('files', XMLDB_TYPE_TEXT, null, null, null, null, null, 'ordercheck');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026112905, 'qtype', 'codelab');
+    }
+
     return true;
 }
