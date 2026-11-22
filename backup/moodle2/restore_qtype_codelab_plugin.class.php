@@ -51,6 +51,8 @@ class restore_qtype_codelab_plugin extends restore_qtype_extrafields_plugin {
         // Backups from before 0.6.0 have no limits: the defaults.
         $data['cputime'] = $data['cputime'] ?? 0;
         $data['memorylimit'] = $data['memorylimit'] ?? 0;
+        // Backups from before the time limit per test have none.
+        $data['timelimit'] = $data['timelimit'] ?? 0;
         $this->really_process_extra_question_fields($data);
     }
 }

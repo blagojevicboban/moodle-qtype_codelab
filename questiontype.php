@@ -49,7 +49,8 @@ class qtype_codelab extends question_type {
      */
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
-            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints'];
+            'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints',
+            'timelimit'];
     }
 
     /**
@@ -154,6 +155,7 @@ class qtype_codelab extends question_type {
         $question->tolerance = self::tolerance($question->tolerance ?? null);
         $question->cputime = self::limit($question->cputime ?? 0);
         $question->memorylimit = self::limit($question->memorylimit ?? 0);
+        $question->timelimit = self::time_limit($question->timelimit ?? 0);
         $result = parent::save_question_options($question);
         $this->save_hints($question);
         return $result;
@@ -284,6 +286,21 @@ class qtype_codelab extends question_type {
     }
 
     /**
+     * A time limit per test: seconds from grader::MIN_TIMELIMIT to grader::MAX_TIMELIMIT with 2 decimals, 0 (none) for
+     * anything else.
+     *
+     * @param mixed $value
+     * @return float
+     */
+    public static function time_limit($value): float {
+        if (!is_numeric($value)) {
+            return 0.0;
+        }
+        $value = round((float) $value, 2);
+        return $value >= grader::MIN_TIMELIMIT && $value <= grader::MAX_TIMELIMIT ? $value : 0.0;
+    }
+
+    /**
      * Jobe client with the limits of a question or of form data, or null for the default client.
      *
      * @param stdClass $data
@@ -325,5 +342,6 @@ class qtype_codelab extends question_type {
         $question->parsons = !empty($questiondata->options->parsons);
         $question->distractors = (string) ($questiondata->options->distractors ?? '');
         $question->aihints = !empty($questiondata->options->aihints);
+        $question->timelimit = self::time_limit($questiondata->options->timelimit ?? 0);
     }
 }

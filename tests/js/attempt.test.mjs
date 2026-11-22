@@ -30,7 +30,8 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 // The module imports Moodle and tiny_codelab modules, which Node cannot load. The functions tested here use none of
 // them and nothing runs when the module loads, so the module is loaded without its import lines.
 const source = read('../../amd/src/attempt.js').replace(/^import .*;$/gm, '');
-const {program, testProgram, prefixLines, matches, firstDifference, displayLines, runPool, PARALLEL_TESTS} =
+const {program, testProgram, prefixLines, matches, firstDifference, displayLines, runPool, PARALLEL_TESTS, tooSlow,
+    seconds} =
     await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const cases = JSON.parse(read('../fixtures/comparison-cases.json'));
@@ -122,4 +123,16 @@ test('a failed task fails the pool and starts no new task', async() => {
     };
     await assert.rejects(runPool([{ms: 1, fail: true}, {ms: 20}, {ms: 20}, {ms: 1}, {ms: 1}], task), /network/);
     assert.deepEqual(started, [0, 1, 2]);
+});
+
+test('a test over the time limit is too slow, only when the server gave a time', () => {
+    assert.equal(tooSlow(1.42, 1), true);
+    assert.equal(tooSlow(0.5, 1), false);
+    assert.equal(tooSlow(1, 1), false);
+    // No limit, or no time (Jobe): never too slow.
+    assert.equal(tooSlow(5, 0), false);
+    assert.equal(tooSlow(null, 1), false);
+    assert.equal(seconds(0.123), '0.12');
+    assert.equal(seconds(0.001), '0.01');
+    assert.equal(seconds(2), '2.00');
 });
