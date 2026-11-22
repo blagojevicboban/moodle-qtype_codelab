@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy provider: answers are sent to the Jobe server to be run on the tests; answers are kept by the question engine.
+ * Privacy provider: answers are sent to Jobe or the CodeLab runner to be run, Python may run in the browser (Pyodide);
+ * answers are kept by the question engine.
  *
  * @package    qtype_codelab
  * @copyright  2026 Boban Blagojević
@@ -31,7 +32,8 @@ use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 
 /**
- * Privacy provider: answers are sent to the Jobe server to be run on the tests; answers are kept by the question engine.
+ * Privacy provider: answers are sent to Jobe or the CodeLab runner to be run, Python may run in the browser (Pyodide);
+ * answers are kept by the question engine.
  *
  * @package    qtype_codelab
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -51,6 +53,17 @@ class provider implements
             'code' => 'privacy:metadata:jobe:code',
             'stdin' => 'privacy:metadata:jobe:stdin',
         ], 'privacy:metadata:jobe');
+        // The CodeLab runner, when the site has one: grading on it (SQL always, other languages when it is the server
+        // for running and grading), and Run in the attempt, where the browser sends the program and the typed input.
+        $collection->add_external_location_link('runner', [
+            'userid' => 'privacy:metadata:runner:userid',
+            'code' => 'privacy:metadata:runner:code',
+            'stdin' => 'privacy:metadata:runner:stdin',
+        ], 'privacy:metadata:runner');
+        // Python in the attempt runs in the browser, which loads Pyodide from the address in the settings.
+        $collection->add_external_location_link('pyodide', [
+            'ipaddress' => 'privacy:metadata:pyodide:ipaddress',
+        ], 'privacy:metadata:pyodide');
         return $collection;
     }
 
