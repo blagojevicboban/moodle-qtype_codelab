@@ -25,6 +25,7 @@ import {Parsons} from 'qtype_codelab/parsons';
 import {createEditor} from 'tiny_codelab/monaco';
 import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
+import {liveRegion} from 'tiny_codelab/announce';
 import {available as pythonAvailable} from 'tiny_codelab/python';
 import {PythonSession} from 'tiny_codelab/session';
 import {fullscreenButton} from 'tiny_codelab/fullscreen';
@@ -401,7 +402,10 @@ export const init = async(config) => {
     const testsButton = config.tests.length ? button(s.runtests, 'btn-secondary') : null;
     const panel = document.createElement('div');
     panel.className = 'tiny_codelab-console mt-2';
-    panel.setAttribute('role', 'status');
+    // A scrolling region reachable by the keyboard, not live: the end of a run is read in a live region next to it
+    // (tiny_codelab/announce), instead of every line while it is written.
+    panel.setAttribute('role', 'region');
+    panel.tabIndex = 0;
     panel.setAttribute('aria-label', s.output);
     panel.hidden = true;
     // SQL reads no input.
@@ -539,6 +543,10 @@ export const init = async(config) => {
             summary.className = 'tiny_codelab-console-status' + (passed === config.tests.length ? ' tiny_codelab-status-ok' : '');
             summary.textContent = s.testsof.replace('{$a->passed}', passed).replace('{$a->total}', config.tests.length);
             panel.append(summary, list);
+            const region = liveRegion(panel);
+            if (region) {
+                region.textContent = summary.textContent;
+            }
         } catch (e) {
             await showError(panel, e);
         } finally {
