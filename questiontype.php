@@ -43,7 +43,8 @@ require_once($CFG->dirroot . '/question/type/codelab/question.php');
 class qtype_codelab extends question_type {
     /** Languages in the order they are offered. */
     const LANGUAGES = ['c', 'cpp', 'python', 'java', 'csharp', 'javascript', 'pascal', 'php', 'mysql',
-        'typescript', 'bash', 'go', 'rust', 'r', 'ruby', 'lua', 'kotlin', 'perl', 'octave'];
+        'typescript', 'bash', 'go', 'rust', 'r', 'ruby', 'lua', 'kotlin', 'perl', 'octave',
+        'julia', 'scheme', 'dart', 'scala', 'elixir', 'swift'];
 
     /**
      * Extra fields kept in qtype_codelab_options (also used for backup, restore, import and export).
