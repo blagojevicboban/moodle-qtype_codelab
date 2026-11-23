@@ -44,7 +44,7 @@ class gaps {
         $len = strlen($line);
         $out = '';
         $quote = '';
-        $hashcomment = $lang === 'python' || $lang === 'php';
+        $hashcomment = in_array($lang, ['python', 'php', 'bash', 'r'], true);
         for ($i = 0; $i < $len; $i++) {
             $ch = $line[$i];
             if ($quote !== '') {
