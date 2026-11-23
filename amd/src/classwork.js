@@ -27,7 +27,7 @@ import {getStrings} from 'core/str';
 
 const KEYS = ['classwork', 'classanswers', 'classanalysis', 'classempty', 'classhidenames', 'classshownames',
     'classnotgraded', 'classsummary', 'classpending', 'classother', 'classunchecked', 'classtest', 'classtesthidden',
-    'classwrong', 'classmessages', 'classgrades', 'classemptyoutput', 'classstudent'];
+    'classwrong', 'classmessages', 'classgrades', 'classsimilar', 'classsimilarnote', 'classemptyoutput', 'classstudent'];
 
 /** Refresh of the answers while the panel is open, in milliseconds. */
 const REFRESH = 10000;
@@ -178,6 +178,15 @@ export const drawAnalysis = (host, r, s) => {
         grades.append(column);
     });
     host.append(grades);
+    if (Array.isArray(r.similar) && r.similar.length) {
+        host.append(el('div', 'qtype_codelab-class-subtitle', s.classsimilar));
+        host.append(el('p', 'qtype_codelab-class-note small text-muted mb-1', s.classsimilarnote));
+        const simList = el('ul', 'qtype_codelab-class-similar');
+        r.similar.forEach((p) => {
+            simList.append(el('li', '', `${p.usera} \u2014 ${p.userb}: ${p.percent} %`));
+        });
+        host.append(simList);
+    }
 };
 
 /**

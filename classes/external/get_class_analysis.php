@@ -22,6 +22,7 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use qtype_codelab\local\grader;
+use qtype_codelab\local\similarity;
 
 /**
  * Analysis of the class answers to a CodeLab question in a quiz: for each test how many answers pass it and the most
@@ -61,11 +62,11 @@ class get_class_analysis extends external_api {
      * @return array
      */
     public static function execute(int $cmid, int $slot): array {
-        global $CFG;
+        global $CFG, $DB;
         require_once($CFG->dirroot . '/question/engine/bank.php');
         $answers = get_class_answers::answers($cmid, $slot);
         $empty = ['answers' => 0, 'otherversions' => 0, 'pending' => 0, 'unchecked' => 0, 'compile' => 0, 'runtime' => 0,
-            'timelimit' => 0, 'tests' => [], 'messages' => [], 'grades' => array_fill(0, 10, 0)];
+            'timelimit' => 0, 'tests' => [], 'messages' => [], 'grades' => array_fill(0, 10, 0), 'similar' => []];
         if (!$answers) {
             return $empty;
         }
@@ -73,7 +74,15 @@ class get_class_analysis extends external_api {
         $versions = array_count_values(array_column($answers, 'questionid'));
         arsort($versions);
         $questionid = (int) array_key_first($versions);
-        return self::analyse(\question_bank::load_question($questionid), $questionid, $answers);
+        $fields = \core_user\fields::for_name()->get_sql('', false, '', '', false)->selects;
+        $users = $DB->get_records_list('user', 'id', array_keys($answers), '', 'id, deleted' . ($fields ? ", {$fields}" : ''));
+        $names = [];
+        foreach ($users as $uid => $user) {
+            if (empty($user->deleted)) {
+                $names[(int) $uid] = fullname($user);
+            }
+        }
+        return self::analyse(\question_bank::load_question($questionid), $questionid, $answers, $names);
     }
 
     /**
@@ -82,11 +91,17 @@ class get_class_analysis extends external_api {
      * @param \qtype_codelab_question $question the version analysed
      * @param int $questionid its id
      * @param array $answers userid => ['questionid', 'answer', ...] as get_class_answers::answers()
+     * @param array $names userid => full name (optional, for similarity pairs)
      * @return array as execute_returns()
      */
-    public static function analyse(\qtype_codelab_question $question, int $questionid, array $answers): array {
+    public static function analyse(
+        \qtype_codelab_question $question,
+        int $questionid,
+        array $answers,
+        array $names = []
+    ): array {
         $out = ['answers' => 0, 'otherversions' => 0, 'pending' => 0, 'unchecked' => 0, 'compile' => 0, 'runtime' => 0,
-            'timelimit' => 0, 'tests' => [], 'messages' => [], 'grades' => array_fill(0, 10, 0)];
+            'timelimit' => 0, 'tests' => [], 'messages' => [], 'grades' => array_fill(0, 10, 0), 'similar' => []];
         $out['otherversions'] = count(array_filter($answers, fn($a) => (int) $a['questionid'] !== $questionid));
         $tests = $question->tests;
         $passed = array_fill(0, count($tests), 0);
@@ -142,6 +157,13 @@ class get_class_analysis extends external_api {
             $out['tests'][] = ['hidden' => !empty($tc['hidden']), 'passed' => $passed[$i], 'wrong' => self::top($wrong[$i])];
         }
         $out['messages'] = self::top($messages);
+        $submissions = [];
+        foreach ($answers as $uid => $a) {
+            if ((int) $a['questionid'] === $questionid) {
+                $submissions[] = ['name' => $names[(int) $uid] ?? ('#' . $uid), 'code' => (string) $a['answer']];
+            }
+        }
+        $out['similar'] = similarity::find_pairs($submissions, (string) $question->language, (string) $question->template);
         return $out;
     }
 
@@ -208,6 +230,12 @@ class get_class_analysis extends external_api {
             ])),
             'messages' => clone $texts,
             'grades' => new external_multiple_structure(new external_value(PARAM_INT, 'Answers with a grade in this tenth')),
+            'similar' => new external_multiple_structure(new external_single_structure([
+                'usera' => new external_value(PARAM_TEXT, 'First student'),
+                'userb' => new external_value(PARAM_TEXT, 'Second student'),
+                'percent' => new external_value(PARAM_INT, 'Token similarity percent'),
+                'shared' => new external_value(PARAM_INT, 'Shared fingerprint count'),
+            ]), 'Pairs of submissions with high token similarity', VALUE_DEFAULT, []),
         ]);
     }
 }
