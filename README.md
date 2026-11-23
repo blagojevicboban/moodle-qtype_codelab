@@ -9,7 +9,10 @@ A programming question for Moodle quizzes. The student writes a program in the c
 ([Monaco](https://microsoft.github.io/monaco-editor/)). The program is run on the teacher's tests on a
 [Jobe](https://github.com/trampgeek/jobe) server, and the grade is the weighted share of the tests it passes.
 
-Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal** and **PHP**.
+Languages (**26 server-graded languages**): **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js),
+**Pascal**, **PHP**, **MySQL (MariaDB)**, **TypeScript**, **Bash**, **Go**, **Rust**, **R**, **Ruby**, **Lua**,
+**Kotlin**, **Perl**, **Octave**, **Julia**, **Scheme**, **Dart**, **Scala**, **Elixir**, **Swift** and **Haskell**
+(each offered automatically when installed on the server).
 
 > Status: **stable**.
 

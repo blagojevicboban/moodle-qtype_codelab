@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.17.0 (2026-11-23)
+
+- Interface translated into 14 more languages (29 total): Portuguese (Brazil), Turkish, Dutch, Russian, Ukrainian,
+  Romanian, Hungarian, Bulgarian, Greek, Albanian, Japanese, Simplified Chinese, Korean and Arabic.
+- 17 new question languages on the CodeLab runner (26 server-graded languages total): TypeScript, Bash, Go, Rust, R,
+  Ruby, Lua, Kotlin, Perl, Octave, Julia, Scheme, Dart, Scala, Elixir, Swift and Haskell, offered automatically when
+  installed on the runner.
+- Updated Parsons gap comment masking for Bash, R, Ruby, Perl, Julia and Elixir.
+- Requires tiny_codelab 1.24.0.
+
 ## 1.16.0 (2026-11-23)
 
 - Unit tests for C, C++ and Python: a test may hold assertions (TEST and ASSERT_EQ) instead of an expected output; a

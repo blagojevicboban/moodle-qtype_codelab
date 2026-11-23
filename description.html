@@ -10,19 +10,17 @@
   <p><strong>Live demo:</strong> try CodeLab on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a> as a guest (Python runs in the browser), or sign in with <strong>teacher</strong> or <strong>student</strong> (password <strong>Demo-2026</strong>) for every language, the debugger and SQL. Reset nightly.</p>
 
   <hr>
-  <p><strong>What's New in v1.16.0</strong></p>
+  <p><strong>What's New in v1.17.0</strong></p>
   <ul>
-    <li><strong>Built-in unit tests for C, C++ and Python:</strong> write assertion-based function tests without needing an expected stdout block, with exact failing assertion messages shown per test.</li>
-    <li><strong>Local submission similarity check:</strong> the teacher Analysis tab compares student answers locally by normalized code tokens, ignoring variable renaming, comments, whitespace and starter code, with no external service.</li>
-    <li><strong>C and C++ compiler and standard per question:</strong> choose GCC, Clang or MSVC compatibility mode and language standard in the question form, preserved by backup and restore.</li>
-    <li><strong>Peak memory alongside run time:</strong> test results and review feedback display both time and peak memory when using CodeLab runner 0.13.0 or newer.</li>
-    <li><strong>Multi-file editor tabs:</strong> companion question files appear as read-only tabs above the Monaco editor with syntax highlighting by extension.</li>
+    <li><strong>29 interface languages:</strong> added 14 new translations (Portuguese Brazil, Turkish, Dutch, Russian, Ukrainian, Romanian, Hungarian, Bulgarian, Greek, Albanian, Japanese, Simplified Chinese, Korean and Arabic).</li>
+    <li><strong>17 new question languages on the CodeLab runner (26 server-graded languages total):</strong> TypeScript, Bash, Go, Rust, R, Ruby, Lua, Kotlin, Perl, Octave, Julia, Scheme, Dart, Scala, Elixir, Swift and Haskell, offered automatically when installed on the server.</li>
+    <li><strong>Parsons gaps comment masking:</strong> updated comment detection for Bash, R, Ruby, Perl, Julia and Elixir.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
-    <li><strong>Eight languages and SQL:</strong> C, C++, Python, Java, C#, JavaScript, Pascal, PHP and SQL on MariaDB with the CodeLab runner.</li>
+    <li><strong>26 server-graded languages:</strong> C, C++, Python, Java, C#, JavaScript, TypeScript, Pascal, PHP, SQL (MariaDB), Bash, Go, Rust, R, Ruby, Lua, Kotlin, Perl, Octave, Julia, Scheme, Dart, Scala, Elixir, Swift and Haskell.</li>
     <li><strong>Flexible tests:</strong> input, expected output, input files, function test code or unit-test assertions, weights and hidden tests; empty expected outputs are filled from the model solution on save, which must pass the tests.</li>
     <li><strong>Output comparison:</strong> exact, ignoring trailing spaces, numbers with a tolerance, a regular expression, or lines in any order for SQL.</li>
     <li><strong>Check with penalties:</strong> in Interactive with multiple tries and Adaptive mode each wrong Check costs the penalty; a time limit per test shows slow solutions.</li>
@@ -46,7 +44,7 @@
   <p><strong>Requirements</strong></p>
   <ul>
     <li><strong>Moodle:</strong> 4.5 LTS to 5.3.</li>
-    <li><strong>CodeLab for TinyMCE:</strong> version 1.23.0 or newer, installed first, with Jobe or the CodeLab runner configured.</li>
+    <li><strong>CodeLab for TinyMCE:</strong> version 1.24.0 or newer, installed first, with Jobe or the CodeLab runner configured.</li>
     <li><strong>Hosted runner (optional):</strong> paid monthly quota plan by Boban Blagojevi&#263; (boban.blagojevic@tsp.edu.rs). Not required.</li>
   </ul>
 
