@@ -10,12 +10,13 @@
   <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
 
   <hr>
-  <p><strong>What's New in v1.15.0</strong></p>
+  <p><strong>What's New in v1.16.0</strong></p>
   <ul>
-    <li><strong>Parsons 2:</strong> Check order button (with optional partial mark for lines in their place) and fill-in gaps (0 to 10 expressions hidden in solution lines, never in distractors).</li>
-    <li><strong>Input files for questions:</strong> attach up to 5 input files placed in the working folder before each run (Run, Run tests and grading on CodeLab runner 0.10.0, Jobe and Pyodide), shown read-only to students.</li>
-    <li><strong>From 1.14.0:</strong> test run times and optional time limit per test on the CodeLab runner, and 15 languages.</li>
-    <li><strong>Also since 1.10.0:</strong> grading on the CodeLab runner without Jobe, class work and analysis in quizzes, optional AI explanations per question, side-by-side failed test comparison and accessibility improvements.</li>
+    <li><strong>Built-in unit tests for C, C++ and Python:</strong> write assertion-based function tests (TEST and ASSERT_EQ, ASSERT_NE, ASSERT_TRUE, ASSERT_FALSE, ASSERT_NEAR, ASSERT_STREQ in C/C++; assert_eq and assert_near in Python) without an expected stdout block, with exact failing assertion messages per test.</li>
+    <li><strong>Local submission similarity check:</strong> the teacher Analysis tab compares student answers locally using MOSS-style token winnowing (ignoring variable renaming, comments, whitespace and starter code) with no external service.</li>
+    <li><strong>C and C++ compiler and standard per question:</strong> choose GCC, Clang or MSVC compatibility mode and language standard in the question form, preserved by backup and restore.</li>
+    <li><strong>Peak memory alongside run time:</strong> test results and review feedback display both time and peak memory (for example 0.12 s, 3.4 MB) when using CodeLab runner 0.13.0 or newer.</li>
+    <li><strong>Multi-file editor tabs:</strong> companion question files appear as read-only tabs above the Monaco editor with syntax highlighting by file extension.</li>
   </ul>
 
   <hr>
@@ -44,7 +45,7 @@
   <p><strong>Requirements</strong></p>
   <ul>
     <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
-    <li><strong>tiny_codelab:</strong> version 1.22.0 or newer, installed first, with a Jobe server or the CodeLab runner in its settings.</li>
+    <li><strong>tiny_codelab:</strong> version 1.23.0 or newer, installed first, with a Jobe server or the CodeLab runner in its settings.</li>
     <li><strong>Hosted runner (optional):</strong> a paid plan with a monthly quota of runs, provided by the author, Boban Blagojevi&#263;. Ask for a connection key at boban.blagojevic@tsp.edu.rs. Nothing requires it: a Jobe server or your own CodeLab runner (open source) grade the questions without it.</li>
   </ul>
 
