@@ -1,61 +1,58 @@
 <div>
   <p><strong>CodeLab Question Type: Programming Questions Graded with Tests</strong></p>
-  <p><em>Students write a program in the code editor of VS Code. It is run on the teacher's tests on a Jobe server or the CodeLab runner, and the grade is the weighted share of the tests it passes.</em></p>
+  <p><em>Students write a program in the code editor of VS Code. It is run on the teacher's tests on Jobe or the CodeLab runner, and graded by the weighted share of passed tests.</em></p>
   <div>
     <a href="https://github.com/blagojevicboban/moodle-qtype_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-qtype_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
     <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
     <a href="https://github.com/blagojevicboban/moodle-qtype_codelab" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" alt="License GPL v3"></a>
   </div>
 
-  <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
+  <p><strong>Live demo:</strong> try CodeLab on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a> as a guest (Python runs in the browser), or sign in with <strong>teacher</strong> or <strong>student</strong> (password <strong>Demo-2026</strong>) for every language, the debugger and SQL. Reset nightly.</p>
 
   <hr>
   <p><strong>What's New in v1.16.0</strong></p>
   <ul>
-    <li><strong>Built-in unit tests for C, C++ and Python:</strong> write assertion-based function tests (TEST and ASSERT_EQ, ASSERT_NE, ASSERT_TRUE, ASSERT_FALSE, ASSERT_NEAR, ASSERT_STREQ in C/C++; assert_eq and assert_near in Python) without an expected stdout block, with exact failing assertion messages per test.</li>
-    <li><strong>Local submission similarity check:</strong> the teacher Analysis tab compares student answers locally using MOSS-style token winnowing (ignoring variable renaming, comments, whitespace and starter code) with no external service.</li>
+    <li><strong>Built-in unit tests for C, C++ and Python:</strong> write assertion-based function tests without needing an expected stdout block, with exact failing assertion messages shown per test.</li>
+    <li><strong>Local submission similarity check:</strong> the teacher Analysis tab compares student answers locally by normalized code tokens, ignoring variable renaming, comments, whitespace and starter code, with no external service.</li>
     <li><strong>C and C++ compiler and standard per question:</strong> choose GCC, Clang or MSVC compatibility mode and language standard in the question form, preserved by backup and restore.</li>
-    <li><strong>Peak memory alongside run time:</strong> test results and review feedback display both time and peak memory (for example 0.12 s, 3.4 MB) when using CodeLab runner 0.13.0 or newer.</li>
-    <li><strong>Multi-file editor tabs:</strong> companion question files appear as read-only tabs above the Monaco editor with syntax highlighting by file extension.</li>
+    <li><strong>Peak memory alongside run time:</strong> test results and review feedback display both time and peak memory when using CodeLab runner 0.13.0 or newer.</li>
+    <li><strong>Multi-file editor tabs:</strong> companion question files appear as read-only tabs above the Monaco editor with syntax highlighting by extension.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
-    <li><strong>Eight languages and SQL:</strong> C, C++, Python, Java, C#, JavaScript, Pascal and PHP, and SQL questions on MySQL (MariaDB) with the CodeLab runner, where the code before holds the tables and a test can check them after an INSERT, UPDATE or DELETE.</li>
-    <li><strong>Tests:</strong> each test has an input, an expected output, a weight, and can be hidden. Students see only how many hidden tests passed. Empty expected outputs are filled in by running the model solution when the question is saved.</li>
-    <li><strong>Hidden code before and after the answer:</strong> for example the class and Main around a few statements.</li>
-    <li><strong>For the student:</strong> the code editor with typing help, Run with their own input, and Run the tests for the tests that are not hidden. With CodeLab for TinyMCE 1.13.3 the editor zooms with Ctrl and the mouse wheel and explains keywords, operators and printf formats in tooltips.</li>
-    <li><strong>Safe grading:</strong> the grade is computed on the server only. Results are cached, so a review or a regrade does not load the server again. When the server cannot check a program at the final submit, the answer waits for the teacher.</li>
-    <li><strong>Check with penalties</strong> in Interactive and Adaptive mode, and output compared exactly, without trailing spaces, as numbers with a tolerance, by a regular expression, or as lines in any order for SQL rows.</li>
-    <li><strong>Options:</strong> time and memory limits, and turning off typing help for tests. A question without tests is graded by the teacher.</li>
-    <li><strong>Parsons problems:</strong> students put the shuffled lines of the solution in order, with distractor lines; Python lines are indented by the student.</li>
-    <li><strong>Backup and restore</strong> keep all settings and tests.</li>
+    <li><strong>Eight languages and SQL:</strong> C, C++, Python, Java, C#, JavaScript, Pascal, PHP and SQL on MariaDB with the CodeLab runner.</li>
+    <li><strong>Flexible tests:</strong> input, expected output, function test code or unit-test assertions, weights and hidden tests; empty expected outputs are filled from the model solution on save.</li>
+    <li><strong>Hidden code before and after the answer:</strong> wrap student functions or statements cleanly without showing boilerplate.</li>
+    <li><strong>Safe cached grading:</strong> grades are computed on the server only, results are cached across reviews and regrades, and side-by-side output diffs highlight the first differing line.</li>
+    <li><strong>Parsons problems:</strong> shuffled solution lines with distractors, optional fill-in gaps and Check order with partial credit.</li>
+    <li><strong>Class work and Analysis:</strong> live student answer cards, test pass rates, common wrong outputs, frequent compiler errors, grade distribution and local similarity pairs.</li>
+    <li><strong>Options and backup:</strong> time and memory limits, optional typing help and AI error hints per question, and full backup and restore.</li>
   </ul>
 
   <hr>
   <p><strong>The CodeLab plugins</strong></p>
   <ul>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab for TinyMCE</a></strong>: inserts examples in the TinyMCE editor. The other two plugins use its editor and runner.</li>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab filter</a></strong>: turns examples into code editors that readers can edit and run.</li>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong> (this plugin): programming questions graded with tests on Jobe or the CodeLab runner.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab for TinyMCE</a></strong>: inserts examples in TinyMCE and provides the shared editor and runner.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab filter</a></strong>: turns examples into interactive code editors.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong> (this plugin): programming questions graded with tests.</li>
   </ul>
 
   <hr>
   <p><strong>Requirements</strong></p>
   <ul>
-    <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
-    <li><strong>tiny_codelab:</strong> version 1.23.0 or newer, installed first, with a Jobe server or the CodeLab runner in its settings.</li>
-    <li><strong>Hosted runner (optional):</strong> a paid plan with a monthly quota of runs, provided by the author, Boban Blagojevi&#263;. Ask for a connection key at boban.blagojevic@tsp.edu.rs. Nothing requires it: a Jobe server or your own CodeLab runner (open source) grade the questions without it.</li>
+    <li><strong>Moodle:</strong> 4.5 LTS to 5.3.</li>
+    <li><strong>CodeLab for TinyMCE:</strong> version 1.23.0 or newer, installed first, with Jobe or the CodeLab runner configured.</li>
+    <li><strong>Hosted runner (optional):</strong> paid monthly quota plan by Boban Blagojevi&#263; (boban.blagojevic@tsp.edu.rs). Not required.</li>
   </ul>
 
   <hr>
   <p><strong>Privacy</strong></p>
-  <p>Answers are stored like any quiz answer. Programs and their input are sent to the server set by the administrator (Jobe or the CodeLab runner, own or hosted) to be compiled and run. The plugin implements the Moodle Privacy API.</p>
+  <p>Answers are stored like any quiz answer. Programs and input are sent to the configured Jobe or CodeLab runner server to compile and run. Submission similarity runs locally inside Moodle. Implements the Moodle Privacy API.</p>
 
   <hr>
-  <p>Developed by <strong>Boban Blagojevi&#263;</strong>. Languages: English, Serbian (Latin and Cyrillic) and 12 more: de, fr, es, it, pt, pl, hr, bs, sl, mk, sk, cs.<br>
-    Source, documentation and issue tracker:
-    <a href="https://github.com/blagojevicboban/moodle-qtype_codelab" target="_blank" rel="noreferrer noopener">github.com/blagojevicboban/moodle-qtype_codelab</a><br>
+  <p>Developed by <strong>Boban Blagojevi&#263;</strong>. 15 languages: en, sr_lt, sr_cr, de, fr, es, it, pt, pl, hr, bs, sl, mk, sk, cs.<br>
+    Source and issues: <a href="https://github.com/blagojevicboban/moodle-qtype_codelab" target="_blank" rel="noreferrer noopener">github.com/blagojevicboban/moodle-qtype_codelab</a><br>
     Licensed under the GNU GPL v3 or later.</p>
 </div>
