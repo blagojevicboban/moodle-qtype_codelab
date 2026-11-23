@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.16.0 (2026-11-23)
+
+- Unit tests for C, C++ and Python: a test may hold assertions (TEST and ASSERT_EQ) instead of an expected output; a
+  failing assertion is shown with its message.
+- Similarity of answers: the Analysis tab compares the students' answers by their normalized tokens, so renamed
+  variables, comments, spaces and the starter code do not hide a copy. It runs inside Moodle, with no outside service.
+- Compiler profile and standard per question for C and C++ (GCC, Clang or MSVC compatibility), kept by backup and
+  restore.
+- Peak memory beside the run time in the test results and the feedback, with the CodeLab runner 0.13.0 or newer.
+- Companion files of a question appear as read-only tabs above the editor.
+- Requires tiny_codelab 1.23.0.
+
 ## 1.15.0 (2026-11-23)
 
 - Parsons problems: Check order button with optional partial mark for lines in their place (`ordercheck`), and fill-in
