@@ -31,7 +31,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 // them and nothing runs when the module loads, so the module is loaded without its import lines.
 const source = read('../../amd/src/attempt.js').replace(/^import .*;$/gm, '');
 const {program, testProgram, prefixLines, matches, firstDifference, displayLines, runPool, PARALLEL_TESTS, tooSlow,
-    seconds, megabytes} =
+    seconds, megabytes, isUnitTest} =
     await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const cases = JSON.parse(read('../fixtures/comparison-cases.json'));
@@ -138,4 +138,15 @@ test('a test over the time limit is too slow, only when the server gave a time',
     assert.equal(megabytes(3482), '3.4');
     assert.equal(megabytes(50), '0.1');
     assert.equal(megabytes(16384), '16.0');
+});
+
+test('unit tests: isUnitTest and testProgram wrap C, C++ and Python assertions', () => {
+    assert.equal(isUnitTest('c', 'TEST(sum) { ASSERT_EQ(add(2, 3), 5); }'), true);
+    assert.equal(isUnitTest('python', 'assert_eq(add(2, 3), 5)'), true);
+    assert.equal(isUnitTest('c', 'printf("%d\\n", add(2, 3));'), false);
+    const wrappedC = testProgram('c', 'int add(int a, int b) { return a + b; }\n', 'TEST(a) { ASSERT_EQ(add(2, 3), 5); }');
+    assert.match(wrappedC, /#define ASSERT_EQ\(/);
+    assert.match(wrappedC, /_cl_test_a\(\);/);
+    const wrappedPy = testProgram('python', 'def add(a, b):\n    return a + b\n', 'assert_eq(add(2, 3), 5)');
+    assert.match(wrappedPy, /def assert_eq\(/);
 });

@@ -302,10 +302,13 @@ class qtype_codelab_edit_form extends question_edit_form {
             $errors['solution'] = get_string('parsonsnosolution', 'qtype_codelab');
         }
         $regex = ($data['comparison'] ?? '') === 'regex';
+        $lang = (string) ($data['language'] ?? 'c');
         foreach ($data['teststdin'] ?? [] as $i => $stdin) {
             $expected = (string) ($data['testexpected'][$i] ?? '');
-            $used = trim((string) $stdin) !== '' || trim((string) ($data['testcode'][$i] ?? '')) !== '';
-            if ($used && $expected === '' && !$hassolution) {
+            $tcode = (string) ($data['testcode'][$i] ?? '');
+            $used = trim((string) $stdin) !== '' || trim($tcode) !== '';
+            $isunit = \qtype_codelab\local\unittest::is_unit_test($lang, $tcode);
+            if ($used && $expected === '' && !$hassolution && !$isunit) {
                 $errors["testexpected[$i]"] = get_string('noexpected', 'qtype_codelab');
             } else if ($regex && $expected !== '' && !grader::regex_valid($expected)) {
                 $errors["testexpected[$i]"] = get_string('badregex', 'qtype_codelab');

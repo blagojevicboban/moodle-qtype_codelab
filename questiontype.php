@@ -214,7 +214,11 @@ class qtype_codelab extends question_type {
      * @return array tests
      */
     public static function fill_expected($question, array $tests, ?grader $grader = null, ?array $files = null): array {
-        $missing = array_keys(array_filter($tests, fn($tc) => $tc['expected'] === ''));
+        $lang = (string) ($question->language ?? 'c');
+        $missing = array_keys(array_filter(
+            $tests,
+            fn($tc) => $tc['expected'] === '' && !\qtype_codelab\local\unittest::is_unit_test($lang, $tc['code'] ?? '')
+        ));
         if (!$missing || trim((string) ($question->solution ?? '')) === '') {
             return $tests;
         }
@@ -261,12 +265,14 @@ class qtype_codelab extends question_type {
         if (trim((string) ($data['solution'] ?? '')) === '') {
             return $none;
         }
+        $lang = (string) ($data['language'] ?? 'c');
         $tests = [];
         foreach ($data['teststdin'] ?? [] as $i => $stdin) {
             $expected = grader::unix((string) ($data['testexpected'][$i] ?? ''));
-            if ($expected !== '') {
+            $tcode = (string) ($data['testcode'][$i] ?? '');
+            if ($expected !== '' || \qtype_codelab\local\unittest::is_unit_test($lang, $tcode)) {
                 $tests[$i] = ['stdin' => grader::unix((string) $stdin), 'expected' => $expected,
-                    'code' => (string) ($data['testcode'][$i] ?? ''), 'hidden' => false, 'weight' => 1.0];
+                    'code' => $tcode, 'hidden' => false, 'weight' => 1.0];
             }
         }
         if (!$tests) {

@@ -156,6 +156,9 @@ class grader {
         if ($code === '') {
             return $program;
         }
+        if (unittest::is_unit_test($lang, $code) && !preg_match('/\bmain\s*\(/', $program)) {
+            return unittest::wrap($lang, $program, $code);
+        }
         if (in_array($lang, ['c', 'cpp'], true) && !preg_match('/\bmain\s*\(/', $program)) {
             $main = $lang === 'c' ? 'int main(void)' : 'int main()';
             $body = '    ' . str_replace("\n", "\n    ", $code);
@@ -408,9 +411,11 @@ class grader {
                 $compiler,
                 $std
             );
+            $isunit = unittest::is_unit_test($lang, $tc['code'] ?? '') && trim($tc['expected']) === '';
             $results[] = [
                 'status' => $run['status'],
-                'passed' => $run['status'] === 'ok' && self::matches($tc['expected'], $run['stdout'], $comparison, $tolerance),
+                'passed' => $run['status'] === 'ok'
+                    && ($isunit || self::matches($tc['expected'], $run['stdout'], $comparison, $tolerance)),
                 'got' => $run['stdout'],
                 'cmpinfo' => $run['cmpinfo'],
                 'stderr' => $run['stderr'],

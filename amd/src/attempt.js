@@ -51,6 +51,119 @@ export const program = (prefix, code, suffix) =>
 /** Place of the test code in the hidden code (as grader::MARKER). */
 const MARKER = '{{TEST}}';
 
+const UNIT_C_RE = /\b(?:TEST|ASSERT_EQ|ASSERT_NE|ASSERT_TRUE|ASSERT_FALSE|ASSERT_NEAR|ASSERT_STREQ)\s*\(/;
+const UNIT_PY_RE = /\b(?:assert_eq|assert_ne|assert_true|assert_false|assert_near)\s*\(/;
+
+/**
+ * Whether a test's code uses unit-test assertions (as unittest::is_unit_test on the server).
+ *
+ * @param {string} lang
+ * @param {string} testcode
+ * @returns {boolean}
+ */
+export const isUnitTest = (lang, testcode) => {
+    const code = String(testcode || '');
+    if (!code) {
+        return false;
+    }
+    if (lang === 'c' || lang === 'cpp') {
+        return UNIT_C_RE.test(code);
+    }
+    return lang === 'python' && UNIT_PY_RE.test(code);
+};
+
+/**
+ * Self-contained unit-test harness for C, C++ or Python (mirrors unittest::wrap on the server).
+ *
+ * @param {string} lang
+ * @param {string} whole
+ * @param {string} code
+ * @returns {string}
+ */
+const wrapUnitTest = (lang, whole, code) => {
+    if (lang === 'python') {
+        const harness = [
+            'import sys as _cl_sys',
+            'def assert_true(c, msg=""):',
+            '    if not c:',
+            '        _cl_sys.stderr.write("FAIL: expected true" + (": " + str(msg) if msg else "") + "\\n")',
+            '        _cl_sys.exit(1)',
+            'def assert_false(c, msg=""):',
+            '    if c:',
+            '        _cl_sys.stderr.write("FAIL: expected false" + (": " + str(msg) if msg else "") + "\\n")',
+            '        _cl_sys.exit(1)',
+            'def assert_eq(a, b, msg=""):',
+            '    if a != b:',
+            '        _cl_sys.stderr.write(f"FAIL: expected {b!r}, got {a!r}" + (f": {msg}" if msg else "") + "\\n")',
+            '        _cl_sys.exit(1)',
+            'def assert_ne(a, b, msg=""):',
+            '    if a == b:',
+            '        _cl_sys.stderr.write(f"FAIL: expected value != {b!r}" + (f": {msg}" if msg else "") + "\\n")',
+            '        _cl_sys.exit(1)',
+            'def assert_near(a, b, eps=1e-6, msg=""):',
+            '    if abs(a - b) > eps:',
+            '        _cl_sys.stderr.write(f"FAIL: expected {b} +- {eps}, got {a}" + (f": {msg}" if msg else "") + "\\n")',
+            '        _cl_sys.exit(1)',
+        ].join('\n');
+        return `${whole}\n${harness}\n${code}\n`;
+    }
+    const harness = lang === 'cpp' ? [
+        '#include <iostream>',
+        '#include <string>',
+        '#include <cmath>',
+        'static int _cl_fail = 0;',
+        '#define ASSERT_TRUE(c) do { if (!(c)) { std::cerr << "FAIL: expected true (" << #c << ")\\n";' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_FALSE(c) do { if (c) { std::cerr << "FAIL: expected false (" << #c << ")\\n";' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_EQ(a, b) do { auto _a = (a); auto _b = (b); if (!(_a == _b)) {' +
+            ' std::cerr << "FAIL: " << #a << " == " << #b << " (expected " << _b << ", got " << _a << ")\\n";' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_NE(a, b) do { auto _a = (a); auto _b = (b); if (_a == _b) {' +
+            ' std::cerr << "FAIL: " << #a << " != " << #b << " (both " << _a << ")\\n";' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_NEAR(a, b, eps) do { double _a = (double)(a), _b = (double)(b), _e = (double)(eps);' +
+            ' if (std::fabs(_a - _b) > _e) { std::cerr << "FAIL: " << #a << " ~= " << #b' +
+            ' << " (expected " << _b << " +- " << _e << ", got " << _a << ")\\n"; _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_STREQ(a, b) do { std::string _a(a), _b(b); if (_a != _b) {' +
+            ' std::cerr << "FAIL: " << #a << " == " << #b << " (expected \\"" << _b << "\\", got \\"" << _a << "\\")\\n";' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define TEST(name) static void _cl_test_##name(void)',
+    ].join('\n') : [
+        '#include <stdio.h>',
+        '#include <stdlib.h>',
+        '#include <string.h>',
+        '#include <math.h>',
+        'static int _cl_fail = 0;',
+        '#define ASSERT_TRUE(c) do { if (!(c)) { fprintf(stderr, "FAIL: expected true (%s)\\n", #c);' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_FALSE(c) do { if (c) { fprintf(stderr, "FAIL: expected false (%s)\\n", #c);' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_EQ(a, b) do { double _a = (double)(a), _b = (double)(b); if (_a != _b) {' +
+            ' fprintf(stderr, "FAIL: %s == %s (expected %.10g, got %.10g)\\n", #a, #b, _b, _a);' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_NE(a, b) do { double _a = (double)(a), _b = (double)(b); if (_a == _b) {' +
+            ' fprintf(stderr, "FAIL: %s != %s (both %.10g)\\n", #a, #b, _a);' +
+            ' _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_NEAR(a, b, eps) do { double _a = (double)(a), _b = (double)(b), _e = (double)(eps);' +
+            ' if (fabs(_a - _b) > _e) { fprintf(stderr, "FAIL: %s ~= %s (expected %.10g +- %.10g, got %.10g)\\n",' +
+            ' #a, #b, _b, _e, _a); _cl_fail = 1; return; } } while (0)',
+        '#define ASSERT_STREQ(a, b) do { const char *_a = (a), *_b = (b);' +
+            ' if (!_a || !_b || strcmp(_a, _b) != 0) {' +
+            ' fprintf(stderr, "FAIL: %s == %s (expected \\"%s\\", got \\"%s\\")\\n",' +
+            ' #a, #b, _b ? _b : "(null)", _a ? _a : "(null)"); _cl_fail = 1; return; } } while (0)',
+        '#define TEST(name) static void _cl_test_##name(void)',
+    ].join('\n');
+    const main = lang === 'cpp' ? 'int main()' : 'int main(void)';
+    const tests = [...code.matchAll(/\bTEST\s*\(\s*([A-Za-z_]\w*)\s*\)/g)].map((m) => m[1]);
+    if (tests.length) {
+        const calls = tests.map((n) => `    _cl_test_${n}();\n    if (_cl_fail) { return 1; }`).join('\n');
+        return `${whole}\n${harness}\n${code}\n${main}\n{\n${calls}\n    return 0;\n}\n`;
+    }
+    return `${whole}\n${harness}\nstatic void _cl_run(void)\n{\n    ${code.split('\n').join('\n    ')}\n}\n` +
+        `${main}\n{\n    _cl_run();\n    return _cl_fail;\n}\n`;
+};
+
 /**
  * The program of one test (as grader::test_program on the server): the test code replaces the marker; without it a C
  * or C++ program without main gets one, and other languages get the test code at the end.
@@ -70,6 +183,9 @@ export const testProgram = (lang, whole, testcode) => {
     }
     if (code === '') {
         return whole;
+    }
+    if (isUnitTest(lang, code) && !/\bmain\s*\(/.test(whole)) {
+        return wrapUnitTest(lang, whole, code);
     }
     if ((lang === 'c' || lang === 'cpp') && !/\bmain\s*\(/.test(whole)) {
         const main = lang === 'c' ? 'int main(void)' : 'int main()';
@@ -433,6 +549,70 @@ const setupFileTabs = ({host, editor, config, textarea, parsons, s}) => {
     return {questionFiles, tabs, getMain};
 };
 
+/**
+ * Format time and peak memory suffix for a test item.
+ *
+ * @param {?number} time
+ * @param {?number} memory
+ * @param {Object<string, string>} s
+ * @returns {string}
+ */
+const formatStats = (time, memory, s) => {
+    if (time === null) {
+        return '';
+    }
+    return memory !== null
+        ? ` (${s.testtimemem.replace('{$a->time}', seconds(time)).replace('{$a->memory}', megabytes(memory))})`
+        : ` (${s.testtime.replace('{$a}', seconds(time))})`;
+};
+
+/**
+ * Render one test result item in "Run the tests".
+ *
+ * @param {Object} args
+ * @param {number} args.i 0-based test index
+ * @param {Object} args.tc test case
+ * @param {Object} args.result run result
+ * @param {boolean} args.unitFail true when a unit-test assertion failed
+ * @param {Object} args.config question config
+ * @param {Object<string, string>} args.s strings
+ * @returns {Promise<{item: HTMLLIElement, ok: boolean}>}
+ */
+const renderTestItem = async({i, tc, result, unitFail, config, s}) => {
+    const unitTest = isUnitTest(config.lang, tc.code) && tc.expected.trim() === '';
+    const same = !unitFail && (unitTest || matches(tc.expected, result.stdout, config.comparison, config.tolerance));
+    const time = typeof result.time === 'number' ? result.time : null;
+    const memory = typeof result.memory === 'number' && result.memory > 0 ? result.memory : null;
+    const slow = tooSlow(time, config.timelimit);
+    const ok = same && !slow;
+    const item = document.createElement('li');
+    item.className = ok ? 'text-success' : 'text-danger';
+    item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1) + formatStats(time, memory, s);
+    if (slow) {
+        const detail = document.createElement('div');
+        detail.textContent = s.tooslow.replace('{$a->time}', seconds(time))
+            .replace('{$a->limit}', String(config.timelimit));
+        item.append(detail);
+    }
+    if (unitFail) {
+        const detail = document.createElement('pre');
+        detail.className = 'mb-1 small text-danger';
+        detail.textContent = (result.stderr || '').trim();
+        item.append(detail);
+    } else if (!same) {
+        const differs = firstDifference(tc.expected, result.stdout, config.comparison);
+        const {html, js} = await Templates.renderForPromise('qtype_codelab/testcompare', {
+            stdin: tc.stdin,
+            expected: {lines: displayLines(tc.expected, differs)},
+            got: {lines: displayLines(result.stdout, differs)},
+        });
+        const detail = document.createElement('div');
+        item.append(detail);
+        Templates.replaceNodeContents(detail, html, js);
+    }
+    return {item, ok};
+};
+
 export const init = async(config) => {
     const modes = runModes(config);
     const textarea = document.getElementById(config.textareaid);
@@ -612,53 +792,23 @@ export const init = async(config) => {
             list.className = 'list-unstyled mb-0';
             let passed = 0;
             const answer = code();
+            const isAssertFail = (result) => result.status === 'runtime' && /FAIL:/.test(result.stderr || '');
             // Up to three tests at the same time; the first result that is not a normal end (a compilation error, the
             // rate limit, a server problem) stops the tests that have not started, and is shown once.
             const results = await runPool(config.tests,
                 (tc) => run(config.lang, testProgram(config.lang, answer, tc.code), tc.stdin, config.contextid,
                     questionFiles, config.compiler || '', config.std || ''),
-                PARALLEL_TESTS, (result) => result.status !== 'ok');
+                PARALLEL_TESTS, (result) => result.status !== 'ok' && !isAssertFail(result));
             for (const [i, tc] of config.tests.entries()) {
                 const result = results[i];
-                if (result.status !== 'ok') {
+                const unitFail = isAssertFail(result);
+                if (result.status !== 'ok' && !unitFail) {
                     // A compilation error or a server problem: show it as a normal run.
                     await showResult(panel, result);
                     return;
                 }
-                const same = matches(tc.expected, result.stdout, config.comparison, config.tolerance);
-                // The time (0.9.0) and peak memory (0.13.0) come only from the CodeLab runner.
-                const time = typeof result.time === 'number' ? result.time : null;
-                const memory = typeof result.memory === 'number' && result.memory > 0 ? result.memory : null;
-                const slow = tooSlow(time, config.timelimit);
-                const ok = same && !slow;
+                const {item, ok} = await renderTestItem({i, tc, result, unitFail, config, s});
                 passed += ok ? 1 : 0;
-                const item = document.createElement('li');
-                item.className = ok ? 'text-success' : 'text-danger';
-                let stats = '';
-                if (time !== null) {
-                    stats = memory !== null
-                        ? ` (${s.testtimemem.replace('{$a->time}', seconds(time)).replace('{$a->memory}', megabytes(memory))})`
-                        : ` (${s.testtime.replace('{$a}', seconds(time))})`;
-                }
-                item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1) + stats;
-                if (slow) {
-                    const detail = document.createElement('div');
-                    detail.textContent = s.tooslow.replace('{$a->time}', seconds(time))
-                        .replace('{$a->limit}', String(config.timelimit));
-                    item.append(detail);
-                }
-                if (!same) {
-                    // Input, expected and got side by side, the first different line marked (as in the feedback).
-                    const differs = firstDifference(tc.expected, result.stdout, config.comparison);
-                    const {html, js} = await Templates.renderForPromise('qtype_codelab/testcompare', {
-                        stdin: tc.stdin,
-                        expected: {lines: displayLines(tc.expected, differs)},
-                        got: {lines: displayLines(result.stdout, differs)},
-                    });
-                    const detail = document.createElement('div');
-                    item.append(detail);
-                    Templates.replaceNodeContents(detail, html, js);
-                }
                 list.append(item);
             }
             panel.replaceChildren();
