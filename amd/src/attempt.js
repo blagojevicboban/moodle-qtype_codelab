@@ -387,6 +387,14 @@ export const tooSlow = (time, limit) => limit > 0 && time !== null && time > lim
 export const seconds = (time) => Math.max(0.01, time).toFixed(2);
 
 /**
+ * Peak memory of a test in MB as shown to students: 1 decimal, at least 0.1 (as the feedback shows it).
+ *
+ * @param {number} kb peak RSS in kilobytes
+ * @returns {string}
+ */
+export const megabytes = (kb) => Math.max(0.1, kb / 1024).toFixed(1);
+
+/**
  * Read-only preview of the question's input files under the input area.
  *
  * @param {Object<string, string>} s strings
@@ -420,8 +428,8 @@ export const init = async(config) => {
     if (!textarea) {
         return;
     }
-    const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'testtime', 'tooslow',
-        'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen', 'filescount'];
+    const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'testtime', 'testtimemem',
+        'tooslow', 'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen', 'filescount'];
     const values = await getStrings(keys.map((key) => ({key, component: key.startsWith('test') || key === 'runtests'
         || key === 'tooslow' ? 'qtype_codelab' : 'tiny_codelab'})));
     const s = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
@@ -611,15 +619,21 @@ export const init = async(config) => {
                     return;
                 }
                 const same = matches(tc.expected, result.stdout, config.comparison, config.tolerance);
-                // The time comes only from the CodeLab runner (0.9.0); without it the time limit has no effect.
+                // The time (0.9.0) and peak memory (0.13.0) come only from the CodeLab runner.
                 const time = typeof result.time === 'number' ? result.time : null;
+                const memory = typeof result.memory === 'number' && result.memory > 0 ? result.memory : null;
                 const slow = tooSlow(time, config.timelimit);
                 const ok = same && !slow;
                 passed += ok ? 1 : 0;
                 const item = document.createElement('li');
                 item.className = ok ? 'text-success' : 'text-danger';
-                item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1) +
-                    (time === null ? '' : ` (${s.testtime.replace('{$a}', seconds(time))})`);
+                let stats = '';
+                if (time !== null) {
+                    stats = memory !== null
+                        ? ` (${s.testtimemem.replace('{$a->time}', seconds(time)).replace('{$a->memory}', megabytes(memory))})`
+                        : ` (${s.testtime.replace('{$a}', seconds(time))})`;
+                }
+                item.textContent = (ok ? s.testpassed : s.testfailed).replace('{$a}', i + 1) + stats;
                 if (slow) {
                     const detail = document.createElement('div');
                     detail.textContent = s.tooslow.replace('{$a->time}', seconds(time))

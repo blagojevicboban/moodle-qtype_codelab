@@ -187,7 +187,7 @@ class qtype_codelab_renderer extends qtype_renderer {
         $hidden = ['passed' => 0, 'total' => 0];
         foreach ($question->tests as $i => $tc) {
             $r = ($results[$i] ?? []) + ['passed' => false, 'got' => '', 'status' => 'error', 'stderr' => '', 'time' => null,
-                'slow' => false];
+                'memory' => null, 'slow' => false];
             if ($tc['hidden']) {
                 $hidden['total']++;
                 $hidden['passed'] += $r['passed'] ? 1 : 0;
@@ -196,12 +196,15 @@ class qtype_codelab_renderer extends qtype_renderer {
             $mark = $r['passed']
                 ? html_writer::span(get_string('passed', 'qtype_codelab'), 'badge bg-success')
                 : html_writer::span(get_string('failed', 'qtype_codelab'), 'badge bg-danger');
-            // The time of the test, when the server reported one (the CodeLab runner).
+            // The time (and peak memory, runner 0.13.0+) of the test, when the server reported them.
             if ($r['time'] !== null) {
-                $mark .= html_writer::div(
-                    get_string('testtime', 'qtype_codelab', self::seconds((float) $r['time'])),
-                    'qtype_codelab-time small text-muted text-nowrap'
-                );
+                $metrics = !empty($r['memory'])
+                    ? get_string('testtimemem', 'qtype_codelab', [
+                        'time' => self::seconds((float) $r['time']),
+                        'memory' => self::megabytes((int) $r['memory']),
+                    ])
+                    : get_string('testtime', 'qtype_codelab', self::seconds((float) $r['time']));
+                $mark .= html_writer::div($metrics, 'qtype_codelab-time small text-muted text-nowrap');
             }
             $got = $r['got'];
             // The first line that differs is marked in both outputs; not when the program did not end well.
@@ -248,6 +251,16 @@ class qtype_codelab_renderer extends qtype_renderer {
      */
     public static function seconds(float $time): string {
         return format_float(max(0.01, $time), 2);
+    }
+
+    /**
+     * Peak memory of a test in MB as shown to students: 1 decimal, at least 0.1.
+     *
+     * @param int $kb peak RSS in kilobytes
+     * @return string
+     */
+    public static function megabytes(int $kb): string {
+        return format_float(max(0.1, $kb / 1024), 1);
     }
 
     /**

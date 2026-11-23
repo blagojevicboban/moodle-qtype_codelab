@@ -192,6 +192,7 @@ $string['testsof'] = 'Zaliczono {$a->passed} z {$a->total} testów';
 $string['teststdin'] = 'Dane wejściowe';
 $string['testsummary'] = 'Zaliczone testy: {$a->passed} z {$a->total}';
 $string['testtime'] = '{$a} s';
+$string['testtimemem'] = '{$a->time} s, {$a->memory} MB';
 $string['testweight'] = 'Waga';
 $string['timelimit'] = 'Limit czasu na test (s)';
 $string['timelimit_help'] = 'Ile sekund może trwać jeden test: test trwający dłużej nie przechodzi jako zbyt wolny, nawet gdy jego wynik jest poprawny. Puste: bez limitu. Od 0.1 do 30. Tylko CodeLab runner podaje, jak długo trwał test; na Jobe to pole nie działa i jedynym limitem jest czas procesora. Czas jest mierzony na serwerze i obejmuje uruchomienie języka (około 0.3 sekundy dla Javy i C#), więc zostaw zapas ponad czas dobrego rozwiązania.';

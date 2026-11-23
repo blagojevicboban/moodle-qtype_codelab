@@ -192,6 +192,7 @@ $string['testsof'] = 'Prođeno {$a->passed} od {$a->total} testova';
 $string['teststdin'] = 'Ulaz';
 $string['testsummary'] = 'Prođeni testovi: {$a->passed} od {$a->total}';
 $string['testtime'] = '{$a} s';
+$string['testtimemem'] = '{$a->time} s, {$a->memory} MB';
 $string['testweight'] = 'Težina';
 $string['timelimit'] = 'Vremensko ograničenje po testu (s)';
 $string['timelimit_help'] = 'Koliko sekundi smije trajati jedan test: test koji traje duže pada kao prespor, i kad mu je izlaz tačan. Prazno: bez ograničenja. Od 0.1 do 30. Samo CodeLab runner javlja koliko je test trajao; na Jobeu ovo polje nema učinka i jedino ograničenje je procesorsko vrijeme. Vrijeme se mjeri na serveru i uključuje pokretanje jezika (oko 0.3 sekunde za Javu i C#), pa ostavite prostora iznad vremena dobrog rješenja.';

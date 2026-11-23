@@ -192,6 +192,7 @@ $string['testsof'] = '{$a->passed} tests réussis sur {$a->total}';
 $string['teststdin'] = 'Entrée';
 $string['testsummary'] = 'Tests réussis : {$a->passed} sur {$a->total}';
 $string['testtime'] = '{$a} s';
+$string['testtimemem'] = '{$a->time} s, {$a->memory} MB';
 $string['testweight'] = 'Poids';
 $string['timelimit'] = 'Limite de temps par test (s)';
 $string['timelimit_help'] = 'Secondes que peut durer un test : un test plus long échoue comme trop lent, même si sa sortie est juste. Vide : aucune limite. De 0.1 à 30. Seul le CodeLab runner indique la durée d\'un test ; sur Jobe ce champ n\'a aucun effet et seule la limite de temps CPU compte. Le temps est mesuré sur le serveur et inclut le démarrage du langage (environ 0.3 seconde pour Java et C#) : laissez une marge au-dessus du temps d\'une bonne solution.';

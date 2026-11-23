@@ -31,7 +31,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 // them and nothing runs when the module loads, so the module is loaded without its import lines.
 const source = read('../../amd/src/attempt.js').replace(/^import .*;$/gm, '');
 const {program, testProgram, prefixLines, matches, firstDifference, displayLines, runPool, PARALLEL_TESTS, tooSlow,
-    seconds} =
+    seconds, megabytes} =
     await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 
 const cases = JSON.parse(read('../fixtures/comparison-cases.json'));
@@ -135,4 +135,7 @@ test('a test over the time limit is too slow, only when the server gave a time',
     assert.equal(seconds(0.123), '0.12');
     assert.equal(seconds(0.001), '0.01');
     assert.equal(seconds(2), '2.00');
+    assert.equal(megabytes(3482), '3.4');
+    assert.equal(megabytes(50), '0.1');
+    assert.equal(megabytes(16384), '16.0');
 });

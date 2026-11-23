@@ -192,6 +192,7 @@ $string['testsof'] = 'Prejdených {$a->passed} z {$a->total} testov';
 $string['teststdin'] = 'Vstup';
 $string['testsummary'] = 'Prejdené testy: {$a->passed} z {$a->total}';
 $string['testtime'] = '{$a} s';
+$string['testtimemem'] = '{$a->time} s, {$a->memory} MB';
 $string['testweight'] = 'Váha';
 $string['timelimit'] = 'Časový limit na test (s)';
 $string['timelimit_help'] = 'Koľko sekúnd smie trvať jeden test: test, ktorý trvá dlhšie, neprejde ako príliš pomalý, aj keď je jeho výstup správny. Prázdne: bez limitu. Od 0.1 do 30. Iba CodeLab runner hlási, ako dlho test trval; na Jobe toto pole nemá účinok a jediným limitom je čas procesora. Čas sa meria na serveri a zahŕňa spustenie jazyka (asi 0.3 sekundy pre Javu a C#), preto nechajte rezervu nad časom dobrého riešenia.';

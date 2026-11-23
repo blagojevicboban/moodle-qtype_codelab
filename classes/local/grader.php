@@ -415,12 +415,13 @@ class grader {
                 'cmpinfo' => $run['cmpinfo'],
                 'stderr' => $run['stderr'],
                 'time' => isset($run['time']) ? (float) $run['time'] : null,
+                'memory' => isset($run['memory']) && is_int($run['memory']) && $run['memory'] > 0 ? $run['memory'] : null,
             ];
             // The same program does not compile on the next tests either, and a sandbox failure would repeat.
             if (($run['status'] === 'compile' && $sameprogram) || in_array($run['status'], self::SANDBOX_FAILURES, true)) {
                 while (count($results) < count($tests)) {
                     $results[] = ['status' => $run['status'], 'passed' => false, 'got' => '', 'cmpinfo' => $run['cmpinfo'],
-                        'stderr' => $run['stderr'], 'time' => null];
+                        'stderr' => $run['stderr'], 'time' => null, 'memory' => null];
                 }
                 break;
             }
