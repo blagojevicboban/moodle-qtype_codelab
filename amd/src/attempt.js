@@ -23,6 +23,7 @@
  */
 import {Parsons} from 'qtype_codelab/parsons';
 import {createEditor} from 'tiny_codelab/monaco';
+import {createFileTabs} from 'tiny_codelab/filetabs';
 import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
 import {liveRegion} from 'tiny_codelab/announce';
@@ -395,31 +396,41 @@ export const seconds = (time) => Math.max(0.01, time).toFixed(2);
 export const megabytes = (kb) => Math.max(0.1, kb / 1024).toFixed(1);
 
 /**
- * Read-only preview of the question's input files under the input area.
+ * Attach read-only companion file tabs when the question has input/source files, and keep textarea synced with main.
  *
- * @param {Object<string, string>} s strings
- * @param {Array<{name: string, text: string}>} files
- * @returns {?HTMLElement}
+ * @param {Object} args
+ * @param {HTMLElement} args.host
+ * @param {import('tiny_codelab/monaco').CodeEditor} args.editor
+ * @param {Object} args.config
+ * @param {HTMLTextAreaElement} args.textarea
+ * @param {?Object} args.parsons
+ * @param {Object<string, string>} args.s
+ * @returns {{questionFiles: Array, tabs: ?Object, getMain: function(): string}}
  */
-const questionFilesBox = (s, files) => {
-    if (!files.length) {
-        return null;
+const setupFileTabs = ({host, editor, config, textarea, parsons, s}) => {
+    const questionFiles = Array.isArray(config.files) ? config.files : [];
+    const tabs = questionFiles.length ? createFileTabs({
+        host,
+        editor,
+        lang: config.lang,
+        initialMain: textarea.value,
+        files: questionFiles,
+        readOnlyMain: config.readonly || Boolean(parsons),
+        readOnlyFiles: true,
+        label: s.filescount.replace('{$a}', questionFiles.length + 1),
+    }) : null;
+    const getMain = () => (tabs ? tabs.getMain() : editor.getValue());
+    if (tabs) {
+        tabs.onMainChange((value) => {
+            textarea.value = value;
+        });
+    } else {
+        editor.onChange((value) => {
+            textarea.value = value;
+        });
     }
-    const details = document.createElement('details');
-    details.className = 'qtype_codelab-files mb-2';
-    const summary = document.createElement('summary');
-    summary.textContent = s.filescount.replace('{$a}', files.length);
-    details.append(summary);
-    for (const file of files) {
-        const title = document.createElement('div');
-        title.className = 'font-monospace fw-bold small mt-1';
-        title.textContent = file.name;
-        const pre = document.createElement('pre');
-        pre.className = 'border rounded p-2 mb-1 bg-light';
-        pre.textContent = file.text;
-        details.append(title, pre);
-    }
-    return details;
+    parsons?.start((prog) => (tabs ? tabs.setMain(prog) : editor.setValue(prog)));
+    return {questionFiles, tabs, getMain};
 };
 
 export const init = async(config) => {
@@ -460,10 +471,7 @@ export const init = async(config) => {
         return;
     }
     textarea.hidden = true;
-    editor.onChange((value) => {
-        textarea.value = value;
-    });
-    parsons?.start((program) => editor.setValue(program));
+    const {questionFiles, tabs, getMain} = setupFileTabs({host, editor, config, textarea, parsons, s});
     // The teacher in a quiz (review, preview, grading): the answers of the class and their analysis.
     if (config.classwork) {
         addClassWork(host, config.classwork);
@@ -503,9 +511,7 @@ export const init = async(config) => {
     panel.hidden = true;
     // SQL reads no input.
     stdinLabel.hidden = stdin.hidden = config.lang === 'mysql';
-    const questionFiles = Array.isArray(config.files) ? config.files : [];
-    const filesDetails = questionFilesBox(s, questionFiles);
-    tools.append(...[stdinLabel, stdin, filesDetails, runButton].filter(Boolean));
+    tools.append(stdinLabel, stdin, runButton);
     [stepButton, stopButton, testsButton].filter(Boolean).forEach((b) => tools.append(b));
     const vars = document.createElement('div');
     vars.className = 'tiny_codelab-vars mt-2';
@@ -521,7 +527,7 @@ export const init = async(config) => {
     tools.insertBefore(fullscreenButton({root: host.parentElement, editor, label: s.fullscreen,
         exitLabel: s.exitfullscreen}), panel);
 
-    const code = () => program(config.prefix, editor.getValue(), config.suffix);
+    const code = () => program(config.prefix, getMain(), config.suffix);
     const busy = (value) => {
         runButton.disabled = value;
         if (testsButton) {
@@ -555,7 +561,7 @@ export const init = async(config) => {
         if (config.lang === 'mysql') {
             // SQL: the code before (tables and data) runs first without showing its output; Run shows the answer.
             options.setup = () => config.prefix;
-            options.program = () => testProgram(config.lang, program('', editor.getValue(), config.suffix),
+            options.program = () => testProgram(config.lang, program('', getMain(), config.suffix),
                 config.tests.find((tc) => tc.code)?.code || '');
             options.offset = 0;
         }
@@ -566,6 +572,7 @@ export const init = async(config) => {
             if (session.state === 'paused') {
                 session.step();
             } else if (session.state === 'idle') {
+                tabs?.select(0);
                 session.start(true, stdin.value);
             }
         });
