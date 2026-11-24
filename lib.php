@@ -41,4 +41,14 @@ function qtype_codelab_extend_navigation_course(navigation_node $navigation, std
         'qtype_codelab_bulkcheck',
         new pix_icon('i/checkpermissions', '')
     );
+    if (has_capability('moodle/question:add', $context)) {
+        $navigation->add(
+            get_string('importcr', 'qtype_codelab'),
+            new moodle_url('/question/type/codelab/importcoderunner.php', ['courseid' => $course->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'qtype_codelab_importcr',
+            new pix_icon('i/import', '')
+        );
+    }
 }
