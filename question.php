@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_codelab\local\constraints;
 use qtype_codelab\local\grader;
 use qtype_codelab\local\order;
 use qtype_codelab\local\question_jobe;
@@ -78,6 +79,8 @@ class qtype_codelab_question extends question_graded_automatically {
     public $compiler = '';
     /** @var string C/C++ language standard (empty for default) */
     public $std = '';
+    /** @var string JSON code constraints: forbid, require, penalty */
+    public $rules = '';
 
     /** @var bool|null set by tests: whether Check was pressed (null: look at the submitted fields) */
     public static $checkrequested = null;
@@ -191,6 +194,8 @@ class qtype_codelab_question extends question_graded_automatically {
                 (string) $this->language
             ));
         }
+        $violations = constraints::check((string) ($response['answer'] ?? ''), (string) $this->language, (string) $this->rules);
+        $fraction = constraints::apply_penalty($fraction, $violations);
         return [$fraction, question_state::graded_state_for_fraction($fraction)];
     }
 

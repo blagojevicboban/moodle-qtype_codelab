@@ -32,7 +32,6 @@ use DOMDocument;
  * @package    qtype_codelab
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers     \qtype_codelab\local\coderunner_importer
  */
 final class coderunner_importer_test extends \basic_testcase {
     /**

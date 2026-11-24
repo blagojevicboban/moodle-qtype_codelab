@@ -235,6 +235,23 @@ class qtype_codelab_edit_form extends question_edit_form {
         $mform->addHelpButton('timelimit', 'timelimit', 'qtype_codelab');
         $mform->setAdvanced('timelimit');
 
+        // Optional static code constraints (forbidden / required tokens and penalty percentage).
+        $mform->addElement('text', 'rulesforbid', get_string('rulesforbid', 'qtype_codelab'), ['size' => 45]);
+        $mform->setType('rulesforbid', PARAM_RAW_TRIMMED);
+        $mform->addHelpButton('rulesforbid', 'rulesforbid', 'qtype_codelab');
+        $mform->setAdvanced('rulesforbid');
+
+        $mform->addElement('text', 'rulesrequire', get_string('rulesrequire', 'qtype_codelab'), ['size' => 45]);
+        $mform->setType('rulesrequire', PARAM_RAW_TRIMMED);
+        $mform->addHelpButton('rulesrequire', 'rulesrequire', 'qtype_codelab');
+        $mform->setAdvanced('rulesrequire');
+
+        $mform->addElement('text', 'rulespenalty', get_string('rulespenalty', 'qtype_codelab'), ['size' => 6]);
+        $mform->setType('rulespenalty', PARAM_RAW_TRIMMED);
+        $mform->setDefault('rulespenalty', \qtype_codelab\local\constraints::DEFAULT_PENALTY);
+        $mform->addHelpButton('rulespenalty', 'rulespenalty', 'qtype_codelab');
+        $mform->setAdvanced('rulespenalty');
+
         // Not saved with the question: only for this save.
         $mform->addElement(
             'advcheckbox',
@@ -257,6 +274,10 @@ class qtype_codelab_edit_form extends question_edit_form {
     protected function data_preprocessing($question) {
         $question = parent::data_preprocessing($question);
         $question = $this->data_preprocessing_hints($question);
+        $rules = \qtype_codelab\local\constraints::parse($question->options->rules ?? '');
+        $question->rulesforbid = implode(', ', $rules['forbid']);
+        $question->rulesrequire = implode(', ', $rules['require']);
+        $question->rulespenalty = $rules['penalty'];
         foreach ($question->options->filelist ?? [] as $i => $file) {
             $question->filename[$i] = $file['name'];
             $question->filetext[$i] = $file['text'];

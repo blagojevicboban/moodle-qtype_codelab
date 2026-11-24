@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_codelab\local\constraints;
 use qtype_codelab\local\grader;
 
 /**
@@ -161,6 +162,18 @@ class qtype_codelab_renderer extends qtype_renderer {
             return html_writer::div(get_string('sandboxfailed', 'qtype_codelab'), 'qtype_codelab-sandbox alert alert-warning');
         }
         $out = '';
+        $violations = constraints::check((string) $answer, (string) $question->language, (string) $question->rules);
+        if (!empty($violations['forbid']) || !empty($violations['require'])) {
+            $items = [];
+            if (!empty($violations['forbid'])) {
+                $items[] = get_string('rules_violated_forbid', 'qtype_codelab', implode(', ', $violations['forbid']));
+            }
+            if (!empty($violations['require'])) {
+                $items[] = get_string('rules_violated_require', 'qtype_codelab', implode(', ', $violations['require']));
+            }
+            $items[] = get_string('rules_violated_penalty', 'qtype_codelab', (int) $violations['penalty']);
+            $out .= html_writer::div(implode(' · ', $items), 'qtype_codelab-rules alert alert-warning py-2 mb-2');
+        }
         // When no test compiles, the answer itself does not: one message. With test code, a single test may not compile.
         if ($results && !array_filter($results, fn($r) => $r['status'] !== 'compile')) {
             $out .= html_writer::div(get_string('compileerror', 'qtype_codelab'), 'qtype_codelab-compile fw-bold');

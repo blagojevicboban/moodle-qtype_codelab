@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.18.0 (2026-11-24)
+
+- Built-in CodeRunner Moodle XML importer (*More → Import CodeRunner XML*): upload a CodeRunner XML export and convert
+  standard C, C++, Python, Java, C#, JavaScript, PHP, Pascal, SQL and other questions directly into the chosen course
+  question category, with a summary table of converted and skipped questions.
+- Static code constraints and penalties: teachers can set comma-separated forbidden tokens (e.g. `sort, eval`) and
+  required tokens (e.g. `for, malloc`) matched outside comments and string literals, with a configurable 0–100% grade
+  penalty and clear violation feedback above the test results.
+
 ## 1.17.0 (2026-11-23)
 
 - Interface translated into 14 more languages (29 total): Portuguese (Brazil), Turkish, Dutch, Russian, Ukrainian,

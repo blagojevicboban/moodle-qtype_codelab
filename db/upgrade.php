@@ -143,5 +143,15 @@ function xmldb_qtype_codelab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026113001, 'qtype', 'codelab');
     }
 
+    if ($oldversion < 2026120300) {
+        // Code constraints (JSON: forbid, require, penalty).
+        $table = new xmldb_table('qtype_codelab_options');
+        $field = new xmldb_field('rules', XMLDB_TYPE_TEXT, null, null, null, null, null, 'std');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026120300, 'qtype', 'codelab');
+    }
+
     return true;
 }

@@ -287,6 +287,7 @@ class coderunner_importer {
             'gaps' => '0',
             'compiler' => '',
             'std' => '',
+            'rules' => '',
         ];
 
         foreach ($fields as $key => $val) {

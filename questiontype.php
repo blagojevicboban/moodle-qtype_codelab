@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use qtype_codelab\local\constraints;
 use qtype_codelab\local\gaps;
 use qtype_codelab\local\grader;
 use qtype_codelab\local\order;
@@ -54,7 +55,7 @@ class qtype_codelab extends question_type {
     public function extra_question_fields() {
         return ['qtype_codelab_options', 'language', 'template', 'solution', 'prefix', 'suffix', 'tests', 'showtests',
             'comparison', 'tolerance', 'cputime', 'memorylimit', 'noassist', 'parsons', 'distractors', 'aihints',
-            'timelimit', 'ordercheck', 'files', 'gaps', 'compiler', 'std'];
+            'timelimit', 'ordercheck', 'files', 'gaps', 'compiler', 'std', 'rules'];
     }
 
     /**
@@ -188,6 +189,15 @@ class qtype_codelab extends question_type {
         $question->gaps = self::gaps_count($question->gaps ?? 0);
         $question->compiler = trim((string) ($question->compiler ?? ''));
         $question->std = trim((string) ($question->std ?? ''));
+        if (isset($question->rulesforbid) || isset($question->rulesrequire)) {
+            $question->rules = constraints::encode(
+                (string) ($question->rulesforbid ?? ''),
+                (string) ($question->rulesrequire ?? ''),
+                $question->rulespenalty ?? constraints::DEFAULT_PENALTY
+            );
+        } else {
+            $question->rules = (string) ($question->rules ?? '');
+        }
         $result = parent::save_question_options($question);
         $this->save_hints($question);
         return $result;
