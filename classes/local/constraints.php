@@ -45,7 +45,7 @@ class constraints {
      * Parse a JSON rules string into normalised arrays.
      *
      * @param string|null $json
-     * @return array{forbid: string[], require: string[], penalty: int}
+     * @return array
      */
     public static function parse(?string $json): array {
         $empty = ['forbid' => [], 'require' => [], 'penalty' => self::DEFAULT_PENALTY];
@@ -90,7 +90,7 @@ class constraints {
      * @param string $code student answer
      * @param string $lang language code
      * @param string|null $rulesjson JSON rules
-     * @return array{forbid: string[], require: string[], penalty: int}
+     * @return array
      */
     public static function check(string $code, string $lang, ?string $rulesjson): array {
         $rules = self::parse($rulesjson);
@@ -122,7 +122,7 @@ class constraints {
      * Apply constraint penalty to a test fraction (0..1).
      *
      * @param float $fraction
-     * @param array{forbid: string[], require: string[], penalty: int} $violations
+     * @param array $violations violated tokens and penalty percentage
      * @return float
      */
     public static function apply_penalty(float $fraction, array $violations): float {
@@ -143,7 +143,7 @@ class constraints {
     public static function strip_comments_and_strings(string $code, string $lang): string {
         $code = str_replace(["\r\n", "\r"], "\n", $code);
         $patterns = [
-            // Double-quoted and single-quoted strings (with backslash escapes).
+            // Strip quoted string literals.
             '/"(?:\\\\.|[^"\\\\\n])*"/',
             "/'(?:\\\\.|[^'\\\\\n])*'/",
         ];

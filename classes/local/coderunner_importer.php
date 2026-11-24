@@ -73,7 +73,7 @@ class coderunner_importer {
      * Convert a Moodle XML string containing CodeRunner questions into CodeLab Moodle XML.
      *
      * @param string $xml raw XML content
-     * @return array{xml: string, converted: array, skipped: array, error: ?string}
+     * @return array converted XML, lists of converted and skipped items, and optional error code
      */
     public static function convert_xml(string $xml): array {
         $prev = libxml_use_internal_errors(true);

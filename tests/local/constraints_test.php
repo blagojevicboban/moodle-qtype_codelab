@@ -24,16 +24,14 @@
 
 namespace qtype_codelab\local;
 
-use PHPUnit\Framework\Attributes\CoversClass;
-
 /**
  * Unit tests for constraints.
  *
  * @package    qtype_codelab
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \qtype_codelab\local\constraints
  */
-#[CoversClass(constraints::class)]
 final class constraints_test extends \basic_testcase {
     /**
      * Forbidden and required tokens ignore comments and string literals and match at word boundaries.
