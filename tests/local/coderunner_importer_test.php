@@ -25,6 +25,7 @@
 namespace qtype_codelab\local;
 
 use DOMDocument;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for coderunner_importer.
@@ -33,6 +34,7 @@ use DOMDocument;
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(coderunner_importer::class)]
 final class coderunner_importer_test extends \basic_testcase {
     /**
      * Converts C function and Python questions and skips unsupported ones.

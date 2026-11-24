@@ -159,7 +159,7 @@ class constraints {
         } else if ($lang === 'scheme') {
             $patterns[] = '/;[^\n]*/';
         } else {
-            // C-like (C, C++, Java, C#, JS, TS, PHP, Go, Rust, Kotlin, Dart, Scala, Swift).
+            // Slash-slash and slash-star comments used by C-family languages.
             $patterns[] = '/\/\/[^\n]*/';
             $patterns[] = '/\/\*[\s\S]*?\*\//';
         }

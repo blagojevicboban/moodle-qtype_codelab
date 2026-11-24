@@ -122,7 +122,13 @@ $form = html_writer::start_tag('form', [
 $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 $form .= html_writer::start_div('mb-3');
 $form .= html_writer::label(get_string('importcr_category', 'qtype_codelab'), 'id_categoryid', true, ['class' => 'form-label']);
-$form .= html_writer::select($categories, 'categoryid', $defaultcat->id, false, ['id' => 'id_categoryid', 'class' => 'form-select']);
+$form .= html_writer::select(
+    $categories,
+    'categoryid',
+    $defaultcat->id,
+    false,
+    ['id' => 'id_categoryid', 'class' => 'form-select']
+);
 $form .= html_writer::end_div();
 $form .= html_writer::start_div('mb-3');
 $form .= html_writer::label(get_string('importcr_file', 'qtype_codelab'), 'id_xmlfile', true, ['class' => 'form-label']);
