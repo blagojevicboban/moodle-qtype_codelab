@@ -144,7 +144,7 @@ function xmldb_qtype_codelab_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026120300) {
-        // Code constraints (JSON: forbid, require, penalty).
+        // Static code constraints stored as JSON.
         $table = new xmldb_table('qtype_codelab_options');
         $field = new xmldb_field('rules', XMLDB_TYPE_TEXT, null, null, null, null, null, 'std');
         if (!$dbman->field_exists($table, $field)) {
