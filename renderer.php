@@ -121,6 +121,9 @@ class qtype_codelab_renderer extends qtype_renderer {
             'aihints' => !$options->readonly && $question->aihints
                 && \tiny_codelab\local\ai_hint::available($options->context, (int) $question->id),
             'questionid' => (int) $question->id,
+            // Model solution for side-by-side diff in review, only when Moodle's review options allow rightanswer.
+            'solution' => $options->readonly && $options->rightanswer && trim((string) $question->solution) !== ''
+                ? (string) $question->solution : '',
             // The teacher in a quiz: the answers of the class and their analysis.
             'classwork' => $this->class_work($qa),
         ]]);

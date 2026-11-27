@@ -277,3 +277,9 @@
 .qtype_codelab-class-messages code {
     white-space: pre-wrap;
 }
+
+.qtype_codelab-diff {
+    overflow: hidden;
+    background: var(--bs-body-bg, #fff);
+    border-color: var(--bs-border-color, #dee2e6);
+}

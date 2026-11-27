@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import {Parsons} from 'qtype_codelab/parsons';
-import {createEditor} from 'tiny_codelab/monaco';
+import {createEditor, createDiffEditor} from 'tiny_codelab/monaco';
 import {createFileTabs} from 'tiny_codelab/filetabs';
 import {run} from 'tiny_codelab/runner';
 import {showRunning, showResult, showError} from 'tiny_codelab/console';
@@ -35,6 +35,7 @@ import {getStrings} from 'core/str';
 import Ajax from 'core/ajax';
 import Templates from 'core/templates';
 import {addClassWork} from './classwork';
+import {hasSqlSchema, renderSqlSchema} from 'tiny_codelab/sqlschema';
 import {watchErrors} from 'tiny_codelab/aihint';
 
 /**
@@ -613,6 +614,81 @@ const renderTestItem = async({i, tc, result, unitFail, config, s}) => {
     return {item, ok};
 };
 
+/**
+ * Optional Tables button and schema panel for MySQL questions with a hidden CREATE TABLE prefix.
+ *
+ * @param {Object} config
+ * @param {Object<string, string>} s
+ * @returns {{tablesButton: ?HTMLButtonElement, schemaPanel: ?HTMLElement}}
+ */
+const setupSqlSchema = (config, s) => {
+    if (config.lang !== 'mysql' || !hasSqlSchema(config.prefix)) {
+        return {tablesButton: null, schemaPanel: null};
+    }
+    const tablesButton = button(s.sqlschema, 'btn-secondary');
+    const schemaPanel = document.createElement('div');
+    schemaPanel.className = 'tiny_codelab-sqlschema mt-2';
+    schemaPanel.hidden = true;
+    tablesButton.setAttribute('aria-expanded', 'false');
+    let rendered = false;
+    tablesButton.addEventListener('click', async() => {
+        if (!schemaPanel.hidden) {
+            schemaPanel.hidden = true;
+            tablesButton.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        if (!rendered) {
+            rendered = await renderSqlSchema(schemaPanel, config.prefix);
+        }
+        schemaPanel.hidden = !rendered;
+        tablesButton.setAttribute('aria-expanded', String(rendered));
+    });
+    return {tablesButton, schemaPanel};
+};
+
+/**
+ * In review mode when Moodle allows showing the right answer, offer a side-by-side Monaco diff against the model solution.
+ *
+ * @param {HTMLElement} host
+ * @param {string} answer
+ * @param {Object} config
+ * @param {Object<string, string>} s
+ */
+const setupSolutionDiff = (host, answer, config, s) => {
+    if (!config.readonly || !config.solution) {
+        return;
+    }
+    const bar = document.createElement('div');
+    bar.className = 'qtype_codelab-diffbar mt-2';
+    const toggle = button(s.comparesolution, 'btn-outline-secondary');
+    toggle.setAttribute('aria-expanded', 'false');
+    const box = document.createElement('div');
+    box.className = 'qtype_codelab-diff border rounded mt-2';
+    box.hidden = true;
+    bar.append(toggle, box);
+    host.after(bar);
+    let diff = null;
+    toggle.addEventListener('click', async() => {
+        if (!box.hidden) {
+            box.hidden = true;
+            toggle.textContent = s.comparesolution;
+            toggle.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        box.hidden = false;
+        toggle.textContent = s.hidediff;
+        toggle.setAttribute('aria-expanded', 'true');
+        if (!diff) {
+            diff = await createDiffEditor(box, {
+                original: answer,
+                modified: config.solution,
+                lang: config.lang,
+                label: s.comparesolution,
+            });
+        }
+    });
+};
+
 export const init = async(config) => {
     const modes = runModes(config);
     const textarea = document.getElementById(config.textareaid);
@@ -620,7 +696,8 @@ export const init = async(config) => {
         return;
     }
     const keys = ['run', 'input', 'output', 'runtests', 'testpassed', 'testfailed', 'testsof', 'testtime', 'testtimemem',
-        'tooslow', 'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen', 'filescount'];
+        'tooslow', 'editorlabel', 'step', 'stop', 'fullscreen', 'exitfullscreen', 'filescount', 'sqlschema',
+        'comparesolution', 'hidediff'];
     const values = await getStrings(keys.map((key) => ({key, component: key.startsWith('test') || key === 'runtests'
         || key === 'tooslow' ? 'qtype_codelab' : 'tiny_codelab'})));
     const s = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
@@ -657,6 +734,7 @@ export const init = async(config) => {
         addClassWork(host, config.classwork);
     }
     if (config.readonly) {
+        setupSolutionDiff(host, textarea.value, config, s);
         return;
     }
 
@@ -681,6 +759,7 @@ export const init = async(config) => {
     const stepButton = steps ? button(s.step, 'btn-secondary') : null;
     const stopButton = browser || remote ? button(s.stop, 'btn-danger') : null;
     const testsButton = config.tests.length ? button(s.runtests, 'btn-secondary') : null;
+    const {tablesButton, schemaPanel} = setupSqlSchema(config, s);
     const panel = document.createElement('div');
     panel.className = 'tiny_codelab-console mt-2';
     // A scrolling region reachable by the keyboard, not live: the end of a run is read in a live region next to it
@@ -692,11 +771,14 @@ export const init = async(config) => {
     // SQL reads no input.
     stdinLabel.hidden = stdin.hidden = config.lang === 'mysql';
     tools.append(stdinLabel, stdin, runButton);
-    [stepButton, stopButton, testsButton].filter(Boolean).forEach((b) => tools.append(b));
+    [stepButton, stopButton, testsButton, tablesButton].filter(Boolean).forEach((b) => tools.append(b));
     const vars = document.createElement('div');
     vars.className = 'tiny_codelab-vars mt-2';
     vars.hidden = true;
     tools.append(panel, vars);
+    if (schemaPanel) {
+        tools.append(schemaPanel);
+    }
     host.after(tools);
     // AI explanations of a compiler message or an error, when the question allows them (tiny_codelab 1.19).
     if (config.aihints) {

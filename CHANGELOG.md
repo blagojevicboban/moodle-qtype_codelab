@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.19.0 (2026-11-28)
+
+- SQL Tables button in MySQL quiz attempts when the hidden prefix defines tables (CREATE TABLE): students can inspect
+  the schema, keys and sample rows without seeing the raw setup SQL (requires tiny_codelab 1.35.0).
+- Side-by-side Monaco diff in quiz review: when Moodle's review options allow showing the right answer, a "Compare with
+  solution" button compares the student's code against the model solution.
+
 ## 1.18.1 (2026-11-27)
 
 - Dark Moodle theme support: question containers, test tables, diffs, Parsons cards, Class work and Analysis panels now
