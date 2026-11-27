@@ -61,14 +61,15 @@
 .qtype_codelab-parsons-box {
     flex: 1 1 18rem;
     min-width: 0;
-    padding: .5rem;
-    border: 1px solid #dee2e6;
-    border-radius: .25rem;
-    background: #f8f9fa;
+    padding: .625rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .375rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    color: var(--bs-body-color, #1d2125);
 }
 
 .qtype_codelab-parsons-program {
-    background: #fff;
+    background: var(--bs-body-bg, #fff);
     border-color: #0f6cbf;
 }
 
@@ -97,11 +98,11 @@
 .qtype_codelab-parsons-line {
     flex: 0 1 auto;
     min-width: 0;
-    padding: .2rem .5rem;
-    border: 1px solid #8f959e;
-    border-radius: .25rem;
-    background: #fff;
-    color: #1d2125;
+    padding: .25rem .55rem;
+    border: 1px solid var(--bs-border-color, #8f959e);
+    border-radius: .3rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #1d2125);
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: .875rem;
     text-align: left;
@@ -151,11 +152,11 @@
 
 /* Class work of a question in a quiz, for the teacher (qtype_codelab/classwork). */
 .qtype_codelab-class-panel {
-    padding: .5rem;
-    border: 1px solid #dee2e6;
-    border-radius: .25rem;
-    background: #fff;
-    color: #1d2125;
+    padding: .625rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .375rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #1d2125);
 }
 
 .qtype_codelab-class-cards {
@@ -165,9 +166,10 @@
 }
 
 .qtype_codelab-class-card {
-    border: 1px solid #dee2e6;
-    border-radius: .25rem;
-    padding: .25rem .5rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .375rem;
+    padding: .35rem .55rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
     min-width: 0;
 }
 
