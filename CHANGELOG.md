@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.18.1 (2026-11-27)
+
+- Dark Moodle theme support: question containers, test tables, diffs, Parsons cards, Class work and Analysis panels now
+  use Bootstrap 5 CSS variables so they adapt cleanly to dark Moodle themes.
+
 ## 1.18.0 (2026-11-24)
 
 - Built-in CodeRunner Moodle XML importer (*More → Import CodeRunner XML*): upload a CodeRunner XML export and convert
