@@ -58,6 +58,7 @@ $string['classanalysis'] = '분석';
 $string['classanswers'] = '답안';
 $string['classempty'] = '아직 제출된 답안이 없습니다.';
 $string['classemptyoutput'] = '(출력 없음)';
+$string['classexportcsv'] = 'CSV 내보내기';
 $string['classgrades'] = '성적 (백분율)';
 $string['classhidenames'] = '이름 숨기기';
 $string['classmessages'] = '가장 빈번한 컴파일러 메시지';

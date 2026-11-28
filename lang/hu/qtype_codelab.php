@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Elemzés';
 $string['classanswers'] = 'Válaszok';
 $string['classempty'] = 'Még nincsenek válaszok.';
 $string['classemptyoutput'] = '(nincs kimenet)';
+$string['classexportcsv'] = 'CSV exportálása';
 $string['classgrades'] = 'Eredmények (százalék)';
 $string['classhidenames'] = 'Nevek elrejtése';
 $string['classmessages'] = 'Leggyakoribb fordítóüzenetek';

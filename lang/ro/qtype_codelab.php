@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analiză';
 $string['classanswers'] = 'Răspunsuri';
 $string['classempty'] = 'Nu există încă răspunsuri.';
 $string['classemptyoutput'] = '(fără ieșire)';
+$string['classexportcsv'] = 'Exportă CSV';
 $string['classgrades'] = 'Note (procent)';
 $string['classhidenames'] = 'Ascunde numele';
 $string['classmessages'] = 'Cele mai frecvente mesaje ale compilatorului';

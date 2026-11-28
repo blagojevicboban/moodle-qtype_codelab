@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analiza';
 $string['classanswers'] = 'Përgjigjet';
 $string['classempty'] = 'Ende pa përgjigje.';
 $string['classemptyoutput'] = '(pa dalje)';
+$string['classexportcsv'] = 'Eksporto CSV';
 $string['classgrades'] = 'Notat (në përqindje)';
 $string['classhidenames'] = 'Fshih emrat';
 $string['classmessages'] = 'Mesazhet më të shpeshta të kompiluesit';

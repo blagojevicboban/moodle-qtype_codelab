@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.19.1 (2026-11-28)
+
+- Export CSV button in the teacher Class work → Analysis tab: downloads a UTF-8 BOM spreadsheet (`codelab-class-analysis.csv`)
+  with summary counts, per-test pass rates and all high-similarity submission pairs (with formula-injection escaping).
+
 ## 1.19.0 (2026-11-28)
 
 - SQL Tables button in MySQL quiz attempts when the hidden prefix defines tables (CREATE TABLE): students can inspect

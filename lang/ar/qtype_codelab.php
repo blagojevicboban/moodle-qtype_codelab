@@ -58,6 +58,7 @@ $string['classanalysis'] = 'التحليل';
 $string['classanswers'] = 'الإجابات';
 $string['classempty'] = 'لا توجد إجابات بعد.';
 $string['classemptyoutput'] = '(لا يوجد إخراج)';
+$string['classexportcsv'] = 'تصدير CSV';
 $string['classgrades'] = 'الدرجات (نسبة مئوية)';
 $string['classhidenames'] = 'إخفاء الأسماء';
 $string['classmessages'] = 'أكثر رسائل المصرّف تكراراً';

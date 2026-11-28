@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analiz';
 $string['classanswers'] = 'Yanıtlar';
 $string['classempty'] = 'Henüz yanıt yok.';
 $string['classemptyoutput'] = '(çıktı yok)';
+$string['classexportcsv'] = 'CSV Dışa Aktar';
 $string['classgrades'] = 'Notlar (yüzde)';
 $string['classhidenames'] = 'Adları gizle';
 $string['classmessages'] = 'En sık derleyici mesajları';

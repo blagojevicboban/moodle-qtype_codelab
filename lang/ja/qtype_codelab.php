@@ -58,6 +58,7 @@ $string['classanalysis'] = '分析';
 $string['classanswers'] = '解答';
 $string['classempty'] = 'まだ解答はありません。';
 $string['classemptyoutput'] = '（出力なし）';
+$string['classexportcsv'] = 'CSVエクスポート';
 $string['classgrades'] = '評点（パーセント）';
 $string['classhidenames'] = '氏名を隠す';
 $string['classmessages'] = '頻出のコンパイラメッセージ';

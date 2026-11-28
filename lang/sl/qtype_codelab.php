@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analiza';
 $string['classanswers'] = 'Odgovori';
 $string['classempty'] = 'Še ni odgovorov.';
 $string['classemptyoutput'] = '(ni izhoda)';
+$string['classexportcsv'] = 'Izvozi CSV';
 $string['classgrades'] = 'Ocene (odstotek)';
 $string['classhidenames'] = 'Skrij imena';
 $string['classmessages'] = 'Najpogostejša sporočila prevajalnika';

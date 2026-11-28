@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analýza';
 $string['classanswers'] = 'Odpovede';
 $string['classempty'] = 'Zatiaľ žiadne odpovede.';
 $string['classemptyoutput'] = '(žiadny výstup)';
+$string['classexportcsv'] = 'Exportovať CSV';
 $string['classgrades'] = 'Hodnotenia (percentá)';
 $string['classhidenames'] = 'Skryť mená';
 $string['classmessages'] = 'Najčastejšie správy prekladača';

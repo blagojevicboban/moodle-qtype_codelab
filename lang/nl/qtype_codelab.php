@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analyse';
 $string['classanswers'] = 'Antwoorden';
 $string['classempty'] = 'Nog geen antwoorden.';
 $string['classemptyoutput'] = '(geen uitvoer)';
+$string['classexportcsv'] = 'CSV exporteren';
 $string['classgrades'] = 'Cijfers (procent)';
 $string['classhidenames'] = 'Namen verbergen';
 $string['classmessages'] = 'Meest voorkomende compilermeldingen';

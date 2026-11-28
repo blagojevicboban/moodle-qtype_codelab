@@ -58,6 +58,7 @@ $string['classanalysis'] = '分析';
 $string['classanswers'] = '作答';
 $string['classempty'] = '暂无作答。';
 $string['classemptyoutput'] = '（无输出）';
+$string['classexportcsv'] = '导出 CSV';
 $string['classgrades'] = '成绩（百分比）';
 $string['classhidenames'] = '隐藏姓名';
 $string['classmessages'] = '最常见的编译器消息';

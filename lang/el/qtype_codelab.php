@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Ανάλυση';
 $string['classanswers'] = 'Απαντήσεις';
 $string['classempty'] = 'Δεν υπάρχουν απαντήσεις ακόμη.';
 $string['classemptyoutput'] = '(χωρίς έξοδο)';
+$string['classexportcsv'] = 'Εξαγωγή CSV';
 $string['classgrades'] = 'Βαθμοί (ποσοστό)';
 $string['classhidenames'] = 'Απόκρυψη ονομάτων';
 $string['classmessages'] = 'Πιο συχνά μηνύματα μεταγλωττιστή';

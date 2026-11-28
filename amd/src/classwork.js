@@ -25,7 +25,7 @@
 import Ajax from 'core/ajax';
 import {getStrings} from 'core/str';
 
-const KEYS = ['classwork', 'classanswers', 'classanalysis', 'classempty', 'classhidenames', 'classshownames',
+const KEYS = ['classwork', 'classanswers', 'classanalysis', 'classempty', 'classexportcsv', 'classhidenames', 'classshownames',
     'classnotgraded', 'classsummary', 'classpending', 'classother', 'classunchecked', 'classtest', 'classtesthidden',
     'classwrong', 'classmessages', 'classgrades', 'classsimilar', 'classsimilarnote', 'classemptyoutput', 'classstudent'];
 
@@ -62,6 +62,46 @@ const el = (tag, className, text) => {
 export const fill = (text, a) => (typeof a === 'object'
     ? text.replace(/\{\$a->(\w+)\}/g, (m, k) => String(a[k] ?? ''))
     : text.replace('{$a}', String(a)));
+
+/**
+ * Escape one CSV cell (RFC 4180) and neutralise leading spreadsheet formula characters.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+const csvCell = (value) => {
+    let text = String(value ?? '');
+    if (/^[=+\-@\t\r]/.test(text)) {
+        text = `'${text}`;
+    }
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+/**
+ * Build a UTF-8 BOM CSV report from a class analysis result (summary, tests and similarity pairs).
+ *
+ * @param {Object} r result of qtype_codelab_get_class_analysis
+ * @returns {string}
+ */
+export const buildAnalysisCsv = (r) => {
+    const rows = [
+        ['Section', 'Item', 'Value', 'Extra'],
+        ['Summary', 'Answers', r.answers ?? 0, ''],
+        ['Summary', 'Compile errors', r.compile ?? 0, ''],
+        ['Summary', 'Runtime errors', r.runtime ?? 0, ''],
+        ['Summary', 'Time or memory limit', r.timelimit ?? 0, ''],
+    ];
+    (r.tests || []).forEach((t, i) => {
+        const pct = r.answers ? Math.round((t.passed / r.answers) * 100) : 0;
+        rows.push(['Test', `Test ${i + 1}${t.hidden ? ' (hidden)' : ''}`, `${t.passed}/${r.answers}`, `${pct}%`]);
+    });
+    if (Array.isArray(r.similar) && r.similar.length) {
+        r.similar.forEach((p) => {
+            rows.push(['Similarity', p.usera, p.userb, `${p.percent}%`]);
+        });
+    }
+    return '\uFEFF' + rows.map((row) => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
+};
 
 /**
  * Cards of the answers.
@@ -131,6 +171,19 @@ export const drawAnalysis = (host, r, s) => {
     if (!r.answers) {
         return;
     }
+    const exportBtn = el('button', 'btn btn-sm btn-outline-secondary mb-2', s.classexportcsv);
+    exportBtn.type = 'button';
+    exportBtn.dataset.action = 'classexportcsv';
+    exportBtn.addEventListener('click', () => {
+        const blob = new Blob([buildAnalysisCsv(r)], {type: 'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'codelab-class-analysis.csv';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    host.append(exportBtn);
     const tests = el('ol', 'qtype_codelab-class-tests list-unstyled');
     r.tests.forEach((t, i) => {
         const item = el('li', 'qtype_codelab-class-test');

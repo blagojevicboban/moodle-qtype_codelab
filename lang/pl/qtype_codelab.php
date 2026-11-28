@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Analiza';
 $string['classanswers'] = 'Odpowiedzi';
 $string['classempty'] = 'Jeszcze brak odpowiedzi.';
 $string['classemptyoutput'] = '(brak wyniku)';
+$string['classexportcsv'] = 'Eksportuj CSV';
 $string['classgrades'] = 'Oceny (procent)';
 $string['classhidenames'] = 'Ukryj nazwiska';
 $string['classmessages'] = 'Najczęstsze komunikaty kompilatora';

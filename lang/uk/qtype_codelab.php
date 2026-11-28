@@ -58,6 +58,7 @@ $string['classanalysis'] = 'Аналіз';
 $string['classanswers'] = 'Відповіді';
 $string['classempty'] = 'Відповідей ще немає.';
 $string['classemptyoutput'] = '(немає виведення)';
+$string['classexportcsv'] = 'Експорт у CSV';
 $string['classgrades'] = 'Оцінки (відсотки)';
 $string['classhidenames'] = 'Сховати імена';
 $string['classmessages'] = 'Найчастіші повідомлення компілятора';
